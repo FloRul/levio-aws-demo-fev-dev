@@ -24,6 +24,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
 
 resource "aws_lambda_event_source_mapping" "event_source_mapping" {
+  depends_on = [ module.lambda_function_container_image ]
   event_source_arn = aws_sqs_queue.queue.arn
   enabled          = true
   function_name    = var.lambda_function_name
