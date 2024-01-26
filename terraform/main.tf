@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket = "levio-aws-demo-fev-terraform"
     key    = "state/terraform_dev.tfstate"
-    region = "us-east-1"
+    region = "us-west-2"
   }
   required_providers {
     aws = {
