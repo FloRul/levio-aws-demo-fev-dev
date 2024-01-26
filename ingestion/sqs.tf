@@ -4,7 +4,7 @@ resource "aws_sqs_queue" "dead_letter_queue" {
 
 resource "aws_sqs_queue" "queue" {
   name = var.queue_name
-
+  visibility_timeout_seconds = 500
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dead_letter_queue.arn
     maxReceiveCount     = 5
@@ -21,7 +21,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     filter_suffix = ".pdf"
   }
 }
-
 
 resource "aws_lambda_event_source_mapping" "event_source_mapping" {
   depends_on = [ module.lambda_function_container_image ]
