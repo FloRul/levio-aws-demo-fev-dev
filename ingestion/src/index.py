@@ -14,14 +14,9 @@ def get_secret():
     secret_name = os.environ.get("PGVECTOR_PASSWORD_SECRET_NAME")
     region_name = "us-east-1"
     session = boto3.Session()
-    client = session.client(
-        service_name="secretsmanager",
-        region_name=region_name
-    )
+    client = session.client(service_name="secretsmanager", region_name=region_name)
     try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
         secret = get_secret_value_response["SecretString"]
         return secret
     except ClientError as e:
@@ -43,7 +38,7 @@ def delete_documents(filename: str):
         user=PGVECTOR_USER,
         password=PGVECTOR_PASSWORD,
         host=PGVECTOR_HOST,
-        port=PGVECTOR_PORT
+        port=PGVECTOR_PORT,
     ) as conn:
         with conn.cursor() as cur:
             sql_query = f"""
@@ -59,10 +54,9 @@ def delete_documents(filename: str):
 
 
 def fetch_file(bucket, key):
-    s3 = boto3.client('s3')
-    # Extract file extension from key
-    file_extension = os.path.splitext(key)[1][1:]
-    local_filename = f'/tmp/{key}'
+    s3 = boto3.client("s3")
+    local_filename = f"/tmp/{key}"
+
     try:
         s3.download_file(bucket, key, local_filename)
     except NoCredentialsError as e:
@@ -74,7 +68,7 @@ def fetch_file(bucket, key):
     except ClientError as e:
         print(e)
         raise e
-    return local_filename, file_extension, key
+    return local_filename
 
 
 def get_connection_string():
@@ -90,28 +84,30 @@ def get_connection_string():
 
 
 def get_vector_store(collection_name="main_collection"):
-    bedrock = boto3.client('bedrock-runtime')
-    return PGVector(connection_string=get_connection_string(),
-                    collection_name=collection_name,
-                    embedding_function=BedrockEmbeddings(client=bedrock))
+    bedrock = boto3.client("bedrock-runtime")
+    return PGVector(
+        connection_string=get_connection_string(),
+        collection_name=collection_name,
+        embedding_function=BedrockEmbeddings(client=bedrock),
+    )
 
 
 def extract_content_from_pdf(file_path, file_name):
     print(f"Extracting content from {file_name}")
     loader = PyPDFLoader(file_path)
     docs = loader.load_and_split(
-        text_splitter=RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50))
+        text_splitter=RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
+    )
     for doc in docs:
-        doc.metadata['source'] = file_name
+        doc.metadata["source"] = file_name
     return docs
 
 
-OBJECT_CREATED = 'ObjectCreated'
-OBJECT_REMOVED = 'ObjectRemoved'
+OBJECT_CREATED = "ObjectCreated"
+OBJECT_REMOVED = "ObjectRemoved"
 
 
 def get_bucket_and_key(record):
-    print(record)
     bucket = record["s3"]["bucket"]["name"]
     key = record["s3"]["object"]["key"]
     return bucket, key
@@ -119,25 +115,28 @@ def get_bucket_and_key(record):
 
 def lambda_handler(event, context):
     print(event)
-    records = json.loads(event['Records'][0]['body'])['Records']
+    records = json.loads(event["Records"][0]["body"])["Records"]
     for record in records:
-        eventName = record['eventName']
+        eventName = record["eventName"]
         print(f"eventName: {eventName}")
         try:
             bucket, key = get_bucket_and_key(record)
             print(f"source_bucket: {bucket}, source_key: {key}")
 
-            vector_store = get_vector_store(collection_name=bucket)
-
             if eventName.startswith(OBJECT_CREATED):
-                local_filename, file_extension, file_name = fetch_file(
-                    bucket, key)
-                print(f"local_filename: {local_filename}")
+                local_filename = fetch_file(bucket, key)
 
-                if file_extension == 'pdf':
+                collection_name = bucket + "-"
+                collection_name += os.path.dirname(key).replace("/", "-")
+
+                vector_store = get_vector_store(collection_name=collection_name)
+
+                # check extension
+                if os.path.splitext(key)[1][1:] == "pdf":
                     print("Extracting text from pdf")
                     docs = extract_content_from_pdf(
-                        local_filename, file_name=file_name)
+                        local_filename, file_name=os.path.basename(key)
+                    )
                     vector_store.add_documents(docs)
                     print(f"Extracted {len(docs)} text")
                     return len(docs)
