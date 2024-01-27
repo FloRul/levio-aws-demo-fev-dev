@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import boto3
@@ -92,14 +93,16 @@ def get_vector_store(collection_name="main_collection"):
     )
 
 
-def extract_content_from_pdf(file_path, file_name):
+def extract_pdf_content(file_path, file_name):
     print(f"Extracting content from {file_name}")
     loader = PyPDFLoader(file_path)
     docs = loader.load_and_split(
         text_splitter=RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
     )
+    created_at = datetime.datetime.now().isoformat()
     for doc in docs:
         doc.metadata["source"] = file_name
+        doc.metadata["created_at"] = created_at
     return docs
 
 
@@ -134,7 +137,7 @@ def lambda_handler(event, context):
                 # check extension
                 if os.path.splitext(key)[1][1:] == "pdf":
                     print("Extracting text from pdf")
-                    docs = extract_content_from_pdf(
+                    docs = extract_pdf_content(
                         local_filename, file_name=os.path.basename(key)
                     )
                     vector_store.add_documents(docs)
