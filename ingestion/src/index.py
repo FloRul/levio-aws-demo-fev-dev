@@ -56,7 +56,7 @@ def delete_documents(filename: str):
 
 def fetch_file(bucket, key):
     s3 = boto3.client("s3")
-    local_filename = f"/tmp/{key}"
+    local_filename = f"/tmp/{key.split('/')[-1]}"
 
     try:
         s3.download_file(bucket, key, local_filename)
