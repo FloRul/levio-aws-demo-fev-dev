@@ -145,7 +145,7 @@ def lambda_handler(event, context):
                     return len(docs)
 
             elif eventName.startswith(OBJECT_REMOVED):
-                return delete_documents(filename=key)
+                return delete_documents(filename=key.split("/")[-1])
 
         except Exception as e:
             print(e)
