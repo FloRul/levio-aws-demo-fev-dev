@@ -12,7 +12,7 @@ module "ingestion" {
   source              = "../ingestion"
   storage_bucket_name = local.storage_bucket_name
   lambda_vpc_security_group_ids = [
-    aws_security_group.lambda_egress_all_sg,
+    aws_security_group.lambda_egress_all_sg.id,
   ]
   lambda_vpc_subnet_ids          = module.vpc.public_subnets
   pg_vector_host                 = aws_db_instance.vector_db.address
@@ -29,7 +29,7 @@ module "ingestion" {
 module "inference" {
   source = "../inference"
   lambda_vpc_security_group_ids = [
-    aws_security_group.lambda_egress_all_sg,
+    aws_security_group.lambda_egress_all_sg.id,
   ]
   lambda_vpc_subnet_ids          = module.vpc.public_subnets
   pg_vector_host                 = aws_db_instance.vector_db.address
@@ -48,7 +48,7 @@ module "inference" {
 module "memory" {
   source = "../conversation_memory"
   lambda_vpc_security_group_ids = [
-    aws_security_group.lambda_egress_all_sg,
+    aws_security_group.lambda_egress_all_sg.id,
   ]
   lambda_vpc_subnet_ids     = module.vpc.public_subnets
   aws_region                = var.aws_region
@@ -59,9 +59,8 @@ module "memory" {
 
 module "list_collections" {
   source           = "../list_collections"
-  lambda_image_uri = var.list_collections_lambda_image_uri
   lambda_vpc_security_group_ids = [
-    aws_security_group.lambda_egress_all_sg,
+    aws_security_group.lambda_egress_all_sg.id,
   ]
   lambda_vpc_subnet_ids = module.vpc.public_subnets
   lambda_function_name  = local.list_collections_lambda_name

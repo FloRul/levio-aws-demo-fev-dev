@@ -54,7 +54,7 @@ resource "aws_vpc_endpoint" "lambda_endpoint" {
   vpc_id              = module.vpc.vpc_id
   service_name        = "com.amazonaws.${var.aws_region}.lambda"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.lambda_egress_all_sg]
+  security_group_ids  = [aws_security_group.lambda_egress_all_sg.id]
   subnet_ids          = module.vpc.public_subnets
   private_dns_enabled = true
 }
@@ -103,7 +103,7 @@ resource "aws_security_group" "database_sg" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.lambda_egress_all_sg, aws_security_group.jumpbox_sg.id]
+    security_groups = [aws_security_group.lambda_egress_all_sg.id, aws_security_group.jumpbox_sg.id]
   }
 }
 
@@ -134,6 +134,6 @@ resource "aws_security_group" "dynamo_db_sg" {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    security_groups = [aws_security_group.lambda_egress_all_sg]
+    security_groups = [aws_security_group.lambda_egress_all_sg.id]
   }
 }

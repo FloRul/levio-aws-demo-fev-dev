@@ -24,8 +24,3 @@ variable "memory_lambda_image_uri" {
   type     = string
   nullable = false
 }
-
-variable "list_collections_lambda_image_uri" {
-  type     = string
-  nullable = false
-}

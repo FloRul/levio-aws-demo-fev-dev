@@ -39,11 +39,6 @@ variable "pg_vector_driver" {
   default  = "psycopg2"
 }
 
-variable "lambda_image_uri" {
-  type     = string
-  nullable = false
-}
-
 variable "aws_region" {
   type    = string
   default = "us-east-1"

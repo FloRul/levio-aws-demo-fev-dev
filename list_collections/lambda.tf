@@ -7,7 +7,9 @@ module "lambda_function_container_image" {
   vpc_security_group_ids   = var.lambda_vpc_security_group_ids
   role_name                = "${var.lambda_function_name}-role"
   attach_policy_statements = true
-  source_path = "${path.module}/src"
+  source_path              = "${path.module}/src"
+  runtime = "python3.12"
+  handler = "index.lambda_handler"
   environment_variables = {
     PGVECTOR_DRIVER   = "psycopg2"
     PGVECTOR_HOST     = var.pg_vector_host
