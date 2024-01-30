@@ -1,11 +1,11 @@
 module "lambda_function_container_image" {
-  timeout                  = 500
+  timeout                  = 120
   source                   = "terraform-aws-modules/lambda/aws"
   function_name            = var.lambda_function_name
   create_package           = false
   image_uri                = var.lambda_image_uri
   package_type             = "Image"
-  memory_size              = 1024
+  memory_size              = 256
   vpc_subnet_ids           = var.lambda_vpc_subnet_ids
   vpc_security_group_ids   = var.lambda_vpc_security_group_ids
   role_name                = "${var.lambda_function_name}-role"

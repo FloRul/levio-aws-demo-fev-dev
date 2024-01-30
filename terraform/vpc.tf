@@ -54,7 +54,7 @@ resource "aws_vpc_endpoint" "lambda_endpoint" {
   vpc_id              = module.vpc.vpc_id
   service_name        = "com.amazonaws.${var.aws_region}.lambda"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.lambda_memory_sg.id]
+  security_group_ids  = [aws_security_group.lambda_egress_all_sg.id]
   subnet_ids          = module.vpc.public_subnets
   private_dns_enabled = true
 }
@@ -63,11 +63,11 @@ resource "aws_security_group" "bedrock_sg" {
   name   = "bedrock-runtime-sg-dev"
   vpc_id = module.vpc.vpc_id
   ingress {
-    description     = "Bedrock runtime sg"
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [aws_security_group.lambda_ingestion_sg.id, aws_security_group.lambda_inference_sg.id]
+    description = "Bedrock runtime sg"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -75,19 +75,7 @@ resource "aws_security_group" "sm_sg" {
   name   = "secret-manager-sg-dev"
   vpc_id = module.vpc.vpc_id
   ingress {
-    description     = "Secrets Manager"
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [aws_security_group.lambda_ingestion_sg.id, aws_security_group.lambda_inference_sg.id]
-  }
-}
-
-resource "aws_security_group" "lambda_ingestion_sg" {
-  name   = "lambda-ingestion-sg-dev"
-  vpc_id = module.vpc.vpc_id
-  egress {
-    description = "Lambda Ingestion"
+    description = "Secrets Manager"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -95,23 +83,11 @@ resource "aws_security_group" "lambda_ingestion_sg" {
   }
 }
 
-resource "aws_security_group" "lambda_inference_sg" {
-  name   = "lambda-inference-sg-dev"
+resource "aws_security_group" "lambda_egress_all_sg" {
+  name   = "public-lambda-sg"
   vpc_id = module.vpc.vpc_id
   egress {
-    description = "Lambda Inference"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_security_group" "lambda_memory_sg" {
-  name   = "lambda-memory-sg-dev"
-  vpc_id = module.vpc.vpc_id
-  egress {
-    description = "Lambda Memory"
+    description = "Lambda egress all"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -127,7 +103,7 @@ resource "aws_security_group" "database_sg" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.lambda_ingestion_sg.id, aws_security_group.jumpbox_sg.id, aws_security_group.lambda_inference_sg.id]
+    security_groups = [aws_security_group.lambda_egress_all_sg.id, aws_security_group.jumpbox_sg.id]
   }
 }
 
@@ -158,6 +134,6 @@ resource "aws_security_group" "dynamo_db_sg" {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    security_groups = [aws_security_group.lambda_memory_sg.id]
+    security_groups = [aws_security_group.lambda_egress_all_sg.id]
   }
 }
