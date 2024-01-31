@@ -32,7 +32,7 @@ jobs:
     - name: Download consolidated image details
       uses: actions/download-artifact@v2
       with:
-        name: consolidated-image-details
+        name: consolidated
         path: .
 
     - name: Set image URIs

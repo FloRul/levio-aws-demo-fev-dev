@@ -1,130 +1,130 @@
-# name: Infrastructure planning and management
+name: Infrastructure planning and management
 
-# on:
-#  pull_request:
-#    branches:
-#      - main
+on:
+ pull_request:
+   branches:
+     - main
 
-# jobs:
-#   planning:
-#     runs-on: ubuntu-latest
-#     if: github.event_name == 'pull_request'
-#     defaults:
-#       run:
-#         working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
-#     permissions:
-#       pull-requests: write
-#     steps:
-#     - uses: actions/checkout@v3
-#     - uses: hashicorp/setup-terraform@v3
-#     - uses: aws-actions/configure-aws-credentials@v2
-#       with:
-#         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#         aws-region: us-east-1
-#     - name: Login to Amazon ECR
-#       id: login-ecr
-#       uses: aws-actions/amazon-ecr-login@v2
+jobs:
+  planning:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
+    permissions:
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v3
+    - uses: hashicorp/setup-terraform@v3
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
 
-#     - name: Get the latest ingestion image tag
-#       id: get-latest-ingestion-tag
-#       run: |
-#         LATEST_INGESTION_TAG=$(aws ecr describe-images --repository-name ${{vars.INGESTION_LAMBDA_ECR}} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text)
-#         echo "LATEST_INGESTION_TAG=$LATEST_INGESTION_TAG" >> $GITHUB_ENV
-#     - name: Get the ingestion image URI from the build job
-#       run: |
-#         echo "INGESTION_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ vars.INGESTION_LAMBDA_ECR }}:${{env.LATEST_INGESTION_TAG}}" >> "$GITHUB_ENV"
+    - name: Get the latest ingestion image tag
+      id: get-latest-ingestion-tag
+      run: |
+        LATEST_INGESTION_TAG=$(aws ecr describe-images --repository-name ${{vars.INGESTION_LAMBDA_ECR}} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text)
+        echo "LATEST_INGESTION_TAG=$LATEST_INGESTION_TAG" >> $GITHUB_ENV
+    - name: Get the ingestion image URI from the build job
+      run: |
+        echo "INGESTION_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ vars.INGESTION_LAMBDA_ECR }}:${{env.LATEST_INGESTION_TAG}}" >> "$GITHUB_ENV"
     
-#     - name: Get the latest memory image tag
-#       id: get-latest-memory-tag
-#       run: |
-#         LATEST_MEMORY_TAG=$(aws ecr describe-images --repository-name ${{vars.MEMORY_LAMBDA_ECR}} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text)
-#         echo "LATEST_MEMORY_TAG=$LATEST_MEMORY_TAG" >> $GITHUB_ENV
-#     - name: Get the memory image URI from the build job
-#       run: |
-#         echo "MEMORY_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ vars.MEMORY_LAMBDA_ECR }}:${{env.LATEST_MEMORY_TAG}}" >> "$GITHUB_ENV"
+    - name: Get the latest memory image tag
+      id: get-latest-memory-tag
+      run: |
+        LATEST_MEMORY_TAG=$(aws ecr describe-images --repository-name ${{vars.MEMORY_LAMBDA_ECR}} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text)
+        echo "LATEST_MEMORY_TAG=$LATEST_MEMORY_TAG" >> $GITHUB_ENV
+    - name: Get the memory image URI from the build job
+      run: |
+        echo "MEMORY_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ vars.MEMORY_LAMBDA_ECR }}:${{env.LATEST_MEMORY_TAG}}" >> "$GITHUB_ENV"
     
-#     - name: Get the latest inference image tag
-#       id: get-latest-inference-tag
-#       run: |
-#         LATEST_INFERENCE_TAG=$(aws ecr describe-images --repository-name ${{vars.INFERENCE_LAMBDA_ECR}} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text)
-#         echo "LATEST_INFERENCE_TAG=$LATEST_INFERENCE_TAG" >> $GITHUB_ENV
-#     - name: Get the inference image URI from the build job
-#       run: |
-#         echo "INFERENCE_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ vars.INFERENCE_LAMBDA_ECR }}:${{env.LATEST_INFERENCE_TAG}}" >> "$GITHUB_ENV"
+    - name: Get the latest inference image tag
+      id: get-latest-inference-tag
+      run: |
+        LATEST_INFERENCE_TAG=$(aws ecr describe-images --repository-name ${{vars.INFERENCE_LAMBDA_ECR}} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output text)
+        echo "LATEST_INFERENCE_TAG=$LATEST_INFERENCE_TAG" >> $GITHUB_ENV
+    - name: Get the inference image URI from the build job
+      run: |
+        echo "INFERENCE_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ vars.INFERENCE_LAMBDA_ECR }}:${{env.LATEST_INFERENCE_TAG}}" >> "$GITHUB_ENV"
     
-#     - name: Terraform fmt
-#       id: fmt
-#       run: terraform fmt -check
-#       continue-on-error: true
+    - name: Terraform fmt
+      id: fmt
+      run: terraform fmt -check
+      continue-on-error: true
 
-#     - name: Terraform Init
-#       id: init
-#       run: terraform init -no-color -upgrade
+    - name: Terraform Init
+      id: init
+      run: terraform init -no-color -upgrade
 
-#     - name: Terraform Validate
-#       id: validate
-#       run: terraform validate -no-color
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
 
-#     - name: Terraform Plan
-#       id: plan
-#       run: terraform plan -var="ingestion_lambda_image_uri=${{ env.INGESTION_IMAGE }}" -var="inference_lambda_image_uri=${{ env.INFERENCE_IMAGE }}" -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" -no-color
-#       continue-on-error: true
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -var="ingestion_lambda_image_uri=${{ env.INGESTION_IMAGE }}" -var="inference_lambda_image_uri=${{ env.INFERENCE_IMAGE }}" -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" -no-color
+      continue-on-error: true
 
-#     - uses: actions/github-script@v6
-#       if: github.event_name == 'pull_request'
-#       env:
-#         PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-#       with:
-#         github-token: ${{ secrets.GITHUB_TOKEN }}
-#         script: |
-#           // 1. Retrieve existing bot comments for the PR
-#           const { data: comments } = await github.rest.issues.listComments({
-#             owner: context.repo.owner,
-#             repo: context.repo.repo,
-#             issue_number: context.issue.number,
-#           })
-#           const botComment = comments.find(comment => {
-#             return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
-#           })
+    - uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      env:
+        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          // 1. Retrieve existing bot comments for the PR
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          })
+          const botComment = comments.find(comment => {
+            return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
+          })
 
-#           // 2. Prepare format of the comment
-#           const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-#           #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-#           #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-#           <details><summary>Validation Output</summary>
+          // 2. Prepare format of the comment
+          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+          <details><summary>Validation Output</summary>
 
-#           \`\`\`\n
-#           ${{ steps.validate.outputs.stdout }}
-#           \`\`\`
+          \`\`\`\n
+          ${{ steps.validate.outputs.stdout }}
+          \`\`\`
 
-#           </details>
+          </details>
 
-#           #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
-#           <details><summary>Show Plan</summary>
+          <details><summary>Show Plan</summary>
 
-#           \`\`\`\n
-#           ${process.env.PLAN}
-#           \`\`\`
+          \`\`\`\n
+          ${process.env.PLAN}
+          \`\`\`
 
-#           </details>
+          </details>
 
-#           *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
-#           // 3. If we have a comment, update it, otherwise create a new one
-#           if (botComment) {
-#             github.rest.issues.updateComment({
-#               owner: context.repo.owner,
-#               repo: context.repo.repo,
-#               comment_id: botComment.id,
-#               body: output
-#             })
-#           } else {
-#             github.rest.issues.createComment({
-#               issue_number: context.issue.number,
-#               owner: context.repo.owner,
-#               repo: context.repo.repo,
-#               body: output
-#             })
-#           }
+          // 3. If we have a comment, update it, otherwise create a new one
+          if (botComment) {
+            github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: output
+            })
+          } else {
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+          }
