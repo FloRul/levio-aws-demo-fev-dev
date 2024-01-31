@@ -2,7 +2,7 @@ name: Apply infrastructure
 
 on:
   push:
-    branches: main 
+    branches: gg 
 jobs:
   apply:
     defaults:
