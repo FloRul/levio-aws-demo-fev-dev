@@ -58,6 +58,7 @@ module "memory" {
 }
 
 module "list_collections" {
+  lambda_image_uri = var.list_collections_lambda_image_uri
   source           = "../list_collections"
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,

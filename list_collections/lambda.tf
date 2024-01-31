@@ -2,14 +2,15 @@ module "lambda_function_container_image" {
   timeout                  = 30
   source                   = "terraform-aws-modules/lambda/aws"
   function_name            = var.lambda_function_name
+  create_package           = false
+  image_uri                = var.lambda_image_uri
   memory_size              = 128
+  package_type             = "Image"
   vpc_subnet_ids           = var.lambda_vpc_subnet_ids
   vpc_security_group_ids   = var.lambda_vpc_security_group_ids
   role_name                = "${var.lambda_function_name}-role"
   attach_policy_statements = true
-  source_path              = "${path.module}/src"
-  runtime = "python3.12"
-  handler = "index.lambda_handler"
+
   environment_variables = {
     PGVECTOR_DRIVER   = "psycopg2"
     PGVECTOR_HOST     = var.pg_vector_host
