@@ -2,17 +2,19 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 import psycopg2
-from aws_lambda_powertools.utilities import parameters
+
+# from aws_lambda_powertools.utilities import parameters
 
 PGVECTOR_HOST = os.environ.get("PGVECTOR_HOST", "localhost")
 PGVECTOR_PORT = int(os.environ.get("PGVECTOR_PORT", 5432))
 PGVECTOR_DATABASE = os.environ.get("PGVECTOR_DATABASE", "postgres")
 PGVECTOR_USER = os.environ.get("PGVECTOR_USER", "postgres")
-PG_PASSWORD = parameters.get_secret(
-    os.environ.get("PG_PASSWORD_SECRET_NAME", "pg-password")
-)
+# PG_PASSWORD = parameters.get_secret(
+#     os.environ.get("PG_PASSWORD_SECRET_NAME", "pg-password")
+# )
 
 COLLECTION_TABLE_NAME = "langchain_pg_collection"
+
 
 def lambda_handler(event, context):
     try:
@@ -20,7 +22,7 @@ def lambda_handler(event, context):
         with psycopg2.connect(
             dbname=PGVECTOR_DATABASE,
             user=PGVECTOR_USER,
-            password=PG_PASSWORD,
+            password="dbreader",  # read only account
             host=PGVECTOR_HOST,
             port=PGVECTOR_PORT,
         ) as conn:
