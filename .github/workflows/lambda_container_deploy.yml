@@ -1,0 +1,55 @@
+on: [push]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda_path: [
+          './inference/src',
+          './conversation_memory/src', 
+          './ingestion/src',
+          './list_collections/src',
+        ]
+        lambda_ecr: [
+          'inference',
+          'conversation_memory', 
+          'ingestion', 
+          'list_collections',
+        ]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Create ECR repository if it doesn't exist
+      run: |
+        aws ecr describe-repositories --repository-names ${{ matrix.lambda_ecr }} || aws ecr create-repository --repository-name ${{ matrix.lambda_ecr }}
+
+    - name: Compute hash of source code
+      id: compute-hash
+      run: |
+        echo "INFERENCE_IMAGE=$(tar -cf - ${{ matrix.lambda_path }} | sha256sum | cut -d ' ' -f 1)" >> $GITHUB_ENV
+      shell: /usr/bin/bash -e {0}
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      working-directory: ${{ matrix.lambda_path }}
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ matrix.lambda_ecr }}
+        IMAGE_TAG: ${{ env.INFERENCE_IMAGE }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
