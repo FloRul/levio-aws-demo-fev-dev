@@ -4,19 +4,6 @@ on:
       - main
 
 jobs:
-  init:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Create initial JSON artifact
-      run: |
-        echo '[]' > image_details.json
-
-    - name: Upload initial JSON artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: image-details
-        path: image_details.json
-
   build-and-push:
     runs-on: ubuntu-latest
     strategy:
@@ -73,16 +60,39 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
     
-    - name: Append to JSON artifact
+    - name: Create JSON artifact
       run: |
-        if [ ! -f image_details.json ]; then
-          echo '[]' > image_details.json
-        fi
-        jq '. += [{"ECR_REGISTRY": "'"${{ steps.login-ecr.outputs.registry }}"'", "ECR_REPOSITORY": "'"${{ matrix.lambda_path_ecr }}"'", "IMAGE_TAG": "'"${{ env.LAMBDA_IMAGE }}"'"}]' image_details.json > tmp.json && mv tmp.json image_details.json
+        echo '[{"ECR_REGISTRY": "'"${{ steps.login-ecr.outputs.registry }}"'", "ECR_REPOSITORY": "'"${{ matrix.lambda_path_ecr }}"'", "IMAGE_TAG": "'"${{ env.LAMBDA_IMAGE }}"'"}]' > image_details_${{ matrix.lambda_path_ecr }}.json
       
+    - name: Upload JSON artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: image-details-${{ matrix.lambda_path_ecr }}
+        path: image_details_${{ matrix.lambda_path_ecr }}.json
+
     - name: Upload updated JSON artifact
       uses: actions/upload-artifact@v2
       with:
         name: image-details
         path: image_details.json
     
+  consolidate:
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v2
+
+    - name: Consolidate artifacts
+      run: |
+        echo '[' > consolidated.json
+        find . -name 'image_details_*.json' -exec cat {} \; -exec echo ',' >> consolidated.json
+        sed -i '$ s/,$//' consolidated.json
+        echo ']' >> consolidated.json
+
+    - name: Upload consolidated artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: consolidated-image-details
+        path: consolidated.json
+  
