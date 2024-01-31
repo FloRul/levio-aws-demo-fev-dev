@@ -1,8 +1,8 @@
-name: Apply infrastructure
+name: apply-infrastructure
 
 on:
   workflow_run:
-    workflows: ["build"]
+    workflows: ["build-push-lambda-image-ecr"]
     types:
       - completed
 

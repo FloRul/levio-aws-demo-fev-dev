@@ -1,4 +1,4 @@
-name: Build and push Docker image to Amazon ECR
+name: build-push-lambda-image-ecr
 
 on: 
   push:
