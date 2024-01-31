@@ -1,3 +1,5 @@
+name: Build and push Docker image to Amazon ECR
+
 on: 
   push:
     branches:
