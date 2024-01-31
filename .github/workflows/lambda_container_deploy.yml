@@ -77,7 +77,7 @@ jobs:
     - name: Consolidate artifacts
       run: |
         echo '[' > consolidated.json
-        find . -name 'image_details_*.json' -exec cat {} \; -exec echo ',' >> consolidated.json
+        find . -name 'image_details_*.json' -exec cat {} \; -exec echo ',' \; >> consolidated.json
         sed -i '$ s/,$//' consolidated.json
         echo ']' >> consolidated.json
 
