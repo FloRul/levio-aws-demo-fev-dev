@@ -78,7 +78,7 @@ jobs:
         if [ ! -f image_details.json ]; then
           echo '[]' > image_details.json
         fi
-        jq '. += [{"ECR_REGISTRY": "'"$ECR_REGISTRY"'", "ECR_REPOSITORY": "'"$ECR_REPOSITORY"'", "IMAGE_TAG": "'"$IMAGE_TAG"'"}]' image_details.json > tmp.json && mv tmp.json image_details.json
+        jq '. += [{"ECR_REGISTRY": "'"${{ steps.login-ecr.outputs.registry }}"'", "ECR_REPOSITORY": "'"${{ matrix.lambda_path_ecr }}"'", "IMAGE_TAG": "'"${{ env.LAMBDA_IMAGE }}"'"}]' image_details.json > tmp.json && mv tmp.json image_details.json
       
     - name: Upload updated JSON artifact
       uses: actions/upload-artifact@v2
