@@ -16,15 +16,6 @@ jobs:
           'list_collections',
         ]
     steps:
-    - name: Install and use jq
-      run: |
-        sudo apt-get install -y jq
-
-    - name: Download JSON artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: image-details
-
     - name: Checkout code
       uses: actions/checkout@v2
 
