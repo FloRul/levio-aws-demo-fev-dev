@@ -1,6 +1,19 @@
 on: [push]
 
 jobs:
+  init:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create initial JSON artifact
+      run: |
+        echo '[]' > image_details.json
+
+    - name: Upload initial JSON artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: image-details
+        path: image_details.json
+
   build-and-push:
     runs-on: ubuntu-latest
     strategy:
@@ -13,6 +26,15 @@ jobs:
           'list_collections',
         ]
     steps:
+    - name: Install and use jq
+      run: |
+        sudo apt-get install -y jq
+
+    - name: Download JSON artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: image-details
+
     - name: Checkout code
       uses: actions/checkout@v2
 
@@ -34,7 +56,7 @@ jobs:
     - name: Compute hash of source code
       id: compute-hash
       run: |
-        echo "INFERENCE_IMAGE=$(tar -cf - ./${{ matrix.lambda_path_ecr }}/src | sha256sum | cut -d ' ' -f 1)" >> $GITHUB_ENV
+        echo "LAMBDA_IMAGE=$(tar -cf - ./${{ matrix.lambda_path_ecr }}/src | sha256sum | cut -d ' ' -f 1)" >> $GITHUB_ENV
       shell: /usr/bin/bash -e {0}
 
     - name: Build, tag, and push image to Amazon ECR
@@ -43,7 +65,21 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ matrix.lambda_path_ecr }}
-        IMAGE_TAG: ${{ env.INFERENCE_IMAGE }}
+        IMAGE_TAG: ${{ env.LAMBDA_IMAGE }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    
+    - name: Append to JSON artifact
+      run: |
+        if [ ! -f image_details.json ]; then
+          echo '[]' > image_details.json
+        fi
+        jq '. += [{"ECR_REGISTRY": "'"$ECR_REGISTRY"'", "ECR_REPOSITORY": "'"$ECR_REPOSITORY"'", "IMAGE_TAG": "'"$IMAGE_TAG"'"}]' image_details.json | sponge image_details.json
+
+    - name: Upload updated JSON artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: image-details
+        path: image_details.json
+    
