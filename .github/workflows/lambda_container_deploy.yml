@@ -53,8 +53,7 @@ jobs:
     
     - name: Create JSON artifact
       run: |
-        echo '[{"ECR_REGISTRY": "'"${{ steps.login-ecr.outputs.registry }}"'", "ECR_REPOSITORY": "'"${{ matrix.lambda_path_ecr }}"'", "IMAGE_TAG": "'"${{ env.LAMBDA_IMAGE }}"'"}]' > image_details_${{ matrix.lambda_path_ecr }}.json
-      
+        echo '{"'"${{ matrix.lambda_path_ecr }}"'": {"ECR_REGISTRY": "'"${{ steps.login-ecr.outputs.registry }}"'", "ECR_REPOSITORY": "'"${{ matrix.lambda_path_ecr }}"'", "IMAGE_TAG": "'"${{ env.LAMBDA_IMAGE }}"'"}}' > image_details_${{ matrix.lambda_path_ecr }}.json
     - name: Upload JSON artifact
       uses: actions/upload-artifact@v2
       with:
@@ -71,15 +70,15 @@ jobs:
     needs: [build-and-push]
     runs-on: ubuntu-latest
     steps:
+    - name: Install and use jq
+      run: |
+        sudo apt-get install -y jq
     - name: Download all artifacts
       uses: actions/download-artifact@v2
 
     - name: Consolidate artifacts
       run: |
-        echo '[' > consolidated.json
-        find . -name 'image_details_*.json' -exec cat {} \; -exec echo ',' \; >> consolidated.json
-        sed -i '$ s/,$//' consolidated.json
-        echo ']' >> consolidated.json
+        jq -s add *.json > consolidated.json
 
     - name: Upload consolidated artifact
       uses: actions/upload-artifact@v2
