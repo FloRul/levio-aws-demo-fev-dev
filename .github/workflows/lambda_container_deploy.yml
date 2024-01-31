@@ -75,8 +75,8 @@ jobs:
         if [ ! -f image_details.json ]; then
           echo '[]' > image_details.json
         fi
-        jq '. += [{"ECR_REGISTRY": "'"$ECR_REGISTRY"'", "ECR_REPOSITORY": "'"$ECR_REPOSITORY"'", "IMAGE_TAG": "'"$IMAGE_TAG"'"}]' image_details.json | sponge image_details.json
-
+        jq '. += [{"ECR_REGISTRY": "'"$ECR_REGISTRY"'", "ECR_REPOSITORY": "'"$ECR_REPOSITORY"'", "IMAGE_TAG": "'"$IMAGE_TAG"'"}]' image_details.json > tmp.json && mv tmp.json image_details.json
+      
     - name: Upload updated JSON artifact
       uses: actions/upload-artifact@v2
       with:
