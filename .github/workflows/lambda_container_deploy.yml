@@ -121,10 +121,10 @@ jobs:
         echo "LIST_COLLECTIONS_IMAGE=$(jq -r '.list_collections | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' consolidated-image-details.json) >> $GITHUB_ENV
     - name: echo image URIs
       run: |
-        echo $INGESTION_IMAGE
-        echo $INFERENCE_IMAGE
-        echo $MEMORY_IMAGE
-        echo $LIST_COLLECTIONS_IMAGE
+        echo ingestion=$INGESTION_IMAGE
+        echo inference=$INFERENCE_IMAGE
+        echo memory=$MEMORY_IMAGE
+        echo list_collection=$LIST_COLLECTIONS_IMAGE
     - name: Terraform Init
       shell: bash
       id: terraform-Init
