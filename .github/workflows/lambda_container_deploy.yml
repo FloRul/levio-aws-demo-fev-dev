@@ -89,6 +89,9 @@ jobs:
         path: consolidated.json
 
   deploy-infra:
+    defaults:
+      run:
+        working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
     needs: [consolidate]
     runs-on: ubuntu-latest
     steps:

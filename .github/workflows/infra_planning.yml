@@ -3,7 +3,7 @@ name: Infrastructure planning and management
 on:
  pull_request:
    branches:
-     - main
+     - kk
 
 jobs:
   planning:
