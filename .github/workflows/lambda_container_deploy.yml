@@ -61,12 +61,6 @@ jobs:
       with:
         name: image-details-${{ matrix.lambda_path_ecr }}
         path: image_details_${{ matrix.lambda_path_ecr }}.json
-
-    - name: Upload updated JSON artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: image-details
-        path: image_details.json
     
   consolidate:
     needs: [build-and-push]
