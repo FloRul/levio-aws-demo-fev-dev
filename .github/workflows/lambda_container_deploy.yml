@@ -107,13 +107,9 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: consolidated-image-details
-        path: output
 
-    - name: Move consolidated-image-details.json to current directory
-      run: mv /home/runner/work/levio-aws-demo-fev-dev/levio-aws-demo-fev-dev/consolidated-image-details.json ./consolidated-image-details.json
-    
     - name: print consolidated-image-details.json
-      run: cat ./consolidated-image-details.json
+      run: cat consolidated-image-details.json
 
     - name: Set image URIs
       shell: bash
