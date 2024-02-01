@@ -86,7 +86,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: consolidated-image-details
-        path: consolidated.json
+        path: consolidated-image-details.json
 
   deploy-infra:
     defaults:
@@ -113,7 +113,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: consolidated-image-details
-        path: consolidated.json
+        path: consolidated-image-details.json
 
     - name: Set image URIs
       run: |
