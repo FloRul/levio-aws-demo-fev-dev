@@ -115,10 +115,10 @@ jobs:
     - name: Set image URIs
       shell: bash
       run: |
-        echo "INGESTION_IMAGE=$(jq -r '.ingestion | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' consolidated-image-details.json) >> $GITHUB_ENV
-        echo "INFERENCE_IMAGE=$(jq -r '.inference | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' consolidated-image-details.json) >> $GITHUB_ENV
-        echo "MEMORY_IMAGE=$(jq -r '.conversation_memory | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' consolidated-image-details.json) >> $GITHUB_ENV
-        echo "LIST_COLLECTIONS_IMAGE=$(jq -r '.list_collections | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' consolidated-image-details.json) >> $GITHUB_ENV
+        echo "INGESTION_IMAGE=$(jq -r '.ingestion | \"\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)\"' consolidated-image-details.json)" >> $GITHUB_ENV
+        echo "INFERENCE_IMAGE=$(jq -r '.inference | \"\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)\"' consolidated-image-details.json)" >> $GITHUB_ENV
+        echo "MEMORY_IMAGE=$(jq -r '.conversation_memory | \"\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)\"' consolidated-image-details.json)" >> $GITHUB_ENV
+        echo "LIST_COLLECTIONS_IMAGE=$(jq -r '.list_collections | \"\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)\"' consolidated-image-details.json)" >> $GITHUB_ENV
     - name: echo image URIs
       run: |
         echo ingestion=$INGESTION_IMAGE
