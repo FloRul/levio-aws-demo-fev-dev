@@ -107,8 +107,8 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: consolidated-image-details
-        path: consolidated-image-details.json
-
+        path: /home/runner/work/levio-aws-demo-fev-dev/levio-aws-demo-fev-dev/consolidated-image-details.json
+        
     - name: Set image URIs
       run: |
         echo "INGESTION_IMAGE=$(jq -r '.ingestion | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' consolidated-image-details.json)" >> "$GITHUB_ENV"
