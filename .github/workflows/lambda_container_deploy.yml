@@ -109,7 +109,7 @@ jobs:
         name: consolidated-image-details
 
     - name: print consolidated-image-details.json
-      run: cat consolidated-image-details.json
+      run: cat ${{ github.workspace }}/consolidated-image-details.json
 
     - name: Set image URIs
       shell: bash
