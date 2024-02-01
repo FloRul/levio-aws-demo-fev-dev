@@ -108,10 +108,7 @@ jobs:
       with:
         name: consolidated-image-details
         path: consolidated-image-details.json
-
-    - name: Move consolidated-image-details.json to current directory
-      run: mv /home/runner/work/levio-aws-demo-fev-dev/levio-aws-demo-fev-dev/consolidated-image-details.json .
-    
+        
     - name: Set image URIs
       shell: bash
       run: |
