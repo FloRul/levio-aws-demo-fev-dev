@@ -60,7 +60,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: image-details-${{ matrix.lambda_path_ecr }}
-        path: output/image_details_${{ matrix.lambda_path_ecr }}.json
+        path: image_details_${{ matrix.lambda_path_ecr }}.json
     
   consolidate:
     needs: [build-and-push]
@@ -71,18 +71,16 @@ jobs:
         sudo apt-get install -y jq
     - name: Download all artifacts
       uses: actions/download-artifact@v4
-      with:
-        path: output
 
     - name: Consolidate artifacts
       run: |
-        jq -s add $(find . -name '*.json') > output/consolidated-image-details.json
+        jq -s add $(find . -name '*.json') > consolidated-image-details.json
 
     - name: Upload consolidated artifact
       uses: actions/upload-artifact@v4
       with:
         name: consolidated-image-details
-        path: output/consolidated-image-details.json
+        path: consolidated-image-details.json
 
   deploy-infra:
     defaults:
@@ -109,10 +107,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: consolidated-image-details
-        path: output/
+        path: output
 
+    - name: Move consolidated-image-details.json to current directory
+      run: mv /home/runner/work/levio-aws-demo-fev-dev/levio-aws-demo-fev-dev/consolidated-image-details.json ./consolidated-image-details.json
+    
     - name: print consolidated-image-details.json
-      run: cat output/consolidated-image-details.json
+      run: cat ./consolidated-image-details.json
 
     - name: Set image URIs
       shell: bash
