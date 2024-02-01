@@ -74,7 +74,7 @@ jobs:
 
     - name: Consolidate artifacts
       run: |
-        jq -s add $(find . -name '*.json') > consolidated.json
+        jq -s add $(find . -name '*.json') > consolidated-image-details.json
 
     - name: Upload consolidated artifact
       uses: actions/upload-artifact@v2
