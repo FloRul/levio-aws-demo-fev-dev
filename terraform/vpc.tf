@@ -86,6 +86,13 @@ resource "aws_security_group" "sm_sg" {
 resource "aws_security_group" "lambda_egress_all_sg" {
   name   = "public-lambda-sg"
   vpc_id = module.vpc.vpc_id
+  ingress {
+    description = "Lambda ingress all"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     description = "Lambda egress all"
     from_port   = 0
