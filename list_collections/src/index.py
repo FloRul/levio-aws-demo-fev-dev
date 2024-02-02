@@ -18,6 +18,7 @@ conn = psycopg2.connect(
 
 
 def lambda_handler(event, context):
+    global conn  # Declare conn as a global variable
     rows = []
     try:
         # Check if the connection is still open
