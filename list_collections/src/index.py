@@ -6,12 +6,12 @@ PGVECTOR_PORT = int(os.environ.get("PGVECTOR_PORT", 5432))
 PGVECTOR_DATABASE = os.environ.get("PGVECTOR_DATABASE", "postgres")
 PGVECTOR_USER = os.environ.get("PGVECTOR_USER", "postgres")
 COLLECTION_TABLE_NAME = "langchain_pg_collection"
-
+PASSWORD = "dbreader"
 # Initialize the connection outside of the handler
 conn = psycopg2.connect(
     dbname=PGVECTOR_DATABASE,
     user=PGVECTOR_USER,
-    password="dbreader",  # read only account
+    password=PASSWORD,  # read only account
     host=PGVECTOR_HOST,
     port=PGVECTOR_PORT,
 )
@@ -27,16 +27,13 @@ def lambda_handler(event, context):
             conn = psycopg2.connect(
                 dbname=PGVECTOR_DATABASE,
                 user=PGVECTOR_USER,
-                password="dbreader",  # read only account
+                password=PASSWORD,  # read only account
                 host=PGVECTOR_HOST,
                 port=PGVECTOR_PORT,
             )
 
         with conn.cursor() as cur:
-            # Execute a query
             cur.execute(f"SELECT name FROM {COLLECTION_TABLE_NAME}")
-
-            # Fetch the results
             rows = cur.fetchall()
 
         return rows
