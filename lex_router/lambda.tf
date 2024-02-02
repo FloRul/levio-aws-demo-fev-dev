@@ -4,7 +4,7 @@ module "lambda_function_container_image" {
   function_name            = var.lambda_function_name
   create_package           = false
   image_uri                = var.lambda_image_uri
-  memory_size              = 128
+  memory_size              = 256
   package_type             = "Image"
   vpc_subnet_ids           = var.lambda_vpc_subnet_ids
   vpc_security_group_ids   = var.lambda_vpc_security_group_ids
