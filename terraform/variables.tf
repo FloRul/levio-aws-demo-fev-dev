@@ -29,3 +29,8 @@ variable "list_collections_lambda_image_uri" {
   type     = string
   nullable = false
 }
+
+variable "lex_router_lambda_image_uri" {
+  type     = string
+  nullable = false
+}

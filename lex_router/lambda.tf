@@ -12,12 +12,6 @@ module "lambda_function_container_image" {
   attach_policy_statements = true
 
   environment_variables = {
-    PGVECTOR_DRIVER   = "psycopg2"
-    PGVECTOR_HOST     = var.pg_vector_host
-    PGVECTOR_PORT     = var.pg_vector_port
-    PGVECTOR_DATABASE = var.pg_vector_database
-    PGVECTOR_USER     = var.pg_vector_user
-    PGVECTOR_PASSWORD = "dbreader"
   }
   policy_statements = {
     log_group = {
@@ -41,18 +35,6 @@ module "lambda_function_container_image" {
         "logs:PutLogEvents",
       ]
     }
-    rds_connect_read = {
-      effect = "Allow"
-
-      resources = [
-        "arn:aws:rds:${var.aws_region}:446872271111:db:${var.pg_vector_database}"
-      ]
-
-      actions = [
-        "rds-db:connect",
-        "rds-db:execute-statement",
-      ]
-    }
     access_network_interface = {
       effect = "Allow"
 
@@ -64,6 +46,17 @@ module "lambda_function_container_image" {
         "ec2:CreateNetworkInterface",
         "ec2:DescribeNetworkInterfaces",
         "ec2:DeleteNetworkInterface"
+      ]
+    }
+    lambda = {
+      effect = "Allow"
+
+      resources = [
+        "arn:aws:lambda:${var.aws_region}:446872271111:function:*"
+      ]
+
+      actions = [
+        "lambda:InvokeFunction"
       ]
     }
   }

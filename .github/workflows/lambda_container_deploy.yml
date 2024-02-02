@@ -16,6 +16,7 @@ jobs:
           'conversation_memory', 
           'ingestion',
           'list_collections',
+          'lex_router',
         ]
     steps:
     - name: Checkout code
@@ -112,12 +113,7 @@ jobs:
         echo "INFERENCE_IMAGE=$(jq -r '.inference | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' ${{ github.workspace }}/consolidated-image-details.json)" >> $GITHUB_ENV
         echo "MEMORY_IMAGE=$(jq -r '.conversation_memory | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' ${{ github.workspace }}/consolidated-image-details.json)" >> $GITHUB_ENV
         echo "LIST_COLLECTIONS_IMAGE=$(jq -r '.list_collections | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' ${{ github.workspace }}/consolidated-image-details.json)" >> $GITHUB_ENV
-    - name: echo image URIs
-      run: |
-        echo ingestion=$INGESTION_IMAGE
-        echo inference=$INFERENCE_IMAGE
-        echo memory=$MEMORY_IMAGE
-        echo list_collection=$LIST_COLLECTIONS_IMAGE
+        echo "LEX_ROUTER_IMAGE=$(jq -r '.lex_router | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' ${{ github.workspace }}/consolidated-image-details.json)" >> $GITHUB_ENV
     - name: Terraform Init
       shell: bash
       id: terraform-Init
@@ -132,4 +128,5 @@ jobs:
         -var="inference_lambda_image_uri=${{ env.INFERENCE_IMAGE }}" 
         -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" 
         -var="list_collections_lambda_image_uri=${{ env.LIST_COLLECTIONS_IMAGE }}" 
+        -var="lex_router_lambda_image_uri=${{ env.LEX_ROUTER_IMAGE }}" 
         -no-color -auto-approve
