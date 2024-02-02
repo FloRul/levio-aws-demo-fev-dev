@@ -22,3 +22,13 @@ variable "lambda_image_uri" {
   type     = string
   nullable = false
 }
+
+variable "intent_lambda_mapping" {
+  description = <<EOF
+  values for environment variables for every lexV2 
+  intents that must be mapped to an existing lambda function 
+  in the same network. The key is the intent name and the value is the lambda function name
+  EOF
+  type        = map(string)
+  nullable    = false
+}

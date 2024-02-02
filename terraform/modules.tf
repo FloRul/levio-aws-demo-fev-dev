@@ -82,5 +82,8 @@ module "lex_router" {
   lambda_image_uri      = var.lex_router_lambda_image_uri
   lambda_function_name  = local.lex_router_lambda_name
   aws_region            = var.aws_region
-  
+  intent_lambda_mapping = {
+    ListCollections = local.list_collections_lambda_name
+    Inference       = local.inference_lambda_name
+  }
 }
