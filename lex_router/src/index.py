@@ -11,8 +11,7 @@ def router(event):
         intent_name = event["sessionState"]["intent"]["name"]
         fn_name = os.environ.get(intent_name)
         print(f"Intent: {intent_name} -> Lambda: {fn_name}")
-        if fn_name is not None:
-            # invoke lambda and return result
+        if fn_name:
             invoke_response = client.invoke(
                 FunctionName=fn_name, Payload=json.dumps(event)
             )
