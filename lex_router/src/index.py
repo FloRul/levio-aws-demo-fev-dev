@@ -18,7 +18,6 @@ def router(event):
             )
             print(f"invoke respoonse : {invoke_response}")
             payload = json.load(invoke_response["Payload"])
-            print(f"Response: {intent_name} -> Lambda: {fn_name} : {payload}")
             return payload
         else:
             raise ValueError(f"Intent {intent_name} could not be resolved")
