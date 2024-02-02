@@ -11,7 +11,7 @@ def router(event):
         intent_name = event["sessionState"]["intent"]["name"]
         fn_name = os.environ.get(intent_name)
         print(f"Intent: {intent_name} -> Lambda: {fn_name}")
-        if fn_name:
+        if fn_name is not None:
             # invoke lambda and return result
             invoke_response = client.invoke(
                 FunctionName=fn_name, Payload=json.dumps(event)
@@ -20,7 +20,10 @@ def router(event):
             payload = json.load(invoke_response["Payload"])
             print(f"Response: {intent_name} -> Lambda: {fn_name} : {payload}")
             return payload
-    except (Exception, e):
+        else:
+            raise ValueError(f"Intent {intent_name} could not be resolved")
+    except Exception as e:
+        print(f"Error during intent lambda routing : {e}")
         raise e
 
 
