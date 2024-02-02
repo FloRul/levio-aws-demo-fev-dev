@@ -123,7 +123,7 @@ jobs:
       id: terraform-Apply
       shell: bash
       run: |
-        terraform apply \ 
+        terraform apply \
         -var="ingestion_lambda_image_uri=${{ env.INGESTION_IMAGE }}" \
         -var="inference_lambda_image_uri=${{ env.INFERENCE_IMAGE }}" \
         -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" \
