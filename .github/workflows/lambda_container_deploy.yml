@@ -36,19 +36,13 @@ jobs:
       run: |
         aws ecr describe-repositories --repository-names ${{ matrix.lambda_path_ecr }} || aws ecr create-repository --repository-name ${{ matrix.lambda_path_ecr }}
 
-    - name: Compute hash of source code
-      id: compute-hash
-      run: |
-        echo "LAMBDA_IMAGE=$(tar -cf - ./${{ matrix.lambda_path_ecr }}/src | sha256sum | cut -d ' ' -f 1)" >> $GITHUB_ENV
-      shell: /usr/bin/bash -e {0}
-
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       working-directory: ./${{ matrix.lambda_path_ecr }}/src
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ matrix.lambda_path_ecr }}
-        IMAGE_TAG: ${{ env.LAMBDA_IMAGE }}
+        IMAGE_TAG: "latest"
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -133,4 +127,9 @@ jobs:
       id: terraform-Apply
       shell: bash
       run: |
-        terraform apply -var="ingestion_lambda_image_uri=${{ env.INGESTION_IMAGE }}" -var="inference_lambda_image_uri=${{ env.INFERENCE_IMAGE }}" -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" -var="list_collections_lambda_image_uri=${{ env.LIST_COLLECTIONS_IMAGE }}" -no-color -auto-approve
+        terraform apply 
+        -var="ingestion_lambda_image_uri=${{ env.INGESTION_IMAGE }}" 
+        -var="inference_lambda_image_uri=${{ env.INFERENCE_IMAGE }}" 
+        -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" 
+        -var="list_collections_lambda_image_uri=${{ env.LIST_COLLECTIONS_IMAGE }}" 
+        -no-color -auto-approve

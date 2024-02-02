@@ -17,6 +17,7 @@ COLLECTION_TABLE_NAME = "langchain_pg_collection"
 
 
 def lambda_handler(event, context):
+    rows = []
     try:
         # Connect to the database
         with psycopg2.connect(
@@ -35,8 +36,12 @@ def lambda_handler(event, context):
 
                 # Print the results
                 for row in rows:
-                    print(row)
+                    rows.append(row)
 
+        return {
+            "statusCode": 200,
+            "body": rows,
+        }
     except Exception as e:
         print(f"Error querying the database: {e}")
         raise e
