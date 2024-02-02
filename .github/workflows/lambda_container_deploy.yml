@@ -36,6 +36,10 @@ jobs:
     - name: Create ECR repository if it doesn't exist
       run: |
         aws ecr describe-repositories --repository-names ${{ matrix.lambda_path_ecr }} || aws ecr create-repository --repository-name ${{ matrix.lambda_path_ecr }}
+    
+    - name: Generate timestamp
+      id: timestamp
+      run: echo "::set-output name=timestamp::$(date +%s)"
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
@@ -43,14 +47,14 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ matrix.lambda_path_ecr }}
-        IMAGE_TAG: latest
+        IMAGE_TAG: ${{ steps.timestamp.outputs.timestamp }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
     
     - name: Create JSON artifact
       run: |
-        echo '{"'"${{ matrix.lambda_path_ecr }}"'": {"ECR_REGISTRY": "'"${{ steps.login-ecr.outputs.registry }}"'", "ECR_REPOSITORY": "'"${{ matrix.lambda_path_ecr }}"'", "IMAGE_TAG": "'"latest"'"}}' > image_details_${{ matrix.lambda_path_ecr }}.json
+        echo '{"'"${{ matrix.lambda_path_ecr }}"'": {"ECR_REGISTRY": "'"${{ steps.login-ecr.outputs.registry }}"'", "ECR_REPOSITORY": "'"${{ matrix.lambda_path_ecr }}"'", "IMAGE_TAG": "'"${{ steps.timestamp.outputs.timestamp }}"'"}}' > image_details_${{ matrix.lambda_path_ecr }}.json
     - name: Upload JSON artifact
       uses: actions/upload-artifact@v4
       with:
