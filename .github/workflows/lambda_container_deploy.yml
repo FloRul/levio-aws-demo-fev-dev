@@ -134,5 +134,3 @@ jobs:
       shell: bash
       run: |
         terraform apply -var="ingestion_lambda_image_uri=${{ env.INGESTION_IMAGE }}" -var="inference_lambda_image_uri=${{ env.INFERENCE_IMAGE }}" -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" -var="list_collections_lambda_image_uri=${{ env.LIST_COLLECTIONS_IMAGE }}" -no-color -auto-approve
-
-  
