@@ -36,10 +36,7 @@ def lambda_handler(event, context):
                 for row in rows:
                     rows.append(row)
 
-        return {
-            "statusCode": 200,
-            "body": rows,
-        }
+        return rows
     except Exception as e:
         print(f"Error querying the database: {e}")
         raise e
