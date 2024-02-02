@@ -27,5 +27,12 @@ def router(event):
 
 def lambda_handler(event, context):
     print(event)
-    response = router(event)
-    return response
+    try:
+        if "sessionState" in event:
+            response = router(event)
+        else:
+            response = {"statusCode": 200, "body": "OK"}
+        return response
+    except Exception as e:
+        print(f"Error during lambda handler : {e}")
+        raise e
