@@ -35,8 +35,25 @@ def lambda_handler(event, context):
         with conn.cursor() as cur:
             cur.execute(f"SELECT name FROM {COLLECTION_TABLE_NAME}")
             rows = cur.fetchall()
+            rows = [row[0] for row in rows]
 
-        return rows
+        return {
+            "sessionState": {
+                "intent": {
+                    "name": "ListCollections",
+                    "state": "Fulfilled",
+                    "confirmationState": "None",
+                },
+                "sessionAttributes": {"options": rows},
+            },
+            "messages": [
+                {
+                    "contentType": "PlainText",
+                    "content": "Voici les sources de données disponibles :",
+                }
+            ],
+            "requestAttributes": {},
+        }
     except Exception as e:
         print(f"Error querying the database: {e}")
         raise e
