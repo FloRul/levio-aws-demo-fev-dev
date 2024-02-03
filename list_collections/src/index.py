@@ -52,8 +52,8 @@ def lambda_handler(event, context):
         return {
             "sessionState": {
                 "intent": {
-                    "name": "ListCollections",
-                    "state": "Fulfilled",
+                    "name": "SelectCollections",
+                    "state": "ReadyForFulfillment",
                     "confirmationState": "None",
                     "slots": slots,
                 },
@@ -62,14 +62,8 @@ def lambda_handler(event, context):
             "messages": [
                 {
                     "contentType": "PlainText",
-                    "content": "Voici les sources de données disponibles :",
-                },
-                {
-                    "contentType": "PlainText",
-                    "content": "Please choose an option",
-                    "messageType": "ElicitSlot",
-                    "slotToElicit": "CollectionName",
-                },
+                    "content": f"Here are the collections: {', '.join(rows)}",
+                }
             ],
             "requestAttributes": {},
         }
