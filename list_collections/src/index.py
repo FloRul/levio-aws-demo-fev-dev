@@ -1,5 +1,6 @@
 import os
 import psycopg2
+import json
 
 PGVECTOR_HOST = os.environ.get("PGVECTOR_HOST", "localhost")
 PGVECTOR_PORT = int(os.environ.get("PGVECTOR_PORT", 5432))
