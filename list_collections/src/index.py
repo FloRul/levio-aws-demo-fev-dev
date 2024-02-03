@@ -35,7 +35,9 @@ def lambda_handler(event, context):
         with conn.cursor() as cur:
             cur.execute(f"SELECT name FROM {COLLECTION_TABLE_NAME}")
             rows = cur.fetchall()
-            rows = [row[0] for row in rows]
+        rows = [row[0] for row in rows]
+        # Format the sessionAttributes as a map of string to string
+        sessionAttributes = {f"option{i}": option for i, option in enumerate(rows)}
 
         return {
             "sessionState": {
@@ -44,7 +46,7 @@ def lambda_handler(event, context):
                     "state": "Fulfilled",
                     "confirmationState": "None",
                 },
-                "sessionAttributes": {"options": rows},
+                "sessionAttributes": sessionAttributes,
             },
             "messages": [
                 {
