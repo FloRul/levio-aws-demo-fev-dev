@@ -45,7 +45,7 @@ def lambda_handler(event, context):
 
         # Format the slots as a map of slot names to slot objects
         slots = {
-            f"option{i}": {"shape": "Scalar", "value": json.dumps(option)}
+            f"option{i}": {"shape": "Scalar", "value": option}
             for i, option in enumerate(rows)
         }
 
