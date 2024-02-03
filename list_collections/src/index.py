@@ -42,13 +42,19 @@ def lambda_handler(event, context):
         # Format the sessionAttributes as a map of string to string
         sessionAttributes = {f"option{i}": option for i, option in enumerate(rows)}
 
+        # Format the slots as a map of slot names to slot objects
+        slots = {
+            f"option{i}": {"shape": "Scalar", "value": json.dumps(option)}
+            for i, option in enumerate(rows)
+        }
+
         return {
             "sessionState": {
                 "intent": {
                     "name": "ListCollections",
                     "state": "Fulfilled",
                     "confirmationState": "None",
-                    "slots": sessionAttributes,
+                    "slots": slots,
                 },
                 "sessionAttributes": sessionAttributes,
             },
