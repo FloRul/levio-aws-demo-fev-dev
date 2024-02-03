@@ -48,6 +48,7 @@ def lambda_handler(event, context):
                     "name": "ListCollections",
                     "state": "Fulfilled",
                     "confirmationState": "None",
+                    "slots": sessionAttributes,
                 },
                 "sessionAttributes": sessionAttributes,
             },
@@ -55,15 +56,15 @@ def lambda_handler(event, context):
                 {
                     "contentType": "PlainText",
                     "content": "Voici les sources de données disponibles :",
-                }
+                },
+                {
+                    "contentType": "PlainText",
+                    "content": "Please choose an option",
+                    "messageType": "ElicitSlot",
+                    "slotToElicit": "CollectionName",
+                },
             ],
             "requestAttributes": {},
-            "dialogAction": {
-                "type": "ElicitSlot",
-                "intentName": "ListCollections",
-                "slotToElicit": "CollectionName",
-                "slots": sessionAttributes,
-            },
         }
     except Exception as e:
         print(f"Error querying the database: {e}")
