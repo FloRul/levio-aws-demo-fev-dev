@@ -118,5 +118,16 @@ module "lambda_function_container_image" {
         "s3:*"
       ]
     }
+    textract = {
+      effect = "Allow"
+
+      resources = [
+        "*"
+      ]
+
+      actions = [
+        "textract:*"
+      ]
+    }
   }
 }
