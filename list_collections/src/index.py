@@ -70,13 +70,13 @@ def lambda_handler(event, context):
             ],
             "requestAttributes": {},
         }
-        return list_collection(collections=rows)
+        return prompt_for_collection_selection(collections=rows)
     except Exception as e:
         print(f"Error querying the database: {e}")
         raise e
 
 
-def list_collection(collections: list):
+def prompt_for_collection_selection(collections: list):
     return {
         "sessionState": {
             "dialogAction": {
@@ -91,9 +91,9 @@ def list_collection(collections: list):
                     SLOT_TO_ELICIT: {
                         "shape": "Scalar",
                         "value": {
-                            "originalValue": "originalValue",
-                            "interpretedValue": "interpretedValue",
-                            "resolvedValues": ["resolvedValues"],
+                            "originalValue": None,
+                            "interpretedValue": None,
+                            "resolvedValues": [],
                         },
                     },
                 },
