@@ -102,7 +102,7 @@ def prompt_for_collection_selection(collections: list):
         "messages": [
             {
                 "contentType": "PlainText",
-                "content": f"Voici une liste de collections disponibles: {', '.join(collections)}",
+                "content": f"Vous souhaitez interroger une source de donnees specifiques, voici une liste de collections disponibles: {', '.join(collections)}",
             },
         ],
     }
