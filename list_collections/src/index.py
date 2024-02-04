@@ -80,7 +80,6 @@ def test_response():
     return {
         "sessionState": {
             "dialogAction": {
-                "slotElicitationStyle": "Default",
                 "slotToElicit": SLOT_TO_ELICIT,
                 "type": "ElicitSlot",
             },
