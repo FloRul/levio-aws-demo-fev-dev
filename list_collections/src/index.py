@@ -70,13 +70,13 @@ def lambda_handler(event, context):
             ],
             "requestAttributes": {},
         }
-        return test_response()
+        return list_collection(collections=rows)
     except Exception as e:
         print(f"Error querying the database: {e}")
         raise e
 
 
-def test_response():
+def list_collection(collections: list):
     return {
         "sessionState": {
             "dialogAction": {
@@ -102,7 +102,7 @@ def test_response():
         "messages": [
             {
                 "contentType": "PlainText",
-                "content": "the content of the message from the lambda list collections",
+                "content": f"Voici une liste de collections disponibles: {', '.join(collections)}",
             },
         ],
     }
