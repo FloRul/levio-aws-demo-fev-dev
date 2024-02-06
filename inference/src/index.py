@@ -45,7 +45,10 @@ def prepare_prompt(query: str, docs: list, history: list):
         if len(docs) > 0:
             docs_context = ".\n".join(map(lambda x: x.page_content, docs))
             document_prompt = f"""Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>."""
-            basic_prompt = f"""{basic_prompt}\n{document_prompt}"""
+        if len(docs) == 0:
+            document_prompt = f"""I could not find any relevant quotes to help you answer the user's query."""
+
+        basic_prompt = f"""{basic_prompt}\n{document_prompt}"""
 
         if len(history) > 0:
             history_context = ".\n".join(
