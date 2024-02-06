@@ -8,6 +8,9 @@ PGVECTOR_DATABASE = os.environ.get("PGVECTOR_DATABASE", "postgres")
 PGVECTOR_USER = os.environ.get("PGVECTOR_USER", "postgres")
 COLLECTION_TABLE_NAME = "langchain_pg_collection"
 PASSWORD = "dbreader"
+
+INTENT_NAME = "SelectCollection"
+SLOT_TO_ELICIT = "collection"
 # Initialize the connection outside of the handler
 conn = psycopg2.connect(
     dbname=PGVECTOR_DATABASE,
@@ -49,10 +52,10 @@ def lambda_handler(event, context):
             for i, option in enumerate(rows)
         }
 
-        return {
+        response = {
             "sessionState": {
                 "intent": {
-                    "name": "SelectCollections",
+                    "name": INTENT_NAME,
                     "state": "ReadyForFulfillment",
                     "confirmationState": "None",
                     "slots": slots,
@@ -67,6 +70,39 @@ def lambda_handler(event, context):
             ],
             "requestAttributes": {},
         }
+        return prompt_for_collection_selection(collections=rows)
     except Exception as e:
         print(f"Error querying the database: {e}")
         raise e
+
+
+def prompt_for_collection_selection(collections: list):
+    return {
+        "sessionState": {
+            "dialogAction": {
+                "slotToElicit": SLOT_TO_ELICIT,
+                "type": "ElicitSlot",
+            },
+            "intent": {
+                "confirmationState": "None",
+                "name": INTENT_NAME,
+                "state": "InProgress",
+                "slots": {
+                    SLOT_TO_ELICIT: {
+                        "shape": "Scalar",
+                        "value": {
+                            "originalValue": None,
+                            "interpretedValue": None,
+                            "resolvedValues": [],
+                        },
+                    },
+                },
+            },
+        },
+        "messages": [
+            {
+                "contentType": "PlainText",
+                "content": f"Vous souhaitez interroger une source de donnees specifiques, voici une liste de collections disponibles: {', '.join(collections)}",
+            },
+        ],
+    }
