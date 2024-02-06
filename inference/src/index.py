@@ -34,7 +34,7 @@ def prepare_prompt(query: str, docs: list, history: list):
     try:
         system_prompt = os.environ.get(
             "SYSTEM_PROMPT",
-            "Answer in four to five sentences.Answer in french, do not use XML tags in your answer.",
+            "Answer in four to five sentences.Answer in french.",
         )
         final_prompt = "{}{}\n\nAssistant:"
 
@@ -115,8 +115,8 @@ def lambda_handler(event, context):
         docs = []
         chat_history = []
 
-        if enable_inference == 1:
-            if enable_retrieval == 1:
+        if enable_inference != 0:
+            if enable_retrieval != 0:
                 retrieval = Retrieval(
                     driver=PGVECTOR_DRIVER,
                     host=PGVECTOR_HOST,
@@ -129,14 +129,14 @@ def lambda_handler(event, context):
                 )
                 docs = retrieval.fetch_documents(query=query, top_k=top_k)
 
-            if enable_history == 1:
+            if enable_history != 0:
                 chat_history = json.loads(history.get(limit=10))
 
             # prepare the prompt
             prompt = prepare_prompt(query, docs, chat_history)
             response = invoke_model(prompt, max_tokens_to_sample, temperature, top_p)
 
-            if enable_history == 1:
+            if enable_history != 0:
                 history.add(
                     human_message=query, assistant_message=response, prompt=prompt
                 )
