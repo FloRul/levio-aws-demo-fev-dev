@@ -16,6 +16,12 @@ def get_secret():
         raise e
 
 
+headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "*",
+}
+
 PGVECTOR_DRIVER = os.environ.get("PGVECTOR_DRIVER", "psycopg2")
 PGVECTOR_HOST = os.environ.get("PGVECTOR_HOST", "localhost")
 PGVECTOR_PORT = int(os.environ.get("PGVECTOR_PORT", 5432))
@@ -112,10 +118,10 @@ def lambda_handler(event, context):
     top_p = float(os.environ.get("TOP_P", 0.9))
     temperature = float(os.environ.get("TEMPERATURE", 0.3))
 
-    history = History(event["sessionId"])
+    history = History(event["queryStringParameters"]["sessionId"])
 
     try:
-        query = event["inputTranscript"]
+        query = event["queryStringParameters"]["query"]
         docs = []
         chat_history = []
 
@@ -145,9 +151,15 @@ def lambda_handler(event, context):
                     human_message=query, assistant_message=response, prompt=prompt
                 )
 
-        # lex_response = prepare_lex_response(response, intent)
-        return {"statusCode": 200, "body": response}
+        return {
+            "statusCode": 200,
+            "body": response,
+            "headers": headers,
+        }
     except Exception as e:
         print(e)
-        # return prepare_lex_response("Sorry, an error has happened.", intent)
-        return {"statusCode": 500, "body": json.dumps(e)}
+        return {
+            "statusCode": 500,
+            "body": json.dumps(e),
+            "headers": headers,
+        }
