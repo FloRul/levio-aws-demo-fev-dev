@@ -36,3 +36,5 @@ terraform.rc
 
 ## Ignore EC2 Key pair files
 *.pem
+
+.idea/*
