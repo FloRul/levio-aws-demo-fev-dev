@@ -4,9 +4,13 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
 
 jobs:
   deploy_lambda:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -41,18 +45,19 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ steps.timestamp.outputs.timestamp }}
       run: |
-        docker build -t $ECR_REGISTRY/${{ vars.INFERENCE_ECR_NAME }}:$IMAGE_TAG ./${{ vars.INFERENCE_ECR_NAME }}/src
+        docker build -t $ECR_REGISTRY/${{ vars.INFERENCE_ECR_NAME }}:$IMAGE_TAG ./lambdas/${{ vars.INFERENCE_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.INFERENCE_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.INGESTION_ECR_NAME }}:$IMAGE_TAG ./${{ vars.INGESTION_ECR_NAME }}/src
+        docker build -t $ECR_REGISTRY/${{ vars.INGESTION_ECR_NAME }}:$IMAGE_TAG ./lambdas/${{ vars.INGESTION_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.INGESTION_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.LEX_ROUTER_ECR_NAME }}:$IMAGE_TAG ./${{ vars.LEX_ROUTER_ECR_NAME }}/src
+        docker build -t $ECR_REGISTRY/${{ vars.LEX_ROUTER_ECR_NAME }}:$IMAGE_TAG ./lambdas/${{ vars.LEX_ROUTER_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.LEX_ROUTER_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.LIST_COLLECTIONS_ECR_NAME }}:$IMAGE_TAG ./${{ vars.LIST_COLLECTIONS_ECR_NAME }}/src
+        docker build -t $ECR_REGISTRY/${{ vars.LIST_COLLECTIONS_ECR_NAME }}:$IMAGE_TAG ./lambdas/${{ vars.LIST_COLLECTIONS_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.LIST_COLLECTIONS_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG ./${{ vars.MEMORY_ECR_NAME }}/src
+        docker build -t $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG ./lambdas/${{ vars.MEMORY_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG
 
   terraform_plan:
+    if: github.event_name == 'pull_request'
     needs: [deploy_lambda]
     defaults:
       run:
@@ -158,3 +163,35 @@ jobs:
               body: output
             })
           }
+  
+  deploy-infra:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    
+    - name: Terraform Init
+      id: init
+      run: terraform init -no-color -upgrade
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+    
+    - name: Terraform Apply
+      run: | 
+        terraform apply \
+        -var="ingestion_repository_name=${{ vars.INGESTION_ECR_NAME }}" \
+        -var="inference_repository_name=${{ vars.INFERENCE_ECR_NAME }}" \
+        -var="memory_repository_name=${{ vars.MEMORY_ECR_NAME }}" \
+        -var="list_collections_repository_name=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
+        -var="lex_router_repository_name=${{ vars.LEX_ROUTER_ECR_NAME }}" \
+        -auto-approve -no-color -input=false 
