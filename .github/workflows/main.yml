@@ -149,7 +149,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: terraform-plan
-        path: terraform.tfplan
+        path: ${{ vars.TF_ACTIONS_WORKING_DIR }}/terraform.tfplan
     
     - uses: actions/github-script@v6
       if: github.event_name == 'pull_request'
