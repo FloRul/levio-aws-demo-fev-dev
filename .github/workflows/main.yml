@@ -28,7 +28,7 @@ jobs:
         aws ecr describe-repositories --repository-names ${{ vars.INFERENCE_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.INFERENCE_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.INGESTION_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.INGESTION_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.LEX_ROUTER_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.LEX_ROUTER_ECR_NAME }}
-        aws ecr describe-repositories --repository-names ${{ vars.LIST_COLLECTION_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.LIST_COLLECTION_ECR_NAME }}
+        aws ecr describe-repositories --repository-names ${{ vars.LIST_COLLECTIONS_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.LIST_COLLECTIONS_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.MEMORY_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.MEMORY_ECR_NAME }}
     
     - name: Generate timestamp
@@ -47,8 +47,8 @@ jobs:
         docker push $ECR_REGISTRY/${{ vars.INGESTION_ECR_NAME }}:$IMAGE_TAG
         docker build -t $ECR_REGISTRY/${{ vars.LEX_ROUTER_ECR_NAME }}:$IMAGE_TAG ./${{ vars.LEX_ROUTER_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.LEX_ROUTER_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.LIST_COLLECTION_ECR_NAME }}:$IMAGE_TAG ./${{ vars.LIST_COLLECTION_ECR_NAME }}/src
-        docker push $ECR_REGISTRY/${{ vars.LIST_COLLECTION_ECR_NAME }}:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/${{ vars.LIST_COLLECTIONS_ECR_NAME }}:$IMAGE_TAG ./${{ vars.LIST_COLLECTIONS_ECR_NAME }}/src
+        docker push $ECR_REGISTRY/${{ vars.LIST_COLLECTIONS_ECR_NAME }}:$IMAGE_TAG
         docker build -t $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG ./${{ vars.MEMORY_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG
 
@@ -91,7 +91,7 @@ jobs:
         -var="ingestion_repository_name=${{ vars.INGESTION_ECR_NAME }}" \
         -var="inference_repository_name_uri=${{ vars.INFERENCE_ECR_NAME }}" \
         -var="memory_repository_name_uri=${{ vars.MEMORY_ECR_NAME }}" \
-        -var="list_collections_repository_name_uri=${{ vars.LIST_COLLECTION_ECR_NAME }}" \
+        -var="list_collections_repository_name_uri=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
         -var="lex_router_repository_name_uri=${{ vars.LEX_ROUTER_ECR_NAME }}" \
         -no-color -out=terraform.tfplan
       
