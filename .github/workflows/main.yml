@@ -53,6 +53,7 @@ jobs:
         docker push $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG
 
   terraform_plan:
+    needs: [deploy_lambda]
     defaults:
       run:
         working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
@@ -68,17 +69,6 @@ jobs:
     
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
-    
-    - name: Install jq
-      run: sudo apt-get install -y jq
-
-    - name: Download consolidated image details
-      uses: actions/download-artifact@v4
-      with:
-        name: consolidated-image-details
-
-    - name: print consolidated-image-details.json
-      run: cat ${{ github.workspace }}/consolidated-image-details.json
 
     - name: Terraform fmt
       id: fmt
@@ -92,7 +82,6 @@ jobs:
     - name: Terraform Validate
       id: validate
       run: terraform validate -no-color
-
     
     - name: Terraform Plan
       id: plan
