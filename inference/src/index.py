@@ -114,11 +114,11 @@ def lambda_handler(event, context):
     max_tokens_to_sample = int(os.environ.get("MAX_TOKENS", 100))
     enable_inference = int(os.environ.get("ENABLE_INFERENCE", 1))
     top_k = int(os.environ.get("TOP_K", 10))
+    embedding_collection_name = os.environ.get("EMBEDDING_COLLECTION_NAME", "docs")
     top_p = float(os.environ.get("TOP_P", 0.9))
     temperature = float(os.environ.get("TEMPERATURE", 0.3))
 
     history = History(event["queryStringParameters"]["sessionId"])
-    embedding_collection_name = event["queryStringParameters"]["collectionName"]
 
     try:
         query = event["queryStringParameters"]["query"]
@@ -155,7 +155,6 @@ def lambda_handler(event, context):
             "statusCode": 200,
             "body": response,
             "headers": headers,
-            "isBase64Encoded": False,
         }
     except Exception as e:
         print(e)

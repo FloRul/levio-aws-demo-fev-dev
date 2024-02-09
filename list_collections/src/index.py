@@ -89,7 +89,6 @@ def lambda_handler(event, context):
             "statusCode": 500,
             "body": json.dumps(e),
             "headers": headers,
-            "isBase64Encoded": False,
         }
 
 
