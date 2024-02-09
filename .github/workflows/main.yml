@@ -1,4 +1,4 @@
-name: Terraform Plan on PR
+name: Deploy Lambdas & Terraform Plan on PR
 
 on:
   pull_request:
@@ -28,7 +28,7 @@ jobs:
         aws ecr describe-repositories --repository-names ${{ vars.INFERENCE_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.INFERENCE_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.INGESTION_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.INGESTION_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.LEX_ROUTER_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.LEX_ROUTER_ECR_NAME }}
-        aws ecr describe-repositories --repository-names ${{ vars.LIST_COLLECTION_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.LIST_COLLECTION_ECR_NAME }}
+        aws ecr describe-repositories --repository-names ${{ vars.LIST_COLLECTIONS_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.LIST_COLLECTIONS_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.MEMORY_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.MEMORY_ECR_NAME }}
     
     - name: Generate timestamp
@@ -41,18 +41,19 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ steps.timestamp.outputs.timestamp }}
       run: |
-        docker build -t $ECR_REGISTRY/${{ vars.INFERENCE_ECR_NAME }}:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/${{ vars.INFERENCE_ECR_NAME }}:$IMAGE_TAG ./${{ vars.INFERENCE_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.INFERENCE_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.INGESTION_ECR_NAME }}:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/${{ vars.INGESTION_ECR_NAME }}:$IMAGE_TAG ./${{ vars.INGESTION_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.INGESTION_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.LEX_ROUTER_ECR_NAME }}:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/${{ vars.LEX_ROUTER_ECR_NAME }}:$IMAGE_TAG ./${{ vars.LEX_ROUTER_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.LEX_ROUTER_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.LIST_COLLECTION_ECR_NAME }}:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/${{ vars.LIST_COLLECTION_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/${{ vars.LIST_COLLECTIONS_ECR_NAME }}:$IMAGE_TAG ./${{ vars.LIST_COLLECTIONS_ECR_NAME }}/src
+        docker push $ECR_REGISTRY/${{ vars.LIST_COLLECTIONS_ECR_NAME }}:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG ./${{ vars.MEMORY_ECR_NAME }}/src
         docker push $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG
 
   terraform_plan:
+    needs: [deploy_lambda]
     defaults:
       run:
         working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
@@ -68,17 +69,6 @@ jobs:
     
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
-    
-    - name: Install jq
-      run: sudo apt-get install -y jq
-
-    - name: Download consolidated image details
-      uses: actions/download-artifact@v4
-      with:
-        name: consolidated-image-details
-
-    - name: print consolidated-image-details.json
-      run: cat ${{ github.workspace }}/consolidated-image-details.json
 
     - name: Terraform fmt
       id: fmt
@@ -92,7 +82,6 @@ jobs:
     - name: Terraform Validate
       id: validate
       run: terraform validate -no-color
-
     
     - name: Terraform Plan
       id: plan
@@ -100,10 +89,10 @@ jobs:
       run: |
         terraform plan \
         -var="ingestion_repository_name=${{ vars.INGESTION_ECR_NAME }}" \
-        -var="inference_repository_name_uri=${{ vars.INFERENCE_ECR_NAME }}" \
-        -var="memory_repository_name_uri=${{ vars.MEMORY_ECR_NAME }}" \
-        -var="list_collections_repository_name_uri=${{ vars.LIST_COLLECTION_ECR_NAME }}" \
-        -var="lex_router_repository_name_uri=${{ vars.LEX_ROUTER_ECR_NAME }}" \
+        -var="inference_repository_name=${{ vars.INFERENCE_ECR_NAME }}" \
+        -var="memory_repository_name=${{ vars.MEMORY_ECR_NAME }}" \
+        -var="list_collections_repository_name=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
+        -var="lex_router_repository_name=${{ vars.LEX_ROUTER_ECR_NAME }}" \
         -no-color -out=terraform.tfplan
       
     - name: Upload Terraform Plan
