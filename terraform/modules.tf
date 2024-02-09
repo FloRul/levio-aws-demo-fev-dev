@@ -6,6 +6,7 @@ locals {
   ingestion_lambda_name        = "levio-demo-fev-ingestion-dev"
   inference_lambda_name        = "levio-demo-fev-inference-dev"
   list_collections_lambda_name = "levio-demo-fev-list-collections-dev"
+  lex_router_lambda_name       = "levio-demo-fev-lex-router-dev"
 }
 
 module "ingestion" {
@@ -59,6 +60,7 @@ module "memory" {
 
 module "list_collections" {
   source           = "../list_collections"
+  lambda_image_uri = var.list_collections_lambda_image_uri
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -69,4 +71,19 @@ module "list_collections" {
   pg_vector_port        = aws_db_instance.vector_db.port
   pg_vector_database    = aws_db_instance.vector_db.db_name
   pg_vector_user        = "collection_embedding_reader"
+}
+
+module "lex_router" {
+  source = "../lex_router"
+  lambda_vpc_security_group_ids = [
+    aws_security_group.lambda_egress_all_sg.id,
+  ]
+  lambda_vpc_subnet_ids = module.vpc.public_subnets
+  lambda_image_uri      = var.lex_router_lambda_image_uri
+  lambda_function_name  = local.lex_router_lambda_name
+  aws_region            = var.aws_region
+  intent_lambda_mapping = {
+    SelectCollection = local.list_collections_lambda_name
+    Inference         = local.inference_lambda_name
+  }
 }

@@ -16,6 +16,12 @@ def get_secret():
         raise e
 
 
+headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "*",
+}
+
 PGVECTOR_DRIVER = os.environ.get("PGVECTOR_DRIVER", "psycopg2")
 PGVECTOR_HOST = os.environ.get("PGVECTOR_HOST", "localhost")
 PGVECTOR_PORT = int(os.environ.get("PGVECTOR_PORT", 5432))
@@ -34,7 +40,7 @@ def prepare_prompt(query: str, docs: list, history: list):
     try:
         system_prompt = os.environ.get(
             "SYSTEM_PROMPT",
-            "Answer in four to five sentences.Answer in french, do not use XML tags in your answer.",
+            "Answer in four to five sentences.Answer in french.",
         )
         final_prompt = "{}{}\n\nAssistant:"
 
@@ -45,7 +51,10 @@ def prepare_prompt(query: str, docs: list, history: list):
         if len(docs) > 0:
             docs_context = ".\n".join(map(lambda x: x.page_content, docs))
             document_prompt = f"""Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>."""
-            basic_prompt = f"""{basic_prompt}\n{document_prompt}"""
+        if len(docs) == 0:
+            document_prompt = f"""I could not find any relevant quotes to help you answer the user's query."""
+
+        basic_prompt = f"""{basic_prompt}\n{document_prompt}"""
 
         if len(history) > 0:
             history_context = ".\n".join(
@@ -64,15 +73,15 @@ def prepare_prompt(query: str, docs: list, history: list):
         raise e
 
 
-def prepare_lex_response(assistant_message: str, intent: str):
-    return {
-        "sessionState": {
-            "dialogAction": {"type": "ElicitIntent"},
-            "intent": {"name": intent, "state": "InProgress"},
-        },
-        "messages": [{"contentType": "PlainText", "content": assistant_message}],
-        "requestAttributes": {},
-    }
+# def prepare_lex_response(assistant_message: str, intent: str):
+#     return {
+#         "sessionState": {
+#             "dialogAction": {"type": "ElicitIntent"},
+#             "intent": {"name": intent, "state": "InProgress"},
+#         },
+#         "messages": [{"contentType": "PlainText", "content": assistant_message}],
+#         "requestAttributes": {},
+#     }
 
 
 def invoke_model(prompt: str, max_tokens: int, temperature: float, top_p: float):
@@ -105,18 +114,19 @@ def lambda_handler(event, context):
     max_tokens_to_sample = int(os.environ.get("MAX_TOKENS", 100))
     enable_inference = int(os.environ.get("ENABLE_INFERENCE", 1))
     top_k = int(os.environ.get("TOP_K", 10))
-    embedding_collection_name = os.environ.get("EMBEDDING_COLLECTION_NAME", "docs")
     top_p = float(os.environ.get("TOP_P", 0.9))
     temperature = float(os.environ.get("TEMPERATURE", 0.3))
-    history = History(event["sessionId"])
+
+    history = History(event["queryStringParameters"]["sessionId"])
+    embedding_collection_name = event["queryStringParameters"]["collectionName"]
 
     try:
-        query = event["inputTranscript"]
+        query = event["queryStringParameters"]["query"]
         docs = []
         chat_history = []
 
-        if enable_inference == 1:
-            if enable_retrieval == 1:
+        if enable_inference != 0:
+            if enable_retrieval != 0:
                 retrieval = Retrieval(
                     driver=PGVECTOR_DRIVER,
                     host=PGVECTOR_HOST,
@@ -129,20 +139,28 @@ def lambda_handler(event, context):
                 )
                 docs = retrieval.fetch_documents(query=query, top_k=top_k)
 
-            if enable_history == 1:
+            if enable_history != 0:
                 chat_history = json.loads(history.get(limit=10))
 
             # prepare the prompt
             prompt = prepare_prompt(query, docs, chat_history)
             response = invoke_model(prompt, max_tokens_to_sample, temperature, top_p)
 
-            if enable_history == 1:
+            if enable_history != 0:
                 history.add(
                     human_message=query, assistant_message=response, prompt=prompt
                 )
 
-        lex_response = prepare_lex_response(response, intent)
-        return lex_response
+        return {
+            "statusCode": 200,
+            "body": response,
+            "headers": headers,
+            "isBase64Encoded": False,
+        }
     except Exception as e:
         print(e)
-        return prepare_lex_response("Sorry, an error has happened.", intent)
+        return {
+            "statusCode": 500,
+            "body": json.dumps(e),
+            "headers": headers,
+        }

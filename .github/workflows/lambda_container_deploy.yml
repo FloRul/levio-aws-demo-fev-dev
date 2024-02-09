@@ -1,0 +1,136 @@
+name: build-push-lambda-image-ecr
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # The lambda root folder will match the name of the ECR repository
+        lambda_path_ecr: [
+          'inference',
+          'conversation_memory', 
+          'ingestion',
+          'list_collections',
+          'lex_router',
+        ]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Create ECR repository if it doesn't exist
+      run: |
+        aws ecr describe-repositories --repository-names ${{ matrix.lambda_path_ecr }} || aws ecr create-repository --repository-name ${{ matrix.lambda_path_ecr }}
+    
+    - name: Generate timestamp
+      id: timestamp
+      run: echo "::set-output name=timestamp::$(date +%s)"
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      working-directory: ./${{ matrix.lambda_path_ecr }}/src
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ matrix.lambda_path_ecr }}
+        IMAGE_TAG: ${{ steps.timestamp.outputs.timestamp }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    
+    - name: Create JSON artifact
+      run: |
+        echo '{"'"${{ matrix.lambda_path_ecr }}"'": {"ECR_REGISTRY": "'"${{ steps.login-ecr.outputs.registry }}"'", "ECR_REPOSITORY": "'"${{ matrix.lambda_path_ecr }}"'", "IMAGE_TAG": "'"${{ steps.timestamp.outputs.timestamp }}"'"}}' > image_details_${{ matrix.lambda_path_ecr }}.json
+    - name: Upload JSON artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-details-${{ matrix.lambda_path_ecr }}
+        path: image_details_${{ matrix.lambda_path_ecr }}.json
+    
+  consolidate:
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install and use jq
+      run: |
+        sudo apt-get install -y jq
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Consolidate artifacts
+      run: |
+        jq -s add $(find . -name '*.json') > consolidated-image-details.json
+
+    - name: Upload consolidated artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: consolidated-image-details
+        path: consolidated-image-details.json
+
+  deploy-infra:
+    defaults:
+      run:
+        working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
+    needs: [consolidate]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+    
+    - name: Install jq
+      run: sudo apt-get install -y jq
+
+    - name: Download consolidated image details
+      uses: actions/download-artifact@v4
+      with:
+        name: consolidated-image-details
+
+    - name: print consolidated-image-details.json
+      run: cat ${{ github.workspace }}/consolidated-image-details.json
+
+    - name: Set image URIs
+      shell: bash
+      run: |
+        echo "INGESTION_IMAGE=$(jq -r '.ingestion | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' ${{ github.workspace }}/consolidated-image-details.json)" >> $GITHUB_ENV
+        echo "INFERENCE_IMAGE=$(jq -r '.inference | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' ${{ github.workspace }}/consolidated-image-details.json)" >> $GITHUB_ENV
+        echo "MEMORY_IMAGE=$(jq -r '.conversation_memory | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' ${{ github.workspace }}/consolidated-image-details.json)" >> $GITHUB_ENV
+        echo "LIST_COLLECTIONS_IMAGE=$(jq -r '.list_collections | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' ${{ github.workspace }}/consolidated-image-details.json)" >> $GITHUB_ENV
+        echo "LEX_ROUTER_IMAGE=$(jq -r '.lex_router | "\(.ECR_REGISTRY)/\(.ECR_REPOSITORY):\(.IMAGE_TAG)"' ${{ github.workspace }}/consolidated-image-details.json)" >> $GITHUB_ENV
+    - name: Terraform Init
+      shell: bash
+      id: terraform-Init
+      run: |
+        terraform init -no-color -upgrade
+    - name: Terraform Apply
+      id: terraform-Apply
+      shell: bash
+      run: |
+        terraform apply \
+        -var="ingestion_lambda_image_uri=${{ env.INGESTION_IMAGE }}" \
+        -var="inference_lambda_image_uri=${{ env.INFERENCE_IMAGE }}" \
+        -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" \
+        -var="list_collections_lambda_image_uri=${{ env.LIST_COLLECTIONS_IMAGE }}" \
+        -var="lex_router_lambda_image_uri=${{ env.LEX_ROUTER_IMAGE }}" \
+        -no-color -auto-approve

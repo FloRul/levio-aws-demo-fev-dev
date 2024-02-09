@@ -13,32 +13,6 @@ variable "lambda_vpc_subnet_ids" {
   nullable = false
 }
 
-variable "pg_vector_host" {
-  type     = string
-  nullable = false
-}
-
-variable "pg_vector_port" {
-  type     = number
-  nullable = false
-}
-
-variable "pg_vector_database" {
-  type     = string
-  nullable = false
-}
-
-variable "pg_vector_user" {
-  type     = string
-  nullable = false
-}
-
-variable "pg_vector_driver" {
-  type     = string
-  nullable = false
-  default  = "psycopg2"
-}
-
 variable "aws_region" {
   type    = string
   default = "us-east-1"
@@ -47,4 +21,14 @@ variable "aws_region" {
 variable "lambda_image_uri" {
   type     = string
   nullable = false
+}
+
+variable "intent_lambda_mapping" {
+  description = <<EOF
+  values for environment variables for every lexV2 
+  intents that must be mapped to an existing lambda function 
+  in the same network. The key is the intent name and the value is the lambda function name
+  EOF
+  type        = map(string)
+  nullable    = false
 }
