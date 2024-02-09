@@ -2,7 +2,7 @@ variable "lambda_function_name" {
   nullable = false
 }
 
-variable "lambda_image_uri" {
+variable "lambda_repository_name" {
   nullable = false
 }
 

@@ -1,9 +1,14 @@
+data "aws_ecr_image" "lambda_image" {
+  repository_name = var.lambda_repository_name
+  most_recent     = true
+}
+
 module "lambda_function_container_image" {
   timeout                  = 60
   source                   = "terraform-aws-modules/lambda/aws"
   function_name            = var.lambda_function_name
   create_package           = false
-  image_uri                = var.lambda_image_uri
+  image_uri                = data.aws_ecr_image.lambda_image.image_uri
   package_type             = "Image"
   memory_size              = 1024
   vpc_subnet_ids           = var.lambda_vpc_subnet_ids

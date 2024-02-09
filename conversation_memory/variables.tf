@@ -18,8 +18,7 @@ variable "lambda_vpc_subnet_ids" {
   nullable = false
 }
 
-variable "lambda_image_uri" {
-  type     = string
+variable "lambda_repository_name" {
   nullable = false
 }
 

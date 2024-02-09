@@ -11,26 +11,26 @@ variable "jumpbox_instance_type" {
   default = "t2.micro"
 }
 
-variable "ingestion_lambda_image_uri" {
+variable "ingestion_repository_name" {
   type     = string
   nullable = false
 }
-variable "inference_lambda_image_uri" {
-  type     = string
-  nullable = false
-}
-
-variable "memory_lambda_image_uri" {
+variable "inference_repository_name" {
   type     = string
   nullable = false
 }
 
-variable "list_collections_lambda_image_uri" {
+variable "memory_repository_name" {
   type     = string
   nullable = false
 }
 
-variable "lex_router_lambda_image_uri" {
+variable "list_collections_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "lex_router_repository_name" {
   type     = string
   nullable = false
 }
