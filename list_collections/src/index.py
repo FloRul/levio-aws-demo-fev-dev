@@ -20,12 +20,6 @@ conn = psycopg2.connect(
     port=PGVECTOR_PORT,
 )
 
-headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "*",
-}
-
 
 def lambda_handler(event, context):
     global conn  # Declare conn as a global variable
@@ -77,19 +71,10 @@ def lambda_handler(event, context):
         #     "requestAttributes": {},
         # }
         # return prompt_for_collection_selection(collections=rows)
-
-        return {
-            "statusCode": 200,
-            "body": json.dumps(rows),
-            "headers": headers,
-        }
+        return {"statusCode": 200, "body": json.dumps(rows)}
     except Exception as e:
         print(f"Error querying the database: {e}")
-        return {
-            "statusCode": 500,
-            "body": json.dumps(e),
-            "headers": headers,
-        }
+        return {"statusCode": 500, "body": json.dumps(e)}
 
 
 # def prompt_for_collection_selection(collections: list):
