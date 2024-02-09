@@ -1,4 +1,4 @@
-name: Terraform Plan on PR
+name: Deploy Lambdas & Terraform Plan on PR
 
 on:
   pull_request:
