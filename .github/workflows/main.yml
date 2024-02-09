@@ -140,7 +140,7 @@ jobs:
         -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" \
         -var="list_collections_lambda_image_uri=${{ env.LIST_COLLECTIONS_IMAGE }}" \
         -var="lex_router_lambda_image_uri=${{ env.LEX_ROUTER_IMAGE }}" \
-        -no-color -auto-approve -out=terraform.tfplan
+        -no-color -out=terraform.tfplan
       
     - name: Upload Terraform Plan
       uses: actions/upload-artifact@v4
