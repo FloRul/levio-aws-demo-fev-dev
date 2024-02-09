@@ -89,10 +89,10 @@ jobs:
       run: |
         terraform plan \
         -var="ingestion_repository_name=${{ vars.INGESTION_ECR_NAME }}" \
-        -var="inference_repository_name_uri=${{ vars.INFERENCE_ECR_NAME }}" \
-        -var="memory_repository_name_uri=${{ vars.MEMORY_ECR_NAME }}" \
-        -var="list_collections_repository_name_uri=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
-        -var="lex_router_repository_name_uri=${{ vars.LEX_ROUTER_ECR_NAME }}" \
+        -var="inference_repository_name=${{ vars.INFERENCE_ECR_NAME }}" \
+        -var="memory_repository_name=${{ vars.MEMORY_ECR_NAME }}" \
+        -var="list_collections_repository_name=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
+        -var="lex_router_repository_name=${{ vars.LEX_ROUTER_ECR_NAME }}" \
         -no-color -out=terraform.tfplan
       
     - name: Upload Terraform Plan
