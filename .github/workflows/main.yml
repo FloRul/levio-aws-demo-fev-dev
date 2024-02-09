@@ -82,6 +82,9 @@ jobs:
         path: consolidated-image-details.json
 
   terraform_plan:
+    defaults:
+      run:
+        working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
     needs: [consolidate]
     runs-on: ubuntu-latest
     steps:
