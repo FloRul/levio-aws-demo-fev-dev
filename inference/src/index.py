@@ -73,17 +73,6 @@ def prepare_prompt(query: str, docs: list, history: list):
         raise e
 
 
-# def prepare_lex_response(assistant_message: str, intent: str):
-#     return {
-#         "sessionState": {
-#             "dialogAction": {"type": "ElicitIntent"},
-#             "intent": {"name": intent, "state": "InProgress"},
-#         },
-#         "messages": [{"contentType": "PlainText", "content": assistant_message}],
-#         "requestAttributes": {},
-#     }
-
-
 def invoke_model(prompt: str, max_tokens: int, temperature: float, top_p: float):
     body = json.dumps(
         {
