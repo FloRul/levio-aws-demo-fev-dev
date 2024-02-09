@@ -82,6 +82,9 @@ jobs:
         path: consolidated-image-details.json
 
   terraform_plan:
+    defaults:
+      run:
+        working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
     needs: [consolidate]
     runs-on: ubuntu-latest
     steps:
@@ -140,7 +143,7 @@ jobs:
         -var="memory_lambda_image_uri=${{ env.MEMORY_IMAGE }}" \
         -var="list_collections_lambda_image_uri=${{ env.LIST_COLLECTIONS_IMAGE }}" \
         -var="lex_router_lambda_image_uri=${{ env.LEX_ROUTER_IMAGE }}" \
-        -no-color -auto-approve -out=terraform.tfplan
+        -no-color -out=terraform.tfplan
       
     - name: Upload Terraform Plan
       uses: actions/upload-artifact@v4
@@ -153,7 +156,7 @@ jobs:
       env:
         PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.PAT_SECRET }}
         script: |
           // 1. Retrieve existing bot comments for the PR
           const { data: comments } = await github.rest.issues.listComments({
