@@ -1,0 +1,36 @@
+name: deploy-infra
+
+on: 
+  push:
+    branches:
+      - xx
+
+jobs:
+  deploy-infra:
+    defaults:
+      run:
+        working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+    
+    - name: Install jq
+      run: sudo apt-get install -y jq
+
+    - name: Download Terraform Plan
+      uses: actions/download-artifact@v4
+      with:
+        name: terraform-plan
+        path: ${{ github.workspace }}/terraform.tfplan
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve -no-color -input=false ${{ github.workspace }}/terraform.tfplan
