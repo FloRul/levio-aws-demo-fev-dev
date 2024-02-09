@@ -24,4 +24,11 @@ jobs:
       uses: hashicorp/setup-terraform@v3
     
     - name: Terraform Apply
-      run: terraform apply -auto-approve -no-color -input=false ${{ github.workspace }}/terraform.tfplan
+      run: | 
+        terraform apply \
+        -var="ingestion_repository_name=${{ vars.INGESTION_ECR_NAME }}" \
+        -var="inference_repository_name=${{ vars.INFERENCE_ECR_NAME }}" \
+        -var="memory_repository_name=${{ vars.MEMORY_ECR_NAME }}" \
+        -var="list_collections_repository_name=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
+        -var="lex_router_repository_name=${{ vars.LEX_ROUTER_ECR_NAME }}" \
+        -auto-approve -no-color -input=false 
