@@ -67,15 +67,15 @@ def prepare_prompt(query: str, docs: list, history: list):
         raise e
 
 
-# def prepare_lex_response(assistant_message: str, intent: str):
-#     return {
-#         "sessionState": {
-#             "dialogAction": {"type": "ElicitIntent"},
-#             "intent": {"name": intent, "state": "InProgress"},
-#         },
-#         "messages": [{"contentType": "PlainText", "content": assistant_message}],
-#         "requestAttributes": {},
-#     }
+def prepare_lex_response(assistant_message: str, intent: str):
+    return {
+        "sessionState": {
+            "dialogAction": {"type": "ElicitIntent"},
+            "intent": {"name": intent, "state": "InProgress"},
+        },
+        "messages": [{"contentType": "PlainText", "content": assistant_message}],
+        "requestAttributes": {},
+    }
 
 
 def invoke_model(prompt: str, max_tokens: int, temperature: float, top_p: float):
@@ -111,7 +111,6 @@ def lambda_handler(event, context):
     embedding_collection_name = os.environ.get("EMBEDDING_COLLECTION_NAME", "docs")
     top_p = float(os.environ.get("TOP_P", 0.9))
     temperature = float(os.environ.get("TEMPERATURE", 0.3))
-
     history = History(event["sessionId"])
 
     try:
@@ -145,9 +144,8 @@ def lambda_handler(event, context):
                     human_message=query, assistant_message=response, prompt=prompt
                 )
 
-        # lex_response = prepare_lex_response(response, intent)
-        return {"statusCode": 200, "body": response}
+        lex_response = prepare_lex_response(response, intent)
+        return lex_response
     except Exception as e:
         print(e)
-        # return prepare_lex_response("Sorry, an error has happened.", intent)
-        return {"statusCode": 500, "body": json.dumps(e)}
+        return prepare_lex_response("Sorry, an error has happened.", intent)
