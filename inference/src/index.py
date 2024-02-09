@@ -95,7 +95,6 @@ def invoke_model(prompt: str, max_tokens: int, temperature: float, top_p: float)
 
 
 def lambda_handler(event, context):
-    intent = str(event["sessionState"]["intent"]["name"])
     response = "this is a dummy response"
 
     enable_history = int(os.environ.get("ENABLE_HISTORY", 1))
