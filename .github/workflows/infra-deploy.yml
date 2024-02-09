@@ -3,7 +3,7 @@ name: deploy-infra
 on: 
   push:
     branches:
-      - xx
+      - main
 
 jobs:
   deploy-infra:
