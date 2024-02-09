@@ -30,7 +30,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: terraform-plan
-        path: ${{ github.workspace }}/terraform.tfplan
+        github-token: ${{ secrets.PAT_SECRET }}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve -no-color -input=false ${{ github.workspace }}/terraform.tfplan
