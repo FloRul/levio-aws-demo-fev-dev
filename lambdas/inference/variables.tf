@@ -83,3 +83,8 @@ variable "api_gateway_rest_api_root_resource_id" {
   type     = string
   nullable = false
 }
+
+variable "stage_name" {
+  type     = string
+  nullable = false
+}
