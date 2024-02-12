@@ -35,7 +35,7 @@ resource "aws_lambda_permission" "lambda_permission" {
   function_name = var.lambda_function_name
   principal     = "apigateway.amazonaws.com"
 
-  source_arn = "arn:aws:execute-api:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${var.api_gateway_rest_api_id}/*/${aws_api_gateway_method.api_gateway_method.http_method}${aws_api_gateway_resource.api_gateway_resource.path}"
+  source_arn = "arn:aws:execute-api:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${var.api_gateway_rest_api_id}/*/${aws_api_gateway_method.api_gateway_method.http_method}${aws_api_gateway_resource.this.path}"
 }
 
 data "aws_caller_identity" "current" {}
