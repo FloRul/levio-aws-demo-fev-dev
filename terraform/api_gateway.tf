@@ -29,16 +29,16 @@ resource "aws_api_gateway_usage_plan" "this" {
     stage  = var.api_gateway_stage_name
     throttle {
       burst_limit = 50
-      path = "/inference/GET"
+      path        = "/inference/GET"
     }
   }
 
   quota_settings {
     limit  = 100
-    offset = 2
+    offset = 0
     period = "DAY"
   }
-  
+
   throttle_settings {
     burst_limit = 100
     rate_limit  = 50
