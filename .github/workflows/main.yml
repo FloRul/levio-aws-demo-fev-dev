@@ -194,4 +194,23 @@ jobs:
         -var="memory_repository_name=${{ vars.MEMORY_ECR_NAME }}" \
         -var="list_collections_repository_name=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
         -var="lex_router_repository_name=${{ vars.LEX_ROUTER_ECR_NAME }}" \
-        -auto-approve -no-color -input=false 
+        -auto-approve -no-color -input=false
+  
+  purge-ecr:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: Purge ECR
+      run: |
+        for digest in $(aws ecr list-images --repository-name ${{ vars.INFERENCE_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-1].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.INFERENCE_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.INGESTION_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-1].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.INGESTION_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.LEX_ROUTER_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-1].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.LEX_ROUTER_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.LIST_COLLECTIONS_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-1].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.LIST_COLLECTIONS_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.MEMORY_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-1].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.MEMORY_ECR_NAME }} --image-ids imageDigest=$digest; done
