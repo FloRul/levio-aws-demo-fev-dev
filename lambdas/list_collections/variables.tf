@@ -1,6 +1,11 @@
 variable "lambda_function_name" {
-  nullable = false
   type     = string
+  nullable = false
+}
+
+variable "lambda_repository_name" {
+  type     = string
+  nullable = false
 }
 
 variable "lambda_vpc_security_group_ids" {
@@ -44,6 +49,12 @@ variable "aws_region" {
   default = "us-east-1"
 }
 
-variable "lambda_repository_name" {
+variable "api_gateway_rest_api_id" {
+  type     = string
+  nullable = false
+}
+
+variable "api_gateway_rest_api_root_resource_id" {
+  type     = string
   nullable = false
 }

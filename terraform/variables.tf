@@ -34,3 +34,10 @@ variable "lex_router_repository_name" {
   type     = string
   nullable = false
 }
+
+variable "api_gateway_stage_name" {
+  default     = "dev"
+  description = "The Api Gateway stage name"
+  nullable    = false
+  type        = string
+}
