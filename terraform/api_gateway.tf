@@ -27,11 +27,26 @@ resource "aws_api_gateway_usage_plan" "this" {
   api_stages {
     api_id = aws_api_gateway_rest_api.this.id
     stage  = var.api_gateway_stage_name
+    throttle {
+      burst_limit = 50
+      path = "/inference/GET"
+    }
+  }
+
+  quota_settings {
+    limit  = 100
+    offset = 2
+    period = "DAY"
+  }
+  
+  throttle_settings {
+    burst_limit = 100
+    rate_limit  = 50
   }
 }
 
 resource "aws_api_gateway_api_key" "this" {
-  name = "api_gateway_api_key"
+  name = "${var.api_name}-key"
 }
 
 resource "aws_api_gateway_usage_plan_key" "this" {
