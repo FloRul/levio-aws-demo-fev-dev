@@ -3,8 +3,14 @@ resource "aws_api_gateway_rest_api" "this" {
 }
 
 resource "aws_api_gateway_deployment" "this" {
-  depends_on = [module.inference, module.list_collections]
-
+  depends_on  = [module.inference, module.list_collections]
+  description = "Deployment for ${timestamp()}"
+  lifecycle {
+    create_before_destroy = true
+  }
+  triggers = {
+    redeployment = timestamp()
+  }
   rest_api_id = aws_api_gateway_rest_api.this.id
 }
 
