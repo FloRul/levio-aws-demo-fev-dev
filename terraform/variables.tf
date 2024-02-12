@@ -35,6 +35,11 @@ variable "lex_router_repository_name" {
   nullable = false
 }
 
+variable "api_name" {
+  default = "levio-demo-fev-api"
+  type    = string
+}
+
 variable "api_gateway_stage_name" {
   default     = "dev"
   description = "The Api Gateway stage name"

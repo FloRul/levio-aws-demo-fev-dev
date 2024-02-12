@@ -44,8 +44,8 @@ module "inference" {
   memory_lambda_name                    = local.memory_lambda_name
   dynamo_history_table_name             = local.dynamo_history_table_name
   embedding_collection_name             = local.storage_bucket_name
-  api_gateway_rest_api_id               = aws_api_gateway_rest_api.api_gateway_rest_api.id
-  api_gateway_rest_api_root_resource_id = aws_api_gateway_rest_api.api_gateway_rest_api.root_resource_id
+  api_gateway_rest_api_id               = aws_api_gateway_rest_api.this.id
+  api_gateway_rest_api_root_resource_id = aws_api_gateway_rest_api.this.root_resource_id
 
 }
 
@@ -74,8 +74,8 @@ module "list_collections" {
   pg_vector_port                        = aws_db_instance.vector_db.port
   pg_vector_database                    = aws_db_instance.vector_db.db_name
   pg_vector_user                        = "collection_embedding_reader"
-  api_gateway_rest_api_id               = aws_api_gateway_rest_api.api_gateway_rest_api.id
-  api_gateway_rest_api_root_resource_id = aws_api_gateway_rest_api.api_gateway_rest_api.root_resource_id
+  api_gateway_rest_api_id               = aws_api_gateway_rest_api.this.id
+  api_gateway_rest_api_root_resource_id = aws_api_gateway_rest_api.this.root_resource_id
 }
 
 module "lex_router" {
