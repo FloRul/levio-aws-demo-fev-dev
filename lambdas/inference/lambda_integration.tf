@@ -12,15 +12,3 @@ module "api_gateway" {
   lambda_function_arn                   = module.lambda_function_container_image.lambda_function_arn
   lambda_function_name                  = var.lambda_function_name
 }
-
-resource "aws_api_gateway_method_settings" "this" {
-  rest_api_id = var.api_gateway_rest_api_id
-  stage_name  = var.stage_name
-  method_path = "${local.api_gateway_path_part}/${local.api_gateway_http_method}"
-  settings {
-    metrics_enabled        = true
-    logging_level          = "INFO"
-    throttling_rate_limit  = 50
-    throttling_burst_limit = 100
-  }
-}
