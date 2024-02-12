@@ -38,11 +38,6 @@ resource "aws_api_gateway_usage_plan" "this" {
     offset = 0
     period = "DAY"
   }
-
-  throttle_settings {
-    burst_limit = 100
-    rate_limit  = 50
-  }
 }
 
 resource "aws_api_gateway_api_key" "this" {
