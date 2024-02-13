@@ -6,28 +6,12 @@ from retrieval import Retrieval
 from history import History
 
 
-def get_secret():
-    try:
-        response = boto3.client("secretsmanager").get_secret_value(
-            SecretId=os.environ.get("PGVECTOR_PASSWORD_SECRET_NAME")
-        )
-        return response["SecretString"]
-    except ClientError as e:
-        raise e
-
 
 headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "*",
 }
-
-PGVECTOR_DRIVER = os.environ.get("PGVECTOR_DRIVER", "psycopg2")
-PGVECTOR_HOST = os.environ.get("PGVECTOR_HOST", "localhost")
-PGVECTOR_PORT = int(os.environ.get("PGVECTOR_PORT", 5432))
-PGVECTOR_DATABASE = os.environ.get("PGVECTOR_DATABASE", "postgres")
-PGVECTOR_USER = os.environ.get("PGVECTOR_USER", "postgres")
-PGVECTOR_PASSWORD = get_secret()
 
 RELEVANCE_TRESHOLD = os.environ.get("RELEVANCE_TRESHOLD", 0.5)
 
@@ -116,12 +100,6 @@ def lambda_handler(event, context):
         if enable_inference != 0:
             if enable_retrieval != 0:
                 retrieval = Retrieval(
-                    driver=PGVECTOR_DRIVER,
-                    host=PGVECTOR_HOST,
-                    port=PGVECTOR_PORT,
-                    database=PGVECTOR_DATABASE,
-                    user=PGVECTOR_USER,
-                    password=PGVECTOR_PASSWORD,
                     collection_name=embedding_collection_name,
                     relevance_treshold=RELEVANCE_TRESHOLD,
                 )
