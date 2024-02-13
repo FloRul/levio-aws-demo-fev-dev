@@ -1,11 +1,8 @@
 import json
 import os
 import boto3
-from botocore.exceptions import ClientError
 from retrieval import Retrieval
 from history import History
-
-
 
 headers = {
     "Access-Control-Allow-Origin": "*",
