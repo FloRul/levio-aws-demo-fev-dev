@@ -3,4 +3,4 @@ langchain-community
 langchain
 psycopg2-binary
 pgvector
-boto3>=1.28.85
+boto3
