@@ -77,8 +77,11 @@ def invoke_model(prompt: str):
 
 def lambda_handler(event, context):
     response = "this is a dummy response"
-    history = History(event["queryStringParameters"]["sessionId"])
     embedding_collection_name = event["queryStringParameters"]["collectionName"]
+    enable_history = False
+    if "sessionId" in event["queryStringParameters"]:
+        enable_history = True
+        history = History(event["queryStringParameters"]["sessionId"])
 
     try:
         query = event["queryStringParameters"]["query"]
@@ -93,21 +96,21 @@ def lambda_handler(event, context):
                 )
                 docs = retrieval.fetch_documents(query=query, top_k=ENV_VARS["top_k"])
 
-            if ENV_VARS["enable_history"]:
+            if enable_history:
                 chat_history = json.loads(history.get(limit=10))
 
             # prepare the prompt
             prompt = prepare_prompt(query, docs, chat_history)
             response = invoke_model(prompt)
 
-            if ENV_VARS["enable_history"]:
+            if enable_history:
                 history.add(
                     human_message=query, assistant_message=response, prompt=prompt
                 )
 
         return {
             "statusCode": 200,
-            "body": response,
+            "body": json.dumps(response),
             "headers": HEADERS,
             "isBase64Encoded": False,
         }
