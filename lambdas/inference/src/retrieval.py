@@ -7,6 +7,7 @@ from langchain_community.vectorstores.pgvector import PGVector
 import boto3
 from langchain_community.embeddings import BedrockEmbeddings
 
+
 def get_secret():
     try:
         response = boto3.client("secretsmanager").get_secret_value(
@@ -17,6 +18,7 @@ def get_secret():
         raise e
 
 
+# TODO: Handle the case when the collection is empty or non existent
 class Retrieval:
     def __init__(
         self,
