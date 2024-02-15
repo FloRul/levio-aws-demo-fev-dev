@@ -4,5 +4,3 @@ langchain
 psycopg2-binary
 pgvector
 boto3
-amazon-textract-textractor
-amazon-textract-textractor[pdf]

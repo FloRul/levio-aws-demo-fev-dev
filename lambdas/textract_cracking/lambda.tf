@@ -3,6 +3,10 @@ data "aws_ecr_image" "lambda_image" {
   most_recent     = true
 }
 
+resource "aws_sns_topic" "ingestion_job_sns_topic" {
+  name = "${var.lambda_function_name}-topic"
+}
+
 module "lambda_function_container_image" {
   timeout                  = 900
   source                   = "terraform-aws-modules/lambda/aws"
