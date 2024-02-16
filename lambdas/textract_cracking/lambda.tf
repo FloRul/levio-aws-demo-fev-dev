@@ -3,6 +3,10 @@ data "aws_ecr_image" "lambda_image" {
   most_recent     = true
 }
 
+resource "aws_sns_topic" "ingestion_job_sns_topic" {
+  name = "${var.lambda_function_name}-topic"
+}
+
 module "lambda_function_container_image" {
   timeout                  = 900
   source                   = "terraform-aws-modules/lambda/aws"
@@ -23,8 +27,7 @@ module "lambda_function_container_image" {
     PGVECTOR_DATABASE             = var.pg_vector_database
     PGVECTOR_USER                 = var.pg_vector_user
     PGVECTOR_PASSWORD_SECRET_NAME = var.pg_vector_password_secret_name
-    CHUNK_SIZE                    = 256
-    CHUNK_OVERLAP                 = 20
+    USE_TEXTRACT                  = 0
   }
   policy_statements = {
     log_group = {

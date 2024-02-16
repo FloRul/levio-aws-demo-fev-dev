@@ -31,6 +31,8 @@ PGVECTOR_HOST = os.environ.get("PGVECTOR_HOST", "localhost")
 PGVECTOR_PORT = int(os.environ.get("PGVECTOR_PORT", 5432))
 PGVECTOR_DATABASE = os.environ.get("PGVECTOR_DATABASE", "postgres")
 PGVECTOR_USER = os.environ.get("PGVECTOR_USER", "postgres")
+CHUNK_SIZE = int(os.environ.get("CHUNK_SIZE", 256))
+CHUNK_OVERLAP = int(os.environ.get("CHUNK_OVERLAP", 20))
 PGVECTOR_PASSWORD = get_secret()
 
 
@@ -98,34 +100,15 @@ def get_vector_store(collection_name="main_collection"):
 def extract_pdf_content(file_path, file_name):
     print(f"Extracting content from {file_name}")
 
-    use_textract = int(os.getenv("USE_TEXTRACT", "0"))
-
-    if use_textract == 1:
-        textract_client = boto3.client("textract")
-        with open(file_path, "rb") as file:
-            response = textract_client.detect_document_text(
-                Document={"Bytes": file.read()}
-            )
-        text = " ".join(
-            [item["Text"] for item in response["Blocks"] if item["BlockType"] == "LINE"]
-        )
-        created_at = datetime.datetime.now().isoformat()
-        doc = Document(
-            text=text, metadata={"source": file_name, "created_at": created_at, "textract": True}
-        )
-        return [doc]
-    else:
-        loader = PyPDFLoader(file_path)
-        docs = loader.load_and_split(
-            text_splitter=RecursiveCharacterTextSplitter(
-                chunk_size=1000, chunk_overlap=50
-            )
-        )
-        created_at = datetime.datetime.now().isoformat()
-        for doc in docs:
-            doc.metadata["source"] = file_name
-            doc.metadata["created_at"] = created_at
-        return docs
+    loader = PyPDFLoader(file_path)
+    docs = loader.load_and_split(
+        text_splitter=RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
+    )
+    created_at = datetime.datetime.now().isoformat()
+    for doc in docs:
+        doc.metadata["source"] = file_name
+        doc.metadata["created_at"] = created_at
+    return docs
 
 
 OBJECT_CREATED = "ObjectCreated"
