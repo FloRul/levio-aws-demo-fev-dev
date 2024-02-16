@@ -29,10 +29,10 @@ module "lambda_function_container_image" {
     ENABLE_RETRIEVAL              = 1
     MEMORY_LAMBDA_NAME            = var.memory_lambda_name
     DYNAMO_TABLE                  = var.dynamo_history_table_name
-    TOP_K                         = 50
-    TEMPERATURE                   = 0.5
+    TOP_K                         = 10
+    TEMPERATURE                   = 0.1
     TOP_P                         = 0.99
-    RELEVANCE_THRESHOLD           = 0.65
+    RELEVANCE_THRESHOLD           = 0.67
     MODEL_ID                      = "anthropic.claude-instant-v1"
     EMBEDDING_COLLECTION_NAME     = var.embedding_collection_name
     SYSTEM_PROMPT                 = "Answer in four to five sentences maximum.Answer in french."

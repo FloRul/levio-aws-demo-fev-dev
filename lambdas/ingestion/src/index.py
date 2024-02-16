@@ -31,6 +31,8 @@ PGVECTOR_HOST = os.environ.get("PGVECTOR_HOST", "localhost")
 PGVECTOR_PORT = int(os.environ.get("PGVECTOR_PORT", 5432))
 PGVECTOR_DATABASE = os.environ.get("PGVECTOR_DATABASE", "postgres")
 PGVECTOR_USER = os.environ.get("PGVECTOR_USER", "postgres")
+CHUNK_SIZE = int(os.environ.get("CHUNK_SIZE", 256))
+CHUNK_OVERLAP = int(os.environ.get("CHUNK_OVERLAP", 20))
 PGVECTOR_PASSWORD = get_secret()
 
 
@@ -100,7 +102,7 @@ def extract_pdf_content(file_path, file_name):
 
     loader = PyPDFLoader(file_path)
     docs = loader.load_and_split(
-        text_splitter=RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
+        text_splitter=RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
     )
     created_at = datetime.datetime.now().isoformat()
     for doc in docs:
