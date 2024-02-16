@@ -36,3 +36,25 @@ variable "aws_region" {
   type    = string
   default = "us-east-1"
 }
+
+variable "authorization_type" {
+  description = "The Api Gateway method authorization type"
+  nullable    = false
+  type        = string
+  default     = "NONE"
+}
+
+variable "authorizer_id" {
+  description = "The Api Gateway method authorizer id"
+  nullable    = true
+  type        = string
+  default     = null
+}
+
+variable "api_key_required" {
+  description = "The Api Gateway method api key required"
+  nullable    = false
+  type        = bool
+  default     = false
+
+}
