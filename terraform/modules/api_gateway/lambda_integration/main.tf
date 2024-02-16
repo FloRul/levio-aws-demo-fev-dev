@@ -16,8 +16,9 @@ resource "aws_api_gateway_method" "api_gateway_method" {
   rest_api_id      = var.api_gateway_rest_api_id
   resource_id      = aws_api_gateway_resource.api_gateway_resource.id
   http_method      = var.api_gateway_http_method
-  authorization    = "NONE"
-  api_key_required = true
+  authorization    = var.authorization_type
+  authorizer_id    = var.authorizer_id
+  api_key_required = var.api_key_required
 }
 
 resource "aws_api_gateway_integration" "api_gateway_integration" {
