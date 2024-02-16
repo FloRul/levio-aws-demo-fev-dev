@@ -11,4 +11,5 @@ module "api_gateway" {
   api_gateway_http_method               = local.api_gateway_http_method
   lambda_function_arn                   = module.lambda_function_container_image.lambda_function_arn
   lambda_function_name                  = var.lambda_function_name
+  api_key_required                      = true
 }
