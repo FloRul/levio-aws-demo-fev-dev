@@ -51,6 +51,17 @@ resource "aws_api_gateway_usage_plan_key" "this" {
   usage_plan_id = aws_api_gateway_usage_plan.this.id
 }
 
+## Auth and Authorizer
+resource "aws_api_gateway_authorizer" "this" {
+  name                   = "${var.api_name}-authorizer"
+  rest_api_id            = aws_api_gateway_rest_api.this.id
+  type = "COGNITO_USER_POOLS"
+  provider_arns = [var.cognito_user_pool_arn]
+}
+
+
+## Logging
+
 resource "aws_api_gateway_account" "this" {
   cloudwatch_role_arn = aws_iam_role.this.arn
 }
