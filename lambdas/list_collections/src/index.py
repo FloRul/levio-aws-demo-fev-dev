@@ -49,38 +49,11 @@ def lambda_handler(event, context):
         # Format the rows into a list of strings
         rows = [row[0] for row in rows]
 
-        # Format the sessionAttributes as a map of string to string
-        # sessionAttributes = {f"option{i}": option for i, option in enumerate(rows)}
-
-        # # Format the slots as a map of slot names to slot objects
-        # slots = {
-        #     f"option{i}": {"shape": "Scalar", "value": option}
-        #     for i, option in enumerate(rows)
-        # }
-
-        # response = {
-        #     "sessionState": {
-        #         "intent": {
-        #             "name": INTENT_NAME,
-        #             "state": "ReadyForFulfillment",
-        #             "confirmationState": "None",
-        #             "slots": slots,
-        #         },
-        #         "sessionAttributes": sessionAttributes,
-        #     },
-        #     "messages": [
-        #         {
-        #             "contentType": "PlainText",
-        #             "content": f"Here are the collections: {', '.join(rows)}",
-        #         }
-        #     ],
-        #     "requestAttributes": {},
-        # }
-        # return prompt_for_collection_selection(collections=rows)
-
         return {
             "statusCode": 200,
-            "body": json.dumps(rows),
+            "body": {
+                "collections": rows,
+            },
             "headers": headers,
         }
     except Exception as e:
@@ -91,35 +64,3 @@ def lambda_handler(event, context):
             "headers": headers,
             "isBase64Encoded": False,
         }
-
-
-# def prompt_for_collection_selection(collections: list):
-#     return {
-#         "sessionState": {
-#             "dialogAction": {
-#                 "slotToElicit": SLOT_TO_ELICIT,
-#                 "type": "ElicitSlot",
-#             },
-#             "intent": {
-#                 "confirmationState": "None",
-#                 "name": INTENT_NAME,
-#                 "state": "InProgress",
-#                 "slots": {
-#                     SLOT_TO_ELICIT: {
-#                         "shape": "Scalar",
-#                         "value": {
-#                             "originalValue": None,
-#                             "interpretedValue": None,
-#                             "resolvedValues": [],
-#                         },
-#                     },
-#                 },
-#             },
-#         },
-#         "messages": [
-#             {
-#                 "contentType": "PlainText",
-#                 "content": f"Vous souhaitez interroger une source de donnees specifiques, voici une liste de collections disponibles: {', '.join(collections)}",
-#             },
-#         ],
-#     }

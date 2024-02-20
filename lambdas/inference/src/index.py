@@ -110,7 +110,10 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "body": json.dumps(response),
+            "body": {
+                "completion": response,
+                "retrieval": {"documents": [doc.to_dict() for doc in docs]},
+            },
             "headers": HEADERS,
             "isBase64Encoded": False,
         }
