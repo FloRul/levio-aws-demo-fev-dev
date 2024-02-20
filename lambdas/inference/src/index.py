@@ -107,17 +107,24 @@ def lambda_handler(event, context):
                 history.add(
                     human_message=query, assistant_message=response, prompt=prompt
                 )
-
+        result = {
+            "completion": response,
+            "docs": json.dumps(
+                list(
+                    map(
+                        lambda x: {
+                            "content": x[0].page_content,
+                            "metadata": x[0].metadata,
+                            "score": x[1],
+                        },
+                        docs,
+                    )
+                )
+            ),
+        }
         return {
             "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "completion": response,
-                    "retrieval": {
-                        "documents": [json.dumps(doc) for doc in docs],
-                    },
-                }
-            ),
+            "body": json.dumps(result),
             "headers": HEADERS,
             "isBase64Encoded": False,
         }
