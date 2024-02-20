@@ -36,7 +36,7 @@ def prepare_prompt(query: str, docs: list, history: list):
 
 def prepare_document_prompt(docs):
     if docs:
-        docs_context = ".\n".join(doc.page_content for doc in docs)
+        docs_context = ".\n".join(doc[0].page_content for doc in docs)
         return f"Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>."
     return "I could not find any relevant quotes to help you answer the user's query."
 
@@ -106,8 +106,6 @@ def lambda_handler(event, context):
                 history.add(
                     human_message=query, assistant_message=response, prompt=prompt
                 )
-
-        print(f"doc :{docs[0]}")
         result = {
             "completion": response,
             "docs": json.dumps(
