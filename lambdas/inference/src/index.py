@@ -95,7 +95,6 @@ def lambda_handler(event, context):
                     relevance_treshold=ENV_VARS["relevance_treshold"],
                 )
                 docs = retrieval.fetch_documents(query=query, top_k=ENV_VARS["top_k"])
-
             if enable_history:
                 chat_history = json.loads(history.get(limit=10))
 
@@ -107,6 +106,8 @@ def lambda_handler(event, context):
                 history.add(
                     human_message=query, assistant_message=response, prompt=prompt
                 )
+
+        print(f"doc :{docs[0]}")
         result = {
             "completion": response,
             "docs": json.dumps(
