@@ -114,7 +114,7 @@ def lambda_handler(event, context):
                 {
                     "completion": response,
                     "retrieval": {
-                        "documents": [doc.to_dict() for doc in docs],
+                        "documents": [json.dumps(doc) for doc in docs],
                     },
                 }
             ),
