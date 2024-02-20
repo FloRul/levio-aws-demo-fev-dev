@@ -51,9 +51,11 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "body": {
-                "collections": rows,
-            },
+            "body": json.dumps(
+                {
+                    "collections": rows,
+                }
+            ),
             "headers": headers,
         }
     except Exception as e:
