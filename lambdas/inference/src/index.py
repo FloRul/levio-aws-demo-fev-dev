@@ -107,7 +107,7 @@ def lambda_handler(event, context):
                     human_message=query, assistant_message=response, prompt=prompt
                 )
 
-        print(docs[0])
+        print(f"doc :{docs[0]}")
         result = {
             "completion": response,
             "docs": json.dumps(
