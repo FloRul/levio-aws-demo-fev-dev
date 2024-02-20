@@ -112,7 +112,9 @@ def lambda_handler(event, context):
             "statusCode": 200,
             "body": {
                 "completion": response,
-                "retrieval": {"documents": [doc.to_dict() for doc in docs]},
+                "retrieval": {
+                    "documents": [doc.to_dict() for doc in docs],
+                },
             },
             "headers": HEADERS,
             "isBase64Encoded": False,
