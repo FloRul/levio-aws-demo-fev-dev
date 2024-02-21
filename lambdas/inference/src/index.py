@@ -42,8 +42,8 @@ def prepare_prompt(query: str, docs: list, history: list, source: str):
     final_prompt = f"""{basic_prompt}\n
     {document_prompt}\n
     {history_prompt}\n
-    {ENV_VARS['system_prompt']}\n
     {source_prompt}\n
+    {ENV_VARS['system_prompt']}\n
     \nAssistant:"""
     return final_prompt
 
