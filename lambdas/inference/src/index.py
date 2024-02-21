@@ -120,7 +120,7 @@ def lambda_handler(event, context):
 
             # prepare the prompt
             prompt = prepare_prompt(query, docs, chat_history, source)
-            response = invoke_model(prompt)
+            response = invoke_model(prompt, source=source)
 
             if enable_history:
                 history.add(
