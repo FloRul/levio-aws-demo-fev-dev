@@ -65,11 +65,16 @@ def prepare_history_prompt(history):
     return ""
 
 
-def invoke_model(prompt: str):
+def invoke_model(prompt: str, source: str = "message"):
+    maxtokens = ENV_VARS["max_tokens"]
+    if source == "email":
+        maxtokens *= 2
+    if source == "call":
+        maxtokens /= 2
     body = json.dumps(
         {
             "prompt": prompt,
-            "max_tokens_to_sample": ENV_VARS["max_tokens"],
+            "max_tokens_to_sample": maxtokens,
             "temperature": ENV_VARS["temperature"],
             "top_p": ENV_VARS["top_p"],
         }
