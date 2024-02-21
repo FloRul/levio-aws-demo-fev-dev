@@ -4,6 +4,14 @@ import boto3
 from retrieval import Retrieval
 from history import History
 
+def prepare_source_prompt(source: str):
+    if source == 'email':
+        return "You are currently answering an email. After you finish answering the initial query anticipate the user's follow-up questions and answer it too up to 4 questions."
+    elif source == 'call':
+        return "Make your answer short and concise."
+    else:
+        return "You are currently answering a message."
+
 HEADERS = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -14,7 +22,7 @@ ENV_VARS = {
     "relevance_treshold": os.environ.get("RELEVANCE_TRESHOLD", 0.5),
     "model_id": os.environ.get("MODEL_ID", "anthropic.claude-instant-v1"),
     "system_prompt": os.environ.get(
-        "SYSTEM_PROMPT", "Answer in four to five sentences.Answer in french."
+        "SYSTEM_PROMPT", "Answer in french."
     ),
     "enable_history": int(os.environ.get("ENABLE_HISTORY", 1)),
     "enable_retrieval": int(os.environ.get("ENABLE_RETRIEVAL", 1)),
@@ -26,11 +34,17 @@ ENV_VARS = {
 }
 
 
-def prepare_prompt(query: str, docs: list, history: list):
+def prepare_prompt(query: str, docs: list, history: list, source: str):
     basic_prompt = f'\n\nHuman: The user sent the following message : "{query}".'
     document_prompt = prepare_document_prompt(docs)
     history_prompt = prepare_history_prompt(history)
-    final_prompt = f"{ENV_VARS['system_prompt']}{basic_prompt}\n{document_prompt}\n{history_prompt}\n\nAssistant:"
+    source_prompt = prepare_source_prompt(source)
+    final_prompt = f"""{basic_prompt}\n
+    {document_prompt}\n
+    {history_prompt}\n
+    {ENV_VARS['system_prompt']}\n
+    {source_prompt}\n
+    \nAssistant:"""
     return final_prompt
 
 
@@ -77,6 +91,7 @@ def invoke_model(prompt: str):
 
 def lambda_handler(event, context):
     response = "this is a dummy response"
+    source = event.get("queryStringParameters", {}).get("source", "message")
     embedding_collection_name = event["queryStringParameters"]["collectionName"]
     enable_history = False
     if "sessionId" in event["queryStringParameters"]:
@@ -99,7 +114,7 @@ def lambda_handler(event, context):
                 chat_history = json.loads(history.get(limit=10))
 
             # prepare the prompt
-            prompt = prepare_prompt(query, docs, chat_history)
+            prompt = prepare_prompt(query, docs, chat_history, source)
             response = invoke_model(prompt)
 
             if enable_history:
