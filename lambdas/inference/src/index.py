@@ -74,7 +74,7 @@ def invoke_model(prompt: str, source: str = "message"):
     body = json.dumps(
         {
             "prompt": prompt,
-            "max_tokens_to_sample": maxtokens,
+            "max_tokens_to_sample": int(maxtokens),
             "temperature": ENV_VARS["temperature"],
             "top_p": ENV_VARS["top_p"],
         }
