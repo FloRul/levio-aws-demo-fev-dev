@@ -35,6 +35,16 @@ variable "lex_router_repository_name" {
   nullable = false
 }
 
+variable "email_request_processor_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "email_response_processor_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
 variable "api_name" {
   default = "levio-demo-fev-api"
   type    = string
@@ -51,4 +61,9 @@ variable "cognito_user_pool_arn" {
   nullable = false
   type     = string
   default  = "arn:aws:cognito-idp:us-east-1:446872271111:userpool/us-east-1_N0uQPJkjd"
+}
+
+variable "sender_email" {
+  type     = string
+  nullable = false
 }
