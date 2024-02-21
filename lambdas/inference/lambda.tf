@@ -35,7 +35,7 @@ module "lambda_function_container_image" {
     RELEVANCE_THRESHOLD           = 0.67
     MODEL_ID                      = "anthropic.claude-instant-v1"
     EMBEDDING_COLLECTION_NAME     = var.embedding_collection_name
-    SYSTEM_PROMPT                 = "Answer in four to five sentences maximum.Answer in french."
+    SYSTEM_PROMPT                 = "Answer in french."
     CHAT_INTENT_NAME              = "global"
   }
   policy_statements = {
