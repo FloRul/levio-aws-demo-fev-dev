@@ -42,8 +42,8 @@ def prepare_prompt(query: str, docs: list, history: list, source: str):
     final_prompt = f"""{basic_prompt}\n
     {document_prompt}\n
     {history_prompt}\n
-    {ENV_VARS['system_prompt']}\n
     {source_prompt}\n
+    {ENV_VARS['system_prompt']}\n
     \nAssistant:"""
     return final_prompt
 
@@ -74,7 +74,7 @@ def invoke_model(prompt: str, source: str = "message"):
     body = json.dumps(
         {
             "prompt": prompt,
-            "max_tokens_to_sample": maxtokens,
+            "max_tokens_to_sample": int(maxtokens),
             "temperature": ENV_VARS["temperature"],
             "top_p": ENV_VARS["top_p"],
         }
