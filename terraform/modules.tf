@@ -1,18 +1,16 @@
 locals {
-  memory_lambda_name                              = "levio-demo-fev-memory-dev"
-  dynamo_history_table_name                       = "levio-demo-fev-chat-history-dev"
-  storage_bucket_name                             = "levio-demo-fev-storage-dev"
-  queue_name                                      = "levio-demo-fev-ingestion-queue-dev"
-  ingestion_lambda_name                           = "levio-demo-fev-ingestion-dev"
-  inference_lambda_name                           = "levio-demo-fev-inference-dev"
-  list_collections_lambda_name                    = "levio-demo-fev-list-collections-dev"
-  lex_router_lambda_name                          = "levio-demo-fev-lex-router-dev"
-  email_request_processor_lambda_name             = "levio-demo-fev-email-request-processor-dev"
-  email_request_processor_lambda_repository_name  = "email_request_processor"
-  email_request_processor_queue_name              = "levio-demo-fev-email-request-processor-queue-dev"
-  email_response_processor_lambda_name            = "levio-demo-fev-email-response-processor-dev"
-  email_response_processor_lambda_repository_name = "email_response_processor"
-  email_response_processor_queue_name             = "levio-demo-fev-email-response-processor-queue-dev"
+  memory_lambda_name                   = "levio-demo-fev-memory-dev"
+  dynamo_history_table_name            = "levio-demo-fev-chat-history-dev"
+  storage_bucket_name                  = "levio-demo-fev-storage-dev"
+  queue_name                           = "levio-demo-fev-ingestion-queue-dev"
+  ingestion_lambda_name                = "levio-demo-fev-ingestion-dev"
+  inference_lambda_name                = "levio-demo-fev-inference-dev"
+  list_collections_lambda_name         = "levio-demo-fev-list-collections-dev"
+  lex_router_lambda_name               = "levio-demo-fev-lex-router-dev"
+  email_request_processor_lambda_name  = "levio-demo-fev-email-request-processor-dev"
+  email_request_processor_queue_name   = "levio-demo-fev-email-request-processor-queue-dev"
+  email_response_processor_lambda_name = "levio-demo-fev-email-response-processor-dev"
+  email_response_processor_queue_name  = "levio-demo-fev-email-response-processor-queue-dev"
 }
 
 module "ingestion" {
@@ -101,7 +99,7 @@ module "lex_router" {
 module "email_response_processor" {
   source                 = "../lambdas/EmailProcessor/EmailResponseProcessorFunction/iac"
   lambda_function_name   = local.email_response_processor_lambda_name
-  lambda_repository_name = local.email_response_processor_lambda_repository_name
+  lambda_repository_name = var.email_response_processor_lambda_repository_name
   sqs_name               = local.email_response_processor_queue_name
   sender_email           = var.sender_email
 }
@@ -109,7 +107,7 @@ module "email_response_processor" {
 module "email_request_processor" {
   source                 = "../lambdas/EmailProcessor/EmailRequestProcessorFunction/iac"
   lambda_function_name   = local.email_request_processor_lambda_name
-  lambda_repository_name = local.email_request_processor_lambda_repository_name
+  lambda_repository_name = var.email_request_processor_lambda_repository_name
   sqs_name               = local.email_request_processor_queue_name
   api_key                = aws_api_gateway_api_key.this.value
   api_url                = "${aws_api_gateway_deployment.this.invoke_url}/${aws_api_gateway_stage.this.stage_name}/${module.inference.path_part}"
