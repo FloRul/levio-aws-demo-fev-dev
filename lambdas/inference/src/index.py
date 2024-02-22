@@ -4,13 +4,15 @@ import boto3
 from retrieval import Retrieval
 from history import History
 
+
 def prepare_source_prompt(source: str):
-    if source == 'email':
+    if source == "email":
         return "You are currently answering an email. After you finish answering the initial query anticipate the user's follow-up questions and answer it too up to 4 questions."
-    elif source == 'call':
+    elif source == "call":
         return "Make your answer short and concise."
     else:
         return "You are currently answering a message."
+
 
 HEADERS = {
     "Access-Control-Allow-Origin": "*",
@@ -21,9 +23,7 @@ HEADERS = {
 ENV_VARS = {
     "relevance_treshold": os.environ.get("RELEVANCE_TRESHOLD", 0.5),
     "model_id": os.environ.get("MODEL_ID", "anthropic.claude-instant-v1"),
-    "system_prompt": os.environ.get(
-        "SYSTEM_PROMPT", "Answer in french."
-    ),
+    "system_prompt": os.environ.get("SYSTEM_PROMPT", "Answer in french."),
     "enable_history": int(os.environ.get("ENABLE_HISTORY", 1)),
     "enable_retrieval": int(os.environ.get("ENABLE_RETRIEVAL", 1)),
     "max_tokens": int(os.environ.get("MAX_TOKENS", 100)),
@@ -45,6 +45,7 @@ def prepare_prompt(query: str, docs: list, history: list, source: str):
     {source_prompt}\n
     {ENV_VARS['system_prompt']}\n
     \nAssistant:"""
+    print(final_prompt)
     return final_prompt
 
 
@@ -98,6 +99,7 @@ def lambda_handler(event, context):
     response = "this is a dummy response"
     source = event.get("queryStringParameters", {}).get("source", "message")
     embedding_collection_name = event["queryStringParameters"]["collectionName"]
+    
     enable_history = False
     if "sessionId" in event["queryStringParameters"]:
         enable_history = True
