@@ -50,7 +50,8 @@ class Retrieval:
     def fetch_documents(self, query: str, top_k: int = 10):
         try:
             docs = self._vector_store.similarity_search_with_relevance_scores(
-                query=query, k=top_k
+                query=query,
+                k=top_k,
             )
             return [x for x in docs if x[1] > self._relevance_treshold]
         except Exception as e:
