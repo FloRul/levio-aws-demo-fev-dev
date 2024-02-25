@@ -31,7 +31,7 @@ resource "aws_api_gateway_integration" "api_gateway_integration" {
 }
 
 resource "aws_lambda_permission" "lambda_permission" {
-  statement_id  = "AllowExecutionFromAPIGateway-${var.lambda_function_name}"
+  statement_id  = "AllowExecutionFromAPIGateway-${var.lambda_function_name}-${var.api_gateway_path_part}-${var.api_gateway_http_method}"
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_function_name
   principal     = "apigateway.amazonaws.com"
