@@ -84,7 +84,7 @@ variable "api_gateway_rest_api_root_resource_id" {
   nullable = false
 }
 
-variable "cognito_user_pool_arn" {
+variable "cognito_user_pool_id" {
   type     = string
   nullable = false
 }
