@@ -14,8 +14,8 @@ locals {
 }
 
 module "ingestion" {
-  source                        = "../lambdas/ingestion"
-  storage_bucket_name           = local.storage_bucket_name
+  source              = "../lambdas/ingestion"
+  storage_bucket_name = local.storage_bucket_name
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -32,7 +32,7 @@ module "ingestion" {
 }
 
 module "inference" {
-  source                        = "../lambdas/inference"
+  source = "../lambdas/inference"
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -50,10 +50,11 @@ module "inference" {
   embedding_collection_name             = local.storage_bucket_name
   api_gateway_rest_api_id               = aws_api_gateway_rest_api.this.id
   api_gateway_rest_api_root_resource_id = aws_api_gateway_rest_api.this.root_resource_id
+  cognito_user_pool_arn                 = var.cognito_user_pool_arn
 }
 
 module "memory" {
-  source                        = "../lambdas/conversation_memory"
+  source = "../lambdas/conversation_memory"
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -65,8 +66,8 @@ module "memory" {
 }
 
 module "list_collections" {
-  source                        = "../lambdas/list_collections"
-  lambda_repository_name        = var.list_collections_repository_name
+  source                 = "../lambdas/list_collections"
+  lambda_repository_name = var.list_collections_repository_name
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -82,7 +83,7 @@ module "list_collections" {
 }
 
 module "lex_router" {
-  source                        = "../lambdas/lex_router"
+  source = "../lambdas/lex_router"
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -90,7 +91,7 @@ module "lex_router" {
   lambda_repository_name = var.lex_router_repository_name
   lambda_function_name   = local.lex_router_lambda_name
   aws_region             = var.aws_region
-  intent_lambda_mapping  = {
+  intent_lambda_mapping = {
     SelectCollection = local.list_collections_lambda_name
     Inference        = local.inference_lambda_name
   }
