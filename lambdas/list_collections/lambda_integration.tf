@@ -3,7 +3,7 @@ locals {
   api_gateway_http_method = "GET"
 }
 
-module "api_gateway" {
+module "integration_base" {
   source                                = "../../terraform/modules/api_gateway/lambda_integration"
   api_gateway_rest_api_id               = var.api_gateway_rest_api_id
   api_gateway_rest_api_root_resource_id = var.api_gateway_rest_api_root_resource_id
