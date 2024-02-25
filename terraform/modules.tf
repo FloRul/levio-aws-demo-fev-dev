@@ -50,7 +50,7 @@ module "inference" {
   embedding_collection_name             = local.storage_bucket_name
   api_gateway_rest_api_id               = aws_api_gateway_rest_api.this.id
   api_gateway_rest_api_root_resource_id = aws_api_gateway_rest_api.this.root_resource_id
-  cognito_user_pool_arn                 = var.cognito_user_pool_arn
+  cognito_user_pool_id                  = data.aws_cognito_user_pools.api_cognito.id
 }
 
 module "memory" {

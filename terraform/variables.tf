@@ -57,12 +57,6 @@ variable "api_gateway_stage_name" {
   type        = string
 }
 
-variable "cognito_user_pool_arn" {
-  nullable = false
-  type     = string
-  default  = "arn:aws:cognito-idp:us-east-1:446872271111:userpool/us-east-1_N0uQPJkjd"
-}
-
 variable "sender_email" {
   type     = string
   nullable = false
