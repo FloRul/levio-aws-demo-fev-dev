@@ -24,5 +24,5 @@ module "integration_cognito" {
   lambda_function_name                  = var.lambda_function_name
   api_key_required                      = false
   authorization_type                    = "COGNITO_USER_POOLS"
-  authorizer_id                         = var.cognito_user_pool_id
+  authorizer_id                         = var.authorizer_id
 }
