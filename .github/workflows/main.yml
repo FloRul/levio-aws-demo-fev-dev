@@ -35,6 +35,7 @@ jobs:
         aws ecr describe-repositories --repository-names ${{ vars.LIST_COLLECTIONS_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.LIST_COLLECTIONS_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.MEMORY_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.MEMORY_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}
+        aws ecr describe-repositories --repository-names ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}
 
     - name: Generate timestamp
@@ -59,6 +60,8 @@ jobs:
         docker push $ECR_REGISTRY/${{ vars.MEMORY_ECR_NAME }}:$IMAGE_TAG
         docker build -t $ECR_REGISTRY/${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/EmailProcessor/EmailRequestProcessorFunction
         docker push $ECR_REGISTRY/${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction
+        docker push $ECR_REGISTRY/${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}:$IMAGE_TAG
         docker build -t $ECR_REGISTRY/${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/EmailProcessor/EmailResponseProcessorFunction
         docker push $ECR_REGISTRY/${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}:$IMAGE_TAG
 
@@ -105,6 +108,7 @@ jobs:
         -var="list_collections_repository_name=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
         -var="lex_router_repository_name=${{ vars.LEX_ROUTER_ECR_NAME }}" \
         -var="email_request_processor_lambda_repository_name=${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}" \
+        -var="email_request_preprocessor_lambda_repository_name=${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}" \
         -var="email_response_processor_lambda_repository_name=${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}" \
         -var="sender_email=${{ vars.SENDER_EMAIL }}" \
         -no-color -out=terraform.tfplan
@@ -193,6 +197,7 @@ jobs:
         for digest in $(aws ecr list-images --repository-name ${{ vars.LIST_COLLECTIONS_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.LIST_COLLECTIONS_ECR_NAME }} --image-ids imageDigest=$digest; done
         for digest in $(aws ecr list-images --repository-name ${{ vars.MEMORY_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.MEMORY_ECR_NAME }} --image-ids imageDigest=$digest; done
         for digest in $(aws ecr list-images --repository-name ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
         for digest in $(aws ecr list-images --repository-name ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
 
   deploy-infra:
@@ -226,6 +231,7 @@ jobs:
         -var="list_collections_repository_name=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
         -var="lex_router_repository_name=${{ vars.LEX_ROUTER_ECR_NAME }}" \
         -var="email_request_processor_lambda_repository_name=${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}" \
+        -var="email_request_preprocessor_lambda_repository_name=${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}" \
         -var="email_response_processor_lambda_repository_name=${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}" \
         -var="sender_email=${{ vars.SENDER_EMAIL }}" \
         -auto-approve -no-color -input=false

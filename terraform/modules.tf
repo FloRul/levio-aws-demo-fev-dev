@@ -1,21 +1,22 @@
 locals {
-  memory_lambda_name                   = "levio-demo-fev-memory-dev"
-  dynamo_history_table_name            = "levio-demo-fev-chat-history-dev"
-  storage_bucket_name                  = "levio-demo-fev-storage-dev"
-  queue_name                           = "levio-demo-fev-ingestion-queue-dev"
-  ingestion_lambda_name                = "levio-demo-fev-ingestion-dev"
-  inference_lambda_name                = "levio-demo-fev-inference-dev"
-  list_collections_lambda_name         = "levio-demo-fev-list-collections-dev"
-  lex_router_lambda_name               = "levio-demo-fev-lex-router-dev"
-  email_request_processor_lambda_name  = "levio-demo-fev-email-request-processor-dev"
-  email_request_processor_queue_name   = "levio-demo-fev-email-request-processor-queue-dev"
-  email_response_processor_lambda_name = "levio-demo-fev-email-response-processor-dev"
-  email_response_processor_queue_name  = "levio-demo-fev-email-response-processor-queue-dev"
+  memory_lambda_name                     = "levio-demo-fev-memory-dev"
+  dynamo_history_table_name              = "levio-demo-fev-chat-history-dev"
+  storage_bucket_name                    = "levio-demo-fev-storage-dev"
+  queue_name                             = "levio-demo-fev-ingestion-queue-dev"
+  ingestion_lambda_name                  = "levio-demo-fev-ingestion-dev"
+  inference_lambda_name                  = "levio-demo-fev-inference-dev"
+  list_collections_lambda_name           = "levio-demo-fev-list-collections-dev"
+  lex_router_lambda_name                 = "levio-demo-fev-lex-router-dev"
+  email_request_preprocessor_lambda_name = "levio-demo-fev-email-request-preprocessor-dev"
+  email_request_processor_lambda_name    = "levio-demo-fev-email-request-processor-dev"
+  email_request_processor_queue_name     = "levio-demo-fev-email-request-processor-queue-dev"
+  email_response_processor_lambda_name   = "levio-demo-fev-email-response-processor-dev"
+  email_response_processor_queue_name    = "levio-demo-fev-email-response-processor-queue-dev"
 }
 
 module "ingestion" {
-  source              = "../lambdas/ingestion"
-  storage_bucket_name = local.storage_bucket_name
+  source                        = "../lambdas/ingestion"
+  storage_bucket_name           = local.storage_bucket_name
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -32,7 +33,7 @@ module "ingestion" {
 }
 
 module "inference" {
-  source = "../lambdas/inference"
+  source                        = "../lambdas/inference"
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -54,7 +55,7 @@ module "inference" {
 }
 
 module "memory" {
-  source = "../lambdas/conversation_memory"
+  source                        = "../lambdas/conversation_memory"
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -66,8 +67,8 @@ module "memory" {
 }
 
 module "list_collections" {
-  source                 = "../lambdas/list_collections"
-  lambda_repository_name = var.list_collections_repository_name
+  source                        = "../lambdas/list_collections"
+  lambda_repository_name        = var.list_collections_repository_name
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -83,7 +84,7 @@ module "list_collections" {
 }
 
 module "lex_router" {
-  source = "../lambdas/lex_router"
+  source                        = "../lambdas/lex_router"
   lambda_vpc_security_group_ids = [
     aws_security_group.lambda_egress_all_sg.id,
   ]
@@ -91,7 +92,7 @@ module "lex_router" {
   lambda_repository_name = var.lex_router_repository_name
   lambda_function_name   = local.lex_router_lambda_name
   aws_region             = var.aws_region
-  intent_lambda_mapping = {
+  intent_lambda_mapping  = {
     SelectCollection = local.list_collections_lambda_name
     Inference        = local.inference_lambda_name
   }
@@ -114,4 +115,17 @@ module "email_request_processor" {
   api_url                = "${aws_api_gateway_deployment.this.invoke_url}${aws_api_gateway_stage.this.stage_name}/${module.inference.path_part}"
   response_queue_url     = module.email_response_processor.queue_url
   response_queue_arn     = module.email_response_processor.queue_arn
+}
+
+module "email_request_preprocessor" {
+  source                 = "../lambdas/EmailProcessor/EmailRequestPreProcessorFunction/iac"
+  lambda_function_name   = local.email_request_preprocessor_lambda_name
+  lambda_repository_name = var.email_request_preprocessor_lambda_repository_name
+  ses_bucket_name        = local.bucket_name
+  chat_key_prefix             = local.chat_key_prefix
+  request_queue_url      = module.email_request_processor.queue_url
+  request_queue_arn      = module.email_request_processor.queue_arn
+  ses_s3_arn             = module.s3_bucket.s3_bucket_arn
+  rule_set_name          = local.rule_set_name
+  chat_rule_name         = local.chat_rule_name
 }
