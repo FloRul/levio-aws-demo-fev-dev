@@ -1,7 +1,6 @@
 locals {
   rule_set_name       = "levio-demo-fev-esta-rule-set-dev"
   chat_rule_name      = "levio-demo-fev-esta-chat-rule-dev"
-  chat_rule_recipient = "levio-demo-fev-esta-chat-rule-recipient-dev"
   chat_key_prefix     = "chat"
   bucket_name         = "levio-demo-fev-esta-ses-bucket-dev"
 }
@@ -17,7 +16,7 @@ resource "aws_ses_active_receipt_rule_set" "active_main_rule_set" {
 resource "aws_ses_receipt_rule" "chat_rule" {
   name          = local.chat_rule_name
   rule_set_name = aws_ses_receipt_rule_set.main_rule_set.rule_set_name
-  recipients    = [local.chat_rule_recipient]
+  recipients    = [var.chat_rule_recipient]
   enabled       = true
   scan_enabled  = true
 

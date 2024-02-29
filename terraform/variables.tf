@@ -66,3 +66,8 @@ variable "sender_email" {
   type     = string
   nullable = false
 }
+
+variable "chat_rule_recipient" {
+  type     = string
+  nullable = false
+}
