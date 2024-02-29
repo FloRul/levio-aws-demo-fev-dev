@@ -1,0 +1,256 @@
+{
+  "Records": [
+    {
+      "eventSource": "aws:ses",
+      "eventVersion": "1.0",
+      "ses": {
+        "mail": {
+          "timestamp": "2024-02-27T14:07:17.596Z",
+          "source": "bruno.abreu@levio.ca",
+          "messageId": "btgh20uqtp2hkdd9sa0r3gtlbiugors8dic0kd01",
+          "destination": [
+            "formulaire@lab.levio.cloud"
+          ],
+          "headersTruncated": false,
+          "headers": [
+            {
+              "name": "Return-Path",
+              "value": "<bruno.abreu@levio.ca>"
+            },
+            {
+              "name": "Received",
+              "value": "from NAM12-DM6-obe.outbound.protection.outlook.com (mail-dm6nam12on2109.outbound.protection.outlook.com [40.107.243.109]) by inbound-smtp.us-east-1.amazonaws.com with SMTP id g8ubjg3v16av0vg3db4ddgfm1rnlseok5gqqf681 for formulaire@lab.levio.cloud; Tue, 27 Feb 2024 14:07:17 +0000 (UTC)"
+            },
+            {
+              "name": "X-SES-Spam-Verdict",
+              "value": "PASS"
+            },
+            {
+              "name": "X-SES-Virus-Verdict",
+              "value": "PASS"
+            },
+            {
+              "name": "Received-SPF",
+              "value": "pass (spfCheck: domain of levio.ca designates 40.107.243.109 as permitted sender) client-ip=40.107.243.109; envelope-from=bruno.abreu@levio.ca; helo=NAM12-DM6-obe.outbound.protection.outlook.com;"
+            },
+            {
+              "name": "Authentication-Results",
+              "value": "amazonses.com; spf=pass (spfCheck: domain of levio.ca designates 40.107.243.109 as permitted sender) client-ip=40.107.243.109; envelope-from=bruno.abreu@levio.ca; helo=NAM12-DM6-obe.outbound.protection.outlook.com; dkim=pass header.i=@levio.ca; dmarc=pass header.from=levio.ca;"
+            },
+            {
+              "name": "X-SES-RECEIPT",
+              "value": "AEFBQUFBQUFBQUFIcXZFbUU0V3dVZ0pyODVmbEpnV2lpbXp1VG5Ha1BlajhlcVo0RG5wR2NqU3BsMTFFRDZhb0RiR0diU2N1MDI1bXZVNUd3YkQ1WlJUSlRPSmxlQy9BeWt3eEtiSzZpNzBsTEM1ME0yTGVVUHRuakJ4dVFleWRSWjN0bjFFdHFmOHR4K3RockRZVDZXN2U0YkpjeU1ZVWhKVndud0J2NUwxTmNPaWRDeFpvNkxTNFBubGo2SC9qbHg1VWwwUmRwQlZJckJyMWUwaGRxRmI3eUdiRmVhcENoaWsvOERzeXB5R2FoV3gwK0g5MmlhS0MzeUpYME9ZQnMxMWpwTWlxcTcvWDA1L1BNbHdwV3dmOGN2T3RCRVpjZDRvdElDNThUUC9haDREN3E1NER0Znc9PQ=="
+            },
+            {
+              "name": "X-SES-DKIM-SIGNATURE",
+              "value": "a=rsa-sha256; q=dns/txt; b=LzZ74LE40neXn77scyLAI5fVyTlHPzp9sYXfUNNqPRYy/w9/uYSPtG0zPMwd97ra3kxrpMi0HIKm1pCzmyo9+jBwI2LbsMyb4Y9NRrF6iBfd+ZvSme5mAqpfLrHt1ItgpEdodzEbIiMNswVBfTWFoAvRqKRx9p1BXy7NGrKDgSA=; c=relaxed/simple; s=224i4yxa5dv7c2xz3womw6peuasteono; d=amazonses.com; t=1709042838; v=1; bh=B3bKN0LvSUvW2aqO7b2qGpOlm4LuiJAWiib79FrQ9Uo=; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;"
+            },
+            {
+              "name": "ARC-Seal",
+              "value": "i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none; b=Rw5BkIXQPgM/0BeKB9nQy9/73ZhZMgruLSpmBE/d6ifNaGgdG8vHXJqDTy630qMRdyE3pQSvFVivbXv+BzbvIh/vV5UNS/xmYLCb3STcw1tzph9kmXaQWAWbo4Ug4hic9jUcdNlyaAI32n9SklefiKTYIM/5O7oo/Z4vhA0lZQYIDFbNcKQDmPXmgpW8It5LjE7ZyGYvWheaYYY9SVlXQ3MeTELNxIpYbeObxz2Y7FRlmrfNHdI0LiYLoYVj23DsvsbcDN/nddIdAOCB1UVgWloLvG81kZ00JHIXEcG+Nu2XZet1/uVX5YVux0B++c9Tp7Ps2vcDDEakhGCXJIUqiw=="
+            },
+            {
+              "name": "ARC-Message-Signature",
+              "value": "i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com; s=arcselector9901; h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1; bh=PccbU24p3/CUmgkUr6x/pMgE7goPg14JxTxDc92oXYA=; b=KaX1+syVInNktYIcSFZOayzZKI6TGB1m4CSjtrI0W4Qvrj/c/MoRLXRVEoP/E80IQrs8oO7CsQqbhXpbzOYRKkJqRIrQ5njAQjoR8vRZEnKrIzd9tY007OTnv5bIEZIBqzDESQ0yf408HpPGRd17xPsbAQIEzyA01xKbUhks+1fPjLM3XtrhRg0f3K6AD2w5EZrbjs0iQkJCEIUrSqOW3FyiDQ6Cbo/axnNp6VB7kmSlbebjqJ0+QtfWf85P0i5uk5vK79Yyu9V5f2pg//5YUR4gD/NkA93Zv69arTV7xN0bH6FU+IV1edPeCl6leqC1gz+CI9NLG2qyaEZvnGOxiQ=="
+            },
+            {
+              "name": "ARC-Authentication-Results",
+              "value": "i=1; mx.microsoft.com 1; spf=pass smtp.mailfrom=levio.ca; dmarc=pass action=none header.from=levio.ca; dkim=pass header.d=levio.ca; arc=none"
+            },
+            {
+              "name": "DKIM-Signature",
+              "value": "v=1; a=rsa-sha256; c=relaxed/relaxed; d=levio.ca; s=selector2; h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck; bh=PccbU24p3/CUmgkUr6x/pMgE7goPg14JxTxDc92oXYA=; b=bRxa/nJQ20NPONv/8t5ScxS3/mPAdiEOfh/CrfeS/NtHqwCZTpA1tnXwEZiaw2hK19V8eLDcuXOIBxuR+hdcKfkwwp1EvSQCRrwgtv94DNspJCqVgWaUo4eN6ddrMWT4oGrFcl/CTLRSqYdSNJTPU0V1mBYYUThEWYfb0rY837M="
+            },
+            {
+              "name": "Received",
+              "value": "from DM5PR08MB3577.namprd08.prod.outlook.com (2603:10b6:4:61::15) by PH0PR08MB7907.namprd08.prod.outlook.com (2603:10b6:510:122::11) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7316.36; Tue, 27 Feb 2024 14:07:13 +0000"
+            },
+            {
+              "name": "Received",
+              "value": "from DM5PR08MB3577.namprd08.prod.outlook.com ([fe80::84f6:9d1e:7e52:f4b]) by DM5PR08MB3577.namprd08.prod.outlook.com ([fe80::84f6:9d1e:7e52:f4b%5]) with mapi id 15.20.7316.037; Tue, 27 Feb 2024 14:07:11 +0000"
+            },
+            {
+              "name": "From",
+              "value": "Bruno Abreu <bruno.abreu@levio.ca>"
+            },
+            {
+              "name": "To",
+              "value": "\"formulaire@lab.levio.cloud\" <formulaire@lab.levio.cloud>"
+            },
+            {
+              "name": "Subject",
+              "value": "Test Lambda Invocation"
+            },
+            {
+              "name": "Thread-Topic",
+              "value": "Test Lambda Invocation"
+            },
+            {
+              "name": "Thread-Index",
+              "value": "AQHaaYY/gStNqUh8O0iozx3q9UHuXg=="
+            },
+            {
+              "name": "Date",
+              "value": "Tue, 27 Feb 2024 14:07:11 +0000"
+            },
+            {
+              "name": "Message-ID",
+              "value": "<DM5PR08MB3577A39F7AD5F835025899F284592@DM5PR08MB3577.namprd08.prod.outlook.com>"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "fr-CA, en-US"
+            },
+            {
+              "name": "Content-Language",
+              "value": "fr-CA"
+            },
+            {
+              "name": "X-MS-Has-Attach",
+              "value": "yes"
+            },
+            {
+              "name": "X-MS-TNEF-Correlator",
+              "value": ""
+            },
+            {
+              "name": "msip_labels",
+              "value": ""
+            },
+            {
+              "name": "authentication-results",
+              "value": "dkim=none (message not signed) header.d=none;dmarc=none action=none header.from=levio.ca;"
+            },
+            {
+              "name": "x-ms-publictraffictype",
+              "value": "Email"
+            },
+            {
+              "name": "x-ms-traffictypediagnostic",
+              "value": "DM5PR08MB3577:EE_|PH0PR08MB7907:EE_"
+            },
+            {
+              "name": "x-ms-office365-filtering-correlation-id",
+              "value": "fa095a06-1743-483b-8d00-08dc379d64a8"
+            },
+            {
+              "name": "x-ms-exchange-senderadcheck",
+              "value": "1"
+            },
+            {
+              "name": "x-ms-exchange-antispam-relay",
+              "value": "0"
+            },
+            {
+              "name": "x-microsoft-antispam",
+              "value": "BCL:0;"
+            },
+            {
+              "name": "x-microsoft-antispam-message-info",
+              "value": "tIRUrnS5OMJh2EeupWjsKQOhkhiRyYFuN2vaFubjutpCXYT9WOL2H6u0jZXK+BVJmYTtXSzYmwxkx5CU2pwrPYsQ1N3m/U4NR71jhCJjAtYz6fCinK924RnoemCigWN/3DE5zQRukLExv6fXY3U+o9qoWeX3esd4zAN+m0ZFM7onIM/70z23Fe+fTBZ53jDsrARmwhKp29HNWGRe01rtG7aKH9g7N/PX4MJEiP3XrM4YLeqNkaO6RS454lBhq/gdmOafrF6uj3k+28u6FaAn/qJi7z7nqxNIYDStqYN/MYBodL9gHxFvTSmFx9iEGG2eG7FGXW3LrlinKIn1dQV+jfO8+X7bVi7/JT/h/0/0aYekqzXLaUh4StwpdVjRQBSpdF1pgzeN0D12heEoBJhvkg=="
+            },
+            {
+              "name": "x-forefront-antispam-report",
+              "value": "CIP:255.255.255.255;CTRY:;LANG:fr;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM5PR08MB3577.namprd08.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(38070700009);DIR:OUT;SFP:1102;"
+            },
+            {
+              "name": "x-ms-exchange-antispam-messagedata-chunkcount",
+              "value": "1"
+            },
+            {
+              "name": "x-ms-exchange-antispam-messagedata-0",
+              "value": "rYQCCCDJfqG7vUFQY0xWakUTRd40UwlcRRg5ndyfja0PqyoMXVCM39PjRIojEFOZgYjkVvpfrJ1kh7QCzgwuuHsjijmJwryogr5QV5s+1tgTFfgNbK7lC/PJxgZsq1CHczt2gwljYZ0YVli3FthQ73n7wX4X9Q0BT5v4Gpp6sCn/jqVYXPeSG0ZQIC5BF8XvP6J8ILb5Mm72tEwh54fh54/BGNFbdzfDvmKfwiQYaXxi5U5T7QLBuFLe//xDBr2deP0xwFqXFnaF2V/VUq4XA4IfREcdNHA4yja6EwshjmBsKnLfOuMfHE3ARXhjuVlgSUOkQG5+DbrppGpjS/UAtkNGtHAxORor67sWZEVszrmGvJKP7kAWir66NcYPo5ToBt/8Mya/0y/1LIoR42S/PnVdca7rOifne9AdpBOarwm+1EZHfmHwpdXU1EtYsySdqAkGxC1rx9Q+5sbK29WmYNHK+3+FW2tvjRqLC5N8ZoPqSLPAs/qs0MGtzN7PPnY1141qyO+GY3GpjGc6xNHIzAJ7rPxjR99LlJKvXPlHhHHZp8aB0h86I/o74uBgj39X/avpshWhhtyZ251Eppxlrq+eZ4qnJdPy8kvvqQtkDGXqy2zBcN9tpPz2lJdUaiEwaOo1omYl3FBXm8eglSPZ8ErTKbyauX8y+w1jaX6JXXoF12FwfrwGHqGnbb/FlM7T9T9YEV3uPpZZRirbXsbiYRfXKB0xXgNsOUqm4K4c5RI28sZv9zlvt3S2i3tCboVFrvaQgkm/ckQf7YtiDQbV0o56V1l5OwnTTrcjNw/LhpZBRi5Hc08CfJ0vY93Sj4dgOnWqbIpp2emmfVix3+fN24fvAMlf9E8VQTpEApT69F2onm4hIniJqj2KJNtkN3OGr5ad5ZoLPQ8t9QUHcg7ryFWUU5mMHOO0zps26BDg2pDED3RewxoH/j/nJojhexJWZblfheJpFhKziseaU+ZRSAm6KzvvzsI0fnaun/Q1i0X/3hYU6IfUr6ohHM+sy2fcax3Mvjep58okJLFWjbhPimjUKdhdlD+v9YS8wSjbw76/mFGpuZnUa0tDgUEgu9u3BSrfr25h2kahz3hTi3G5ghkhwZkdmhEvgF7i2LSQuIBrArwWFQalSe9xBbv3+jitNtLsSJXBW9UlLb8SmVoKUQjV89bMgUipvHL6pmRT1g51wYW2AEqNdzzE8I8eauHhHOu7MpR9xe0jR0Od7j77Gl/87Zq/i3XBJqlp+Ow64V2cfpDAOZlIdc3LLob2iJBKEHehDQsy0XCA5I9M/ksVvf3jlEzseOXjDASSTsq0ZHbYonOFJM0O1hkmJCL8h3n6DltV7K61x6aTdJ+6mt5xmDw3aI1C8Orl9bwVSfG8VtIlSxNI3FTPDdt4oQx6e2/KU0zwuhDF0usz11lmH0ZzbwWIjVOaQM8TfDem1rqibZD1iZ2fyxV7SCpm/8hBYYMdBt/zO+i+lsBbqjtCBCKAoQIJazFRue/YxHEgTEIL5vhKH9puX/WfRbWYvQnxbsnkGlQWdU0vx5vw0dQLGdHDUIUeyg+4UEtcx4sMQJJ7hmA5SCZ2GLz0mHFP4eNf+BAe"
+            },
+            {
+              "name": "Content-Type",
+              "value": "multipart/mixed; boundary=\"_004_DM5PR08MB3577A39F7AD5F835025899F284592DM5PR08MB3577namp_\""
+            },
+            {
+              "name": "MIME-Version",
+              "value": "1.0"
+            },
+            {
+              "name": "X-OriginatorOrg",
+              "value": "levio.ca"
+            },
+            {
+              "name": "X-MS-Exchange-CrossTenant-AuthAs",
+              "value": "Internal"
+            },
+            {
+              "name": "X-MS-Exchange-CrossTenant-AuthSource",
+              "value": "DM5PR08MB3577.namprd08.prod.outlook.com"
+            },
+            {
+              "name": "X-MS-Exchange-CrossTenant-Network-Message-Id",
+              "value": "fa095a06-1743-483b-8d00-08dc379d64a8"
+            },
+            {
+              "name": "X-MS-Exchange-CrossTenant-originalarrivaltime",
+              "value": "27 Feb 2024 14:07:11.7629 (UTC)"
+            },
+            {
+              "name": "X-MS-Exchange-CrossTenant-fromentityheader",
+              "value": "Hosted"
+            },
+            {
+              "name": "X-MS-Exchange-CrossTenant-id",
+              "value": "29d0fa93-cce4-4ea5-9e3c-5808b2d2c7ea"
+            },
+            {
+              "name": "X-MS-Exchange-CrossTenant-mailboxtype",
+              "value": "HOSTED"
+            },
+            {
+              "name": "X-MS-Exchange-CrossTenant-userprincipalname",
+              "value": "+PZ2v06lI/moqNv1Hjj0DxEqk+uvwEc+XFHdPqMWtJMY8xFUgFT9Vuqsultf14F8eh7UOYeqPJe2v83CyGBiAQ=="
+            },
+            {
+              "name": "X-MS-Exchange-Transport-CrossTenantHeadersStamped",
+              "value": "PH0PR08MB7907"
+            }
+          ],
+          "commonHeaders": {
+            "returnPath": "bruno.abreu@levio.ca",
+            "from": [
+              "Bruno Abreu <bruno.abreu@levio.ca>"
+            ],
+            "date": "Tue, 27 Feb 2024 14:07:11 +0000",
+            "to": [
+              "\"formulaire@lab.levio.cloud\" <formulaire@lab.levio.cloud>"
+            ],
+            "messageId": "<DM5PR08MB3577A39F7AD5F835025899F284592@DM5PR08MB3577.namprd08.prod.outlook.com>",
+            "subject": "Test Lambda Invocation"
+          }
+        },
+        "receipt": {
+          "timestamp": "2024-02-27T14:07:17.596Z",
+          "processingTimeMillis": 1392,
+          "recipients": [
+            "formulaire@lab.levio.cloud"
+          ],
+          "spamVerdict": {
+            "status": "PASS"
+          },
+          "virusVerdict": {
+            "status": "PASS"
+          },
+          "spfVerdict": {
+            "status": "PASS"
+          },
+          "dkimVerdict": {
+            "status": "PASS"
+          },
+          "dmarcVerdict": {
+            "status": "PASS"
+          },
+          "action": {
+            "type": "Lambda",
+            "functionArn": "arn:aws:lambda:us-east-1:446872271111:function:EmailEnqueuer-HelloWorldFunction-sHk3wBvrywAf",
+            "invocationType": "Event"
+          }
+        }
+      }
+    }
+  ]
+}
