@@ -111,7 +111,7 @@ module "email_request_processor" {
   lambda_repository_name = var.email_request_processor_lambda_repository_name
   sqs_name               = local.email_request_processor_queue_name
   api_key                = aws_api_gateway_api_key.this.value
-  api_url                = "${aws_api_gateway_deployment.this.invoke_url}/${aws_api_gateway_stage.this.stage_name}/${module.inference.path_part}"
+  api_url                = "${aws_api_gateway_deployment.this.invoke_url}${aws_api_gateway_stage.this.stage_name}/${module.inference.path_part}"
   response_queue_url     = module.email_response_processor.queue_url
   response_queue_arn     = module.email_response_processor.queue_arn
 }
