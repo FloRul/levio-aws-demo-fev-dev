@@ -50,7 +50,7 @@ def prepare_prompt(query: str, docs: list, history: list, source: str):
 
 
 def prepare_document_prompt(docs):
-    if docs:
+    if len(docs) > 0:
         docs_context = ".\n".join(doc[0].page_content for doc in docs)
         return f"Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>."
     return "I could not find any relevant quotes to help you answer the user's query."
@@ -99,7 +99,7 @@ def lambda_handler(event, context):
     response = "this is a dummy response"
     source = event.get("queryStringParameters", {}).get("source", "message")
     embedding_collection_name = event["queryStringParameters"]["collectionName"]
-    
+
     enable_history = False
     if "sessionId" in event["queryStringParameters"]:
         enable_history = True
@@ -130,6 +130,7 @@ def lambda_handler(event, context):
                 )
         result = {
             "completion": response,
+            "final_prompt": prompt,
             "docs": json.dumps(
                 list(
                     map(
