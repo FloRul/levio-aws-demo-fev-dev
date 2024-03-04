@@ -38,10 +38,14 @@ public class S3Service {
 
         Object content = message.getContent();
 
+        return getEmailBodyFromContent(content);
+    }
+
+    private String getEmailBodyFromContent(Object content) throws MessagingException, IOException {
         if (content instanceof String) {
             return (String) content;
         } else if (content instanceof MimeMultipart multipart) {
-            return multipart.getBodyPart(0).getContent().toString();
+            return getEmailBodyFromContent(multipart.getBodyPart(0).getContent());
         }
         return null;
     }
