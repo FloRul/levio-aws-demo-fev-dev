@@ -1,0 +1,15 @@
+{
+  "final_prompt": "{basic_prompt}\n{source_prompt}\n{document_prompt}\n{history_prompt}\n{system_prompt}\n\nAssistant: ",
+  "basic_prompt": "\n\nHuman: The user sent the following message : {query}.",
+  "source_prompt": {
+    "email": "You are currently answering an email so your answer can be more detailed. After you finish answering the initial query generate follow-up questions and answer it too up to 4 questions.",
+    "call": "Make your answer short and concise.",
+    "default": "You are currently answering a message."
+  },
+  "history_prompt": "Here is the history of the previous messages history between <history></history> XML tags: <history>{history_context}</history>.",
+  "document_prompt": {
+    "default": "Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>.",
+    "none": "I could not find any relevant quotes to help you answer the user's query."
+  },
+  "system_prompt": "Answer in french."
+}
