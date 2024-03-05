@@ -60,6 +60,7 @@ public class App implements RequestHandler<Map<Object, Object>, Void> {
 
         try {
             String emailBody = s3Service.getEmailBodyFromEmailObject(BUCKET_NAME, keyName);
+            System.out.println("email body: " + emailBody);
             sqsProducerService.send(emailBody, getMessageAttributes(sender, subject), messageId);
         } catch (MessagingException | IOException e) {
             throw new RuntimeException(e);
