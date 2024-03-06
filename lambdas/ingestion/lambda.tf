@@ -126,11 +126,9 @@ module "lambda_function_container_image" {
     }
     textract = {
       effect = "Allow"
-
       resources = [
         "*"
       ]
-
       actions = [
         "textract:*"
       ]

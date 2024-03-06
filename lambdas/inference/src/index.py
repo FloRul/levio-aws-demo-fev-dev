@@ -5,15 +5,6 @@ from retrieval import Retrieval
 from history import History
 
 
-def prepare_source_prompt(source: str):
-    if source == "email":
-        return "You are currently answering an email so your answer can be more detailed. After you finish answering the initial query generate follow-up questions and answer it too up to 4 questions."
-    elif source == "call":
-        return "Make your answer short and concise."
-    else:
-        return "You are currently answering a message."
-
-
 HEADERS = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -35,18 +26,29 @@ ENV_VARS = {
 
 
 def prepare_prompt(query: str, docs: list, history: list, source: str):
-    basic_prompt = f'\n\nHuman: The user sent the following message : "{query}".'
+    basic_prompt = f'\n\nThe user sent the following message : "{query}".'
+    source_prompt = prepare_source_prompt(source)
     document_prompt = prepare_document_prompt(docs)
     history_prompt = prepare_history_prompt(history)
-    source_prompt = prepare_source_prompt(source)
+
     final_prompt = f"""{basic_prompt}\n
     {source_prompt}\n
     {document_prompt}\n
     {history_prompt}\n
     {ENV_VARS['system_prompt']}\n
     \nAssistant:"""
-    print(final_prompt)
+
     return final_prompt
+
+
+def prepare_source_prompt(source: str):
+    if source == "email":
+        return """You are currently answering an email so your answer can be more detailed. 
+    After you finish answering the initial query generate follow-up questions and answer it too up to 4 questions."""
+    elif source == "call":
+        return "Make your answer short and concise."
+    else:
+        return "You are currently answering a message."
 
 
 def prepare_document_prompt(docs):
@@ -118,7 +120,7 @@ def lambda_handler(event, context):
                 )
                 docs = retrieval.fetch_documents(query=query, top_k=ENV_VARS["top_k"])
             if enable_history:
-                chat_history = json.loads(history.get(limit=10))
+                chat_history = json.loads(history.get(limit=5))
 
             # prepare the prompt
             prompt = prepare_prompt(query, docs, chat_history, source)
