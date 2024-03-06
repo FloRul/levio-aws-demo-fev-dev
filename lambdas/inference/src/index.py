@@ -54,7 +54,8 @@ def prepare_document_prompt(docs):
     if len(docs) > 0:
         docs_context = ".\n".join(doc[0].page_content for doc in docs)
         return f"Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>."
-    return "I could not find any relevant quotes to help you answer the user's query."
+    return """You could not find any relevant quotes to help answer the user's query. 
+Therefore just say that you cannot help furthermore with the user's query, whatever his request is."""
 
 
 def prepare_history_prompt(history):
