@@ -30,13 +30,12 @@ def prepare_prompt(query: str, docs: list, history: list, source: str):
     document_prompt = prepare_document_prompt(docs)
     history_prompt = prepare_history_prompt(history)
 
-    final_prompt = f"""
-    {source_prompt}\n
-    {document_prompt}\n
-    {history_prompt}\n
-    {ENV_VARS['system_prompt']}\n
-    Human:{query}\n
-    \nAssistant:"""
+    final_prompt = f"""{source_prompt}
+    \n{document_prompt}\n
+    \n{history_prompt}\n
+    \n{ENV_VARS['system_prompt']}
+    \n\nHuman:{query}
+    \n\nAssistant:"""
 
     return final_prompt
 
