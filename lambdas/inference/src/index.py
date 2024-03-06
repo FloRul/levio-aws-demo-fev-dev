@@ -26,16 +26,16 @@ ENV_VARS = {
 
 
 def prepare_prompt(query: str, docs: list, history: list, source: str):
-    basic_prompt = f'\n\nThe user sent the following message : "{query}".'
     source_prompt = prepare_source_prompt(source)
     document_prompt = prepare_document_prompt(docs)
     history_prompt = prepare_history_prompt(history)
 
-    final_prompt = f"""{basic_prompt}\n
+    final_prompt = f"""
     {source_prompt}\n
     {document_prompt}\n
     {history_prompt}\n
     {ENV_VARS['system_prompt']}\n
+    Human:{query}\n
     \nAssistant:"""
 
     return final_prompt
