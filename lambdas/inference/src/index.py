@@ -31,9 +31,9 @@ def prepare_prompt(query: str, docs: list, history: list, source: str):
     history_prompt = prepare_history_prompt(history)
 
     final_prompt = f"""{source_prompt}
-    \n{document_prompt}\n
-    \n{history_prompt}\n
-    \n{ENV_VARS['system_prompt']}
+    {document_prompt}
+    {history_prompt}
+    {ENV_VARS['system_prompt']}\n
     \n\nHuman:{query}
     \n\nAssistant:"""
 
@@ -43,18 +43,19 @@ def prepare_prompt(query: str, docs: list, history: list, source: str):
 def prepare_source_prompt(source: str):
     if source == "email":
         return """You are currently answering an email so your answer can be more detailed. 
-    After you finish answering the initial query generate follow-up questions and answer it too up to 4 questions."""
+    After you finish answering the initial query generate follow-up questions and answer it too up to 4 questions.\n"""
     elif source == "call":
-        return "Make your answer short and concise."
+        return "Make your answer short and concise.\n"
     else:
-        return "You are currently answering a message."
+        return "You are currently answering a message.\n"
 
 
 def prepare_document_prompt(docs):
     if len(docs) > 0:
         docs_context = ".\n".join(doc[0].page_content for doc in docs)
-        return f"Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>."
-    return "I could not find any relevant quotes to help you answer the user's query."
+        return f"Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>.\n"
+    return """You could not find any relevant quotes to help answer the user's query.
+Therefore just say that you cannot help furthermore with the user's query, whatever his request is.\n"""
 
 
 def prepare_history_prompt(history):
