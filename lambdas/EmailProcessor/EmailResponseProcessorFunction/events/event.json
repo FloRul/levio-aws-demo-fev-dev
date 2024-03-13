@@ -1,27 +1,49 @@
 {
   "Records": [
     {
-      "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
-      "receiptHandle": "MessageReceiptHandle",
-      "body": "Quel est le nombre maximum de jours pour prendre des vacances ?",
+      "messageId": "9997254c-560c-4e3d-a8bf-442318bf5bf9",
+      "receiptHandle": "AQEBfui1DK9NTuG5jV+6m/275yYhWfGYS+8UoGEi3M+HLS1BSKGw6YZWCEHb8k9VT4DEg3COU3lCagt+9mgang1/STRoKUEvyFt6ciSYesX2I7VHn75RUY+f0XgHc/7F+p124U3ugTHzmhQASIR1Er0C2lczfoSMhIeVqqtgdFGXjzBGJ6ZTP5YdcOhHWOBeL2LjQcCypTew3T2TE/qSsBO451nLigjPGGgg13sJDGha1uxSy2ILXKrtNBF/ugPn3DZq3c8PFqpCtNzyn2seQzC97bLVWC6J6Tt2zF7/GmZ9IYP5FTik1XU7QDJYksDh35r2G0czubhyP5g1fkrP6YhqGQ==",
+      "eventSourceARN": "arn:aws:sqs:us-east-1:446872271111:levio-demo-fev-email-response-processor-queue-dev.fifo",
+      "eventSource": "aws:sqs",
+      "awsRegion": "us-east-1",
+      "body": "Resume response",
+      "md5OfBody": "f3dcab2186d689158fcb2b758759c5f6",
+      "md5OfMessageAttributes": "3484a7928d62feab81a7f3d085ce9fe2",
       "attributes": {
-        "sender": "bruno.abreu@levio.ca",
-        "subject": "Levio HR"
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1710275621941",
+        "SequenceNumber": "18884574632926447616",
+        "MessageGroupId": "bruno.abreu@levio.ca",
+        "SenderId": "AROAWQC5JXED6GYDWVIPM:ResumeRequestProcessor-ResumeRequestProcessorFunct-y6fYGqtNKouH",
+        "MessageDeduplicationId": "fegu2ar9ktaph6b1o66k8t2eaiqgff1f4s2pfa81",
+        "ApproximateFirstReceiveTimestamp": "1710275621941"
       },
       "messageAttributes": {
         "sender": {
           "stringValue": "bruno.abreu@levio.ca",
+          "stringListValues": [],
+          "binaryListValues": [],
           "dataType": "String"
         },
         "subject": {
-          "stringValue": "Levio HR",
+          "stringValue": "Test Resume 2",
+          "stringListValues": [],
+          "binaryListValues": [],
+          "dataType": "String"
+        },
+        "attachment1": {
+          "stringValue": "s3://levio-demo-fev-esta-ses-bucket-dev/resume/AudioTestResume2-fegu2ar9ktaph6b1o66k8t2eaiqgff1f4s2pfa81.txt",
+          "stringListValues": [],
+          "binaryListValues": [],
+          "dataType": "String"
+        },
+        "attachment0": {
+          "stringValue": "s3://levio-demo-fev-esta-ses-bucket-dev/resume/dialogue/AudioTestResume2-fegu2ar9ktaph6b1o66k8t2eaiqgff1f4s2pfa81.txt",
+          "stringListValues": [],
+          "binaryListValues": [],
           "dataType": "String"
         }
-      },
-      "md5OfBody": "{{{md5_of_body}}}",
-      "eventSource": "aws:sqs",
-      "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:MyQueue",
-      "awsRegion": "us-east-1"
+      }
     }
   ]
 }
