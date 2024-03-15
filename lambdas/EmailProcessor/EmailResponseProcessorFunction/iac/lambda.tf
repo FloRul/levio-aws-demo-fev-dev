@@ -75,7 +75,8 @@ module "lambda_function_container_image" {
         "s3-object-lambda:List*"
       ]
       resources = [
-        "arn:aws:s3:*:*:*"
+        var.ses_bucket_arn,
+        "${var.ses_bucket_arn}/*"
       ]
     }
   }

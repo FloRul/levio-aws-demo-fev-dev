@@ -22,3 +22,8 @@ variable "sender_email" {
   type     = string
   nullable = false
 }
+
+variable "ses_bucket_arn" {
+  type     = string
+  nullable = false
+}
