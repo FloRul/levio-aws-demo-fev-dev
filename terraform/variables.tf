@@ -71,3 +71,43 @@ variable "chat_rule_recipient" {
   type     = string
   nullable = false
 }
+
+variable "attachment_saver_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "transcription_processor_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "resume_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "resume_request_processor_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "resume_request_preprocessor_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "prompt_default" {
+  default  = "Refais ce texte sous forme de dialogues entre un intervenant et ses clients: "
+  type     = string
+}
+
+variable "dialogue_prompt" {
+  default  = "Refais ce texte sous forme de dialogues entre un intervenant et ses clients: "
+  type     = string
+}
+
+variable "resume_prompt" {
+  default  = "Tu es un travailleur social. Fais une analyse de ce texte. Ne résume pas trop, permets toi d'avoir du contenu pour soutenir ta réponse"
+  type     = string
+}

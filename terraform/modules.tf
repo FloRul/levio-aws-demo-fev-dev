@@ -1,17 +1,23 @@
 locals {
-  memory_lambda_name                     = "levio-demo-fev-memory-dev"
-  dynamo_history_table_name              = "levio-demo-fev-chat-history-dev"
-  storage_bucket_name                    = "levio-demo-fev-storage-dev"
-  queue_name                             = "levio-demo-fev-ingestion-queue-dev"
-  ingestion_lambda_name                  = "levio-demo-fev-ingestion-dev"
-  inference_lambda_name                  = "levio-demo-fev-inference-dev"
-  list_collections_lambda_name           = "levio-demo-fev-list-collections-dev"
-  lex_router_lambda_name                 = "levio-demo-fev-lex-router-dev"
-  email_request_preprocessor_lambda_name = "levio-demo-fev-email-request-preprocessor-dev"
-  email_request_processor_lambda_name    = "levio-demo-fev-email-request-processor-dev"
-  email_request_processor_queue_name     = "levio-demo-fev-email-request-processor-queue-dev"
-  email_response_processor_lambda_name   = "levio-demo-fev-email-response-processor-dev"
-  email_response_processor_queue_name    = "levio-demo-fev-email-response-processor-queue-dev"
+  memory_lambda_name                      = "levio-demo-fev-memory-dev"
+  dynamo_history_table_name               = "levio-demo-fev-chat-history-dev"
+  storage_bucket_name                     = "levio-demo-fev-storage-dev"
+  queue_name                              = "levio-demo-fev-ingestion-queue-dev"
+  ingestion_lambda_name                   = "levio-demo-fev-ingestion-dev"
+  inference_lambda_name                   = "levio-demo-fev-inference-dev"
+  list_collections_lambda_name            = "levio-demo-fev-list-collections-dev"
+  lex_router_lambda_name                  = "levio-demo-fev-lex-router-dev"
+  email_request_preprocessor_lambda_name  = "levio-demo-fev-email-request-preprocessor-dev"
+  email_request_processor_lambda_name     = "levio-demo-fev-email-request-processor-dev"
+  email_request_processor_queue_name      = "levio-demo-fev-email-request-processor-queue-dev"
+  email_response_processor_lambda_name    = "levio-demo-fev-email-response-processor-dev"
+  email_response_processor_queue_name     = "levio-demo-fev-email-response-processor-queue-dev"
+  attachment_saver_lambda_name            = "levio-demo-fev-attachment-saver-dev"
+  transcription_processor_lambda_name     = "levio-demo-fev-transcription-processor-dev"
+  resume_lambda_name                      = "levio-demo-fev-resume-dev"
+  resume_request_processor_lambda_name    = "levio-demo-fev-resume-request-processor-dev"
+  resume_request_preprocessor_lambda_name = "levio-demo-fev-resume-request-preprocessor-dev"
+  resume_request_processor_queue_name     = "levio-demo-fev-resume-request-processor-queue-dev"
 }
 
 module "ingestion" {
@@ -122,10 +128,57 @@ module "email_request_preprocessor" {
   lambda_function_name   = local.email_request_preprocessor_lambda_name
   lambda_repository_name = var.email_request_preprocessor_lambda_repository_name
   ses_bucket_name        = local.bucket_name
-  chat_key_prefix             = local.chat_key_prefix
+  chat_key_prefix        = local.chat_key_prefix
   request_queue_url      = module.email_request_processor.queue_url
   request_queue_arn      = module.email_request_processor.queue_arn
   ses_s3_arn             = module.s3_bucket.s3_bucket_arn
   rule_set_name          = local.rule_set_name
   chat_rule_name         = local.chat_rule_name
+}
+
+module "attachment_saver" {
+  source                 = "../lambdas/AttachmentSaver/AttachmentSaverFunction/iac"
+  lambda_function_name   = local.attachment_saver_lambda_name
+  lambda_repository_name = var.attachment_saver_lambda_repository_name
+  ses_bucket_name        = local.bucket_name
+  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+}
+
+module "transcription_processor" {
+  source                 = "../lambdas/TranscriptionProcessor/TranscriptionFunction/iac"
+  lambda_function_name   = local.transcription_processor_lambda_name
+  lambda_repository_name = var.transcription_processor_lambda_repository_name
+  ses_bucket_name        = local.bucket_name
+  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+}
+
+module "resume" {
+  source                 = "../lambdas/ResumeProcessor/ResumeFunction/iac"
+  lambda_function_name   = local.resume_lambda_name
+  lambda_repository_name = var.resume_lambda_repository_name
+  prompt_default         = var.prompt_default
+}
+
+module "resume_request_processor" {
+  source                 = "../lambdas/ResumeProcessor/ResumeRequestProcessorFunction/iac"
+  lambda_function_name   = local.resume_request_processor_lambda_name
+  lambda_repository_name = var.resume_request_processor_lambda_repository_name
+  ses_bucket_name        = local.bucket_name
+  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+  resume_function_name   = local.resume_lambda_name
+  resume_function_arn    = module.resume.lambda_function_arn
+  response_queue_arn     = module.email_response_processor.queue_arn
+  queue_url              = module.email_response_processor.queue_url
+  dialogue_prompt        = var.dialogue_prompt
+  resume_prompt          = var.resume_prompt
+  sqs_name               = local.resume_request_processor_queue_name
+}
+
+module "resume_request_preprocessor" {
+  source                 = "../lambdas/ResumeProcessor/ResumeRequestPreProcessorFunction/iac"
+  lambda_function_name   = local.resume_request_preprocessor_lambda_name
+  lambda_repository_name = var.resume_request_preprocessor_lambda_repository_name
+  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+  request_queue_arn      = module.resume_request_processor.queue_arn
+  queue_url              = module.resume_request_processor.queue_url
 }

@@ -37,6 +37,11 @@ jobs:
         aws ecr describe-repositories --repository-names ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}
+        aws ecr describe-repositories --repository-names ${{ vars.ATTACHMENT_SAVER_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.ATTACHMENT_SAVER_ECR_NAME }}
+        aws ecr describe-repositories --repository-names ${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}
+        aws ecr describe-repositories --repository-names ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}
+        aws ecr describe-repositories --repository-names ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}
+        aws ecr describe-repositories --repository-names ${{ vars.RESUME_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.RESUME_ECR_NAME }}
 
     - name: Generate timestamp
       id: timestamp
@@ -64,6 +69,16 @@ jobs:
         docker push $ECR_REGISTRY/${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}:$IMAGE_TAG
         docker build -t $ECR_REGISTRY/${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/EmailProcessor/EmailResponseProcessorFunction
         docker push $ECR_REGISTRY/${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/${{ vars.ATTACHMENT_SAVER_ECR_NAME }}:$IMAGE_TAG ./lambdas/AttachmentSaver/AttachmentSaverFunction
+        docker push $ECR_REGISTRY/${{ vars.ATTACHMENT_SAVER_ECR_NAME }}:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/TranscriptionProcessor/TranscriptionFunction
+        docker push $ECR_REGISTRY/${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/ResumeProcessor/ResumeRequestProcessorFunction
+        docker push $ECR_REGISTRY/${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/ResumeProcessor/ResumeRequestPreProcessorFunction
+        docker push $ECR_REGISTRY/${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/${{ vars.RESUME_ECR_NAME }}:$IMAGE_TAG ./lambdas/ResumeProcessor/ResumeFunction
+        docker push $ECR_REGISTRY/${{ vars.RESUME_ECR_NAME }}:$IMAGE_TAG
 
   terraform_plan:
     if: github.event_name == 'pull_request'
@@ -112,6 +127,11 @@ jobs:
         -var="email_response_processor_lambda_repository_name=${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}" \
         -var="sender_email=${{ vars.SENDER_EMAIL }}" \
         -var="chat_rule_recipient=${{ vars.CHAT_RULE_RECIPIENT }}" \
+        -var="attachment_saver_lambda_repository_name=${{ vars.ATTACHMENT_SAVER_ECR_NAME }}" \
+        -var="transcription_processor_lambda_repository_name=${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}" \
+        -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \
+        -var="resume_request_preprocessor_lambda_repository_name=${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}" \
+        -var="resume_lambda_repository_name=${{ vars.RESUME_ECR_NAME }}" \
         -no-color -out=terraform.tfplan
       
     - name: Upload Terraform Plan
@@ -200,6 +220,11 @@ jobs:
         for digest in $(aws ecr list-images --repository-name ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
         for digest in $(aws ecr list-images --repository-name ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
         for digest in $(aws ecr list-images --repository-name ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.ATTACHMENT_SAVER_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.ATTACHMENT_SAVER_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
+        for digest in $(aws ecr list-images --repository-name ${{ vars.RESUME_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.RESUME_ECR_NAME }} --image-ids imageDigest=$digest; done
 
   deploy-infra:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -236,6 +261,11 @@ jobs:
         -var="email_response_processor_lambda_repository_name=${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}" \
         -var="sender_email=${{ vars.SENDER_EMAIL }}" \
         -var="chat_rule_recipient=${{ vars.CHAT_RULE_RECIPIENT }}" \
+        -var="attachment_saver_lambda_repository_name=${{ vars.ATTACHMENT_SAVER_ECR_NAME }}" \
+        -var="transcription_processor_lambda_repository_name=${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}" \
+        -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \
+        -var="resume_request_preprocessor_lambda_repository_name=${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}" \
+        -var="resume_lambda_repository_name=${{ vars.RESUME_ECR_NAME }}" \
         -auto-approve -no-color -input=false
   
   
