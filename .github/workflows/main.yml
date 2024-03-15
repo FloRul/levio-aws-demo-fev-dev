@@ -132,9 +132,6 @@ jobs:
         -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \
         -var="resume_request_preprocessor_lambda_repository_name=${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}" \
         -var="resume_lambda_repository_name=${{ vars.RESUME_ECR_NAME }}" \
-        -var="prompt_default=${{ vars.PROMPT_DEFAULT }}" \
-        -var="dialogue_prompt=${{ vars.DIALOGUE_PROMPT }}" \
-        -var="resume_prompt=${{ vars.RESUME_PROMPT }}" \
         -no-color -out=terraform.tfplan
       
     - name: Upload Terraform Plan
@@ -269,9 +266,6 @@ jobs:
         -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \
         -var="resume_request_preprocessor_lambda_repository_name=${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}" \
         -var="resume_lambda_repository_name=${{ vars.RESUME_ECR_NAME }}" \
-        -var="prompt_default=${{ vars.PROMPT_DEFAULT }}" \
-        -var="dialogue_prompt=${{ vars.DIALOGUE_PROMPT }}" \
-        -var="resume_prompt=${{ vars.RESUME_PROMPT }}" \
         -auto-approve -no-color -input=false
   
   

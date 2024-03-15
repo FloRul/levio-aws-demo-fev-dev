@@ -98,16 +98,16 @@ variable "resume_request_preprocessor_lambda_repository_name" {
 }
 
 variable "prompt_default" {
+  default  = "Refais ce texte sous forme de dialogues entre un intervenant et ses clients: "
   type     = string
-  nullable = false
 }
 
 variable "dialogue_prompt" {
+  default  = "Refais ce texte sous forme de dialogues entre un intervenant et ses clients: "
   type     = string
-  nullable = false
 }
 
 variable "resume_prompt" {
+  default  = "Tu es un travailleur social. Fais une analyse de ce texte. Ne résume pas trop, permets toi d'avoir du contenu pour soutenir ta réponse"
   type     = string
-  nullable = false
 }
