@@ -39,7 +39,7 @@ module "lambda_function_container_image" {
     EMAIL_PROMPT             = "You are currently answering an email so your answer can be more detailed. After you finish answering the initial query generate follow-up questions and answer it too up to 4 questions.\n"
     CALL_PROMPT              = "Make your answer short and concise.\n"
     CHAT_PROMPT              = "You are currently answering a message.\n"
-    DOCUMENT_PROMPT          = "Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>.\n"
+    DOCUMENT_PROMPT          = "Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{}</quotes>.\n"
     NO_DOCUMENT_FOUND_PROMPT = "You could not find any relevant quotes to help answer the user's query. Therefore just say that you cannot help furthermore with the user's query, whatever his request is.\n"
     HISTORY_PROMPT           = "Here is the history of the previous messages history between <history></history> XML tags: <history>{}</history>."
   }
