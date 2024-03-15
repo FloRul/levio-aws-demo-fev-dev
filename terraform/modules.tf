@@ -110,6 +110,7 @@ module "email_response_processor" {
   lambda_repository_name = var.email_response_processor_lambda_repository_name
   sqs_name               = local.email_response_processor_queue_name
   sender_email           = var.sender_email
+  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
 }
 
 module "email_request_processor" {
