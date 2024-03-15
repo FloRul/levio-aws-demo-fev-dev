@@ -57,10 +57,25 @@ module "lambda_function_container_image" {
     ses = {
       effect  = "Allow"
       actions = [
-        "ses:SendEmail"
+        "ses:SendEmail",
+        "ses:SendRawEmail"
       ]
       resources = [
         "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"
+      ]
+    }
+
+    s3 = {
+      effect  = "Allow"
+      actions = [
+        "s3:Get*",
+        "s3:List*",
+        "s3:Describe*",
+        "s3-object-lambda:Get*",
+        "s3-object-lambda:List*"
+      ]
+      resources = [
+        "arn:aws:s3:*:*:*"
       ]
     }
   }
