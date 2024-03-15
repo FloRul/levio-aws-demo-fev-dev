@@ -71,3 +71,43 @@ variable "chat_rule_recipient" {
   type     = string
   nullable = false
 }
+
+variable "attachment_saver_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "transcription_processor_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "resume_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "resume_request_processor_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "resume_request_preprocessor_lambda_repository_name" {
+  type     = string
+  nullable = false
+}
+
+variable "prompt_default" {
+  type     = string
+  nullable = false
+}
+
+variable "dialogue_prompt" {
+  type     = string
+  nullable = false
+}
+
+variable "resume_prompt" {
+  type     = string
+  nullable = false
+}
