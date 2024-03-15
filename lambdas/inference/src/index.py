@@ -33,7 +33,7 @@ def prepare_prompt(query: str, docs: list, history: list, source: str):
     final_prompt = f"""{source_prompt}
     {document_prompt}
     {history_prompt}
-    {ENV_VARS['system_prompt']}\n
+    {os.environ.get("SYSTEM_PROMPT", "Answer in french.")}\n
     \n\nHuman:{query}
     \n\nAssistant:"""
 
@@ -42,20 +42,29 @@ def prepare_prompt(query: str, docs: list, history: list, source: str):
 
 def prepare_source_prompt(source: str):
     if source == "email":
-        return """You are currently answering an email so your answer can be more detailed. 
-    After you finish answering the initial query generate follow-up questions and answer it too up to 4 questions.\n"""
+        return os.environ.get(
+            "EMAIL_PROMPT", "FALLBACK - You are currently answering an email\n"
+        )
     elif source == "call":
-        return "Make your answer short and concise.\n"
+        return os.environ.get(
+            "CALL_PROMPT", "FALLBACK - Make your answer short and concise.\n"
+        )
     else:
-        return "You are currently answering a message.\n"
+        return os.environ.get(
+            "CHAT_PROMPT", "FALLBACK - Make your answer short and concise.\n"
+        )
 
 
 def prepare_document_prompt(docs):
     if len(docs) > 0:
         docs_context = ".\n".join(doc[0].page_content for doc in docs)
-        return f"Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>.\n"
-    return """You could not find any relevant quotes to help answer the user's query.
-Therefore just say that you cannot help furthermore with the user's query, whatever his request is.\n"""
+        return os.environ.get(
+            "DOCUMENT_PROMPT", "Here are some relevant quotes:\n{}\n"
+        ).format(docs_context)
+    return os.environ.get(
+        "NO_DOCUMENT_FOUND_PROMPT",
+        "You could not find any relevant quotes to help answer the user's query.",
+    )
 
 
 def prepare_history_prompt(history):
@@ -64,7 +73,9 @@ def prepare_history_prompt(history):
             f"Human:{x['HumanMessage']}\nAssistant:{x['AssistantMessage']}"
             for x in history
         )
-        return f"Here is the history of the previous messages history between <history></history> XML tags: <history>{history_context}</history>."
+        return os.environ.get(
+            "HISTORY_PROMPT", "Here is the conversation history:\n{}\n"
+        ).format(history_context)
     return ""
 
 
