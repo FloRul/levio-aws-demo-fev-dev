@@ -3,7 +3,7 @@ locals {
   chat_rule_name    = "levio-demo-fev-esta-chat-rule-dev"
   chat_key_prefix   = "chat"
   resume_rule_name  = "levio-demo-fev-esta-resume-rule-dev"
-  resume_key_prefix = "resume"
+  resume_key_prefix = "resume/email"
   bucket_name       = "levio-demo-fev-esta-ses-bucket-dev"
 }
 
