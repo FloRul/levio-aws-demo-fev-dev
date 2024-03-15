@@ -126,7 +126,6 @@ jobs:
         -var="email_request_preprocessor_lambda_repository_name=${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}" \
         -var="email_response_processor_lambda_repository_name=${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}" \
         -var="sender_email=${{ vars.SENDER_EMAIL }}" \
-        -var="chat_rule_recipient=${{ vars.CHAT_RULE_RECIPIENT }}" \
         -var="attachment_saver_lambda_repository_name=${{ vars.ATTACHMENT_SAVER_ECR_NAME }}" \
         -var="transcription_processor_lambda_repository_name=${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}" \
         -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \
@@ -260,7 +259,6 @@ jobs:
         -var="email_request_preprocessor_lambda_repository_name=${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}" \
         -var="email_response_processor_lambda_repository_name=${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}" \
         -var="sender_email=${{ vars.SENDER_EMAIL }}" \
-        -var="chat_rule_recipient=${{ vars.CHAT_RULE_RECIPIENT }}" \
         -var="attachment_saver_lambda_repository_name=${{ vars.ATTACHMENT_SAVER_ECR_NAME }}" \
         -var="transcription_processor_lambda_repository_name=${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}" \
         -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \

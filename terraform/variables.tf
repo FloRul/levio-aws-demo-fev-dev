@@ -68,8 +68,13 @@ variable "sender_email" {
 }
 
 variable "chat_rule_recipient" {
+  default = "chat@lab.levio.cloud"
   type     = string
-  nullable = false
+}
+
+variable "resume_rule_recipient" {
+  default = "resume@lab.levio.cloud"
+  type     = string
 }
 
 variable "attachment_saver_lambda_repository_name" {

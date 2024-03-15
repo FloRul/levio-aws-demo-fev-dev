@@ -1,8 +1,10 @@
 locals {
-  rule_set_name       = "levio-demo-fev-esta-rule-set-dev"
-  chat_rule_name      = "levio-demo-fev-esta-chat-rule-dev"
-  chat_key_prefix     = "chat"
-  bucket_name         = "levio-demo-fev-esta-ses-bucket-dev"
+  rule_set_name     = "levio-demo-fev-esta-rule-set-dev"
+  chat_rule_name    = "levio-demo-fev-esta-chat-rule-dev"
+  chat_key_prefix   = "chat"
+  resume_rule_name  = "levio-demo-fev-esta-resume-rule-dev"
+  resume_key_prefix = "resume"
+  bucket_name       = "levio-demo-fev-esta-ses-bucket-dev"
 }
 
 resource "aws_ses_receipt_rule_set" "main_rule_set" {
@@ -30,6 +32,21 @@ resource "aws_ses_receipt_rule" "chat_rule" {
     function_arn = module.email_request_preprocessor.lambda_function_arn
     position     = 2
   }
+}
+
+resource "aws_ses_receipt_rule" "resume_rule" {
+  name          = local.resume_rule_name
+  rule_set_name = aws_ses_receipt_rule_set.main_rule_set.rule_set_name
+  recipients    = [var.resume_rule_recipient]
+  enabled       = true
+  scan_enabled  = true
+
+  s3_action {
+    bucket_name       = module.s3_bucket.s3_bucket_id
+    object_key_prefix = local.resume_key_prefix
+    position          = 1
+  }
+
 }
 
 module "s3_bucket" {
@@ -79,6 +96,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     lambda_function_arn = module.resume_request_preprocessor.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "resume/transcription/"
+    filter_suffix       = ".json"
   }
 
 }
