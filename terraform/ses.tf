@@ -96,6 +96,13 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     lambda_function_arn = module.resume_request_preprocessor.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "resume/transcription/"
+    filter_suffix       = ".txt"
+  }
+
+  lambda_function {
+    lambda_function_arn = module.transcription_formatter.lambda_function_arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "resume/transcription/"
     filter_suffix       = ".json"
   }
 

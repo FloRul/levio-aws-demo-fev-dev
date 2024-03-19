@@ -13,7 +13,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.Part;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -61,15 +60,9 @@ public class App implements RequestHandler<SQSEvent, Void> {
                 List<Part> attachments = EmailUtils.extractAttachments(message);
                 String attachmentFilename = attachments.get(0).getFileName();
 
-                String transcription = s3Service.getFile("resume/transcription/" + keyId + ".json");
+                String transcription = s3Service.getFile("resume/transcription/" + keyId + ".txt");
 
-                String transcript = new JSONObject(transcription)
-                        .getJSONObject("results")
-                        .getJSONArray("transcripts")
-                        .getJSONObject(0)
-                        .getString("transcript");
-
-                String dialogue = claudeService.getDialogue(transcript);
+                String dialogue = claudeService.getDialogue(transcription);
                 String filename = extractFileName(attachmentFilename) + "-" + keyId;
                 String dialogueTxtUri = s3Service.saveFile("resume/dialogue/" + filename + ".txt", dialogue.getBytes());
                 String resume = claudeService.getResume(dialogue);
