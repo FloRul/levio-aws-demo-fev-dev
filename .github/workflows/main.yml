@@ -1,16 +1,12 @@
 name: Deploy Lambdas & Terraform Plan on PR
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
 
 jobs:
   deploy_lambda:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -80,153 +76,9 @@ jobs:
         docker build -t $ECR_REGISTRY/${{ vars.RESUME_ECR_NAME }}:$IMAGE_TAG ./lambdas/ResumeProcessor/ResumeFunction
         docker push $ECR_REGISTRY/${{ vars.RESUME_ECR_NAME }}:$IMAGE_TAG
 
-  terraform_plan:
-    if: github.event_name == 'pull_request'
-    needs: [deploy_lambda]
-    defaults:
-      run:
-        working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-    
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-
-    - name: Terraform fmt
-      id: fmt
-      run: terraform fmt -check
-      continue-on-error: true
-
-    - name: Terraform Init
-      id: init
-      run: terraform init -no-color -upgrade
-
-    - name: Terraform Validate
-      id: validate
-      run: terraform validate -no-color
-    
-    - name: Terraform Plan
-      id: plan
-      shell: bash
-      run: |
-        terraform plan \
-        -var="ingestion_repository_name=${{ vars.INGESTION_ECR_NAME }}" \
-        -var="inference_repository_name=${{ vars.INFERENCE_ECR_NAME }}" \
-        -var="memory_repository_name=${{ vars.MEMORY_ECR_NAME }}" \
-        -var="list_collections_repository_name=${{ vars.LIST_COLLECTIONS_ECR_NAME }}" \
-        -var="lex_router_repository_name=${{ vars.LEX_ROUTER_ECR_NAME }}" \
-        -var="email_request_processor_lambda_repository_name=${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}" \
-        -var="email_request_preprocessor_lambda_repository_name=${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }}" \
-        -var="email_response_processor_lambda_repository_name=${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}" \
-        -var="sender_email=${{ vars.SENDER_EMAIL }}" \
-        -var="attachment_saver_lambda_repository_name=${{ vars.ATTACHMENT_SAVER_ECR_NAME }}" \
-        -var="transcription_processor_lambda_repository_name=${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}" \
-        -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \
-        -var="resume_request_preprocessor_lambda_repository_name=${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}" \
-        -var="resume_lambda_repository_name=${{ vars.RESUME_ECR_NAME }}" \
-        -no-color -out=terraform.tfplan
-      
-    - name: Upload Terraform Plan
-      uses: actions/upload-artifact@v4
-      with:
-        name: terraform-plan
-        path: ${{ vars.TF_ACTIONS_WORKING_DIR }}/terraform.tfplan
-    
-    - uses: actions/github-script@v6
-      if: github.event_name == 'pull_request'
-      env:
-        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-      with:
-        github-token: ${{ secrets.PAT_SECRET }}
-        script: |
-          // 1. Retrieve existing bot comments for the PR
-          const { data: comments } = await github.rest.issues.listComments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-          })
-          const botComment = comments.find(comment => {
-            return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
-          })
-
-          // 2. Prepare format of the comment
-          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-          <details><summary>Validation Output</summary>
-
-          \`\`\`\n
-          ${{ steps.validate.outputs.stdout }}
-          \`\`\`
-
-          </details>
-
-          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-
-          <details><summary>Show Plan</summary>
-
-          \`\`\`\n
-          ${process.env.PLAN}
-          \`\`\`
-
-          </details>
-
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
-
-          // 3. If we have a comment, update it, otherwise create a new one
-          if (botComment) {
-            github.rest.issues.updateComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: botComment.id,
-              body: output
-            })
-          } else {
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
-          }
-  
-  purge-ecr:
-    continue-on-error: true
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-    - name: Purge ECR
-      run: |
-        for digest in $(aws ecr list-images --repository-name ${{ vars.INFERENCE_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.INFERENCE_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.INGESTION_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.INGESTION_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.LEX_ROUTER_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.LEX_ROUTER_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.LIST_COLLECTIONS_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.LIST_COLLECTIONS_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.MEMORY_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.MEMORY_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.EMAIL_REQUEST_PREPROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.ATTACHMENT_SAVER_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.ATTACHMENT_SAVER_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }} --image-ids imageDigest=$digest; done
-        for digest in $(aws ecr list-images --repository-name ${{ vars.RESUME_ECR_NAME }} --query 'sort_by(imageIds,&imagePushedAt)[0:-2].imageDigest' --output text); do aws ecr batch-delete-image --repository-name ${{ vars.RESUME_ECR_NAME }} --image-ids imageDigest=$digest; done
-
   deploy-infra:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [deploy_lambda]
     defaults:
       run:
         working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
