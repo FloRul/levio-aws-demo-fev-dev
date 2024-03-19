@@ -17,6 +17,7 @@ locals {
   resume_lambda_name                      = "levio-demo-fev-resume-dev"
   resume_request_processor_lambda_name    = "levio-demo-fev-resume-request-processor-dev"
   resume_request_preprocessor_lambda_name = "levio-demo-fev-resume-request-preprocessor-dev"
+  transcription_formatter_lambda_name     = "levio-demo-fev-transcription-formatter-dev"
   resume_request_processor_queue_name     = "levio-demo-fev-resume-request-processor-queue-dev"
 }
 
@@ -182,4 +183,12 @@ module "resume_request_preprocessor" {
   ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
   request_queue_arn      = module.resume_request_processor.queue_arn
   queue_url              = module.resume_request_processor.queue_url
+}
+
+module "transcription_formatter" {
+  source                 = "../lambdas/TranscriptionProcessor/TranscriptionFormatterFunction/iac"
+  lambda_function_name   = local.transcription_formatter_lambda_name
+  lambda_repository_name = var.transcription_formatter_lambda_repository_name
+  bucket_name            = local.bucket_name
+  bucket_arn             = module.s3_bucket.s3_bucket_arn
 }

@@ -27,7 +27,7 @@
           "arn": "arn:aws:s3:::example-bucket"
         },
         "object": {
-          "key": "resume/transcription/br8ui99ml03pvltjer3f28d2vkeaserten4lmp81.txt",
+          "key": "resume/transcription/AudioTest3.json",
           "size": 1024,
           "eTag": "br8ui99ml03pvltjer3f28d2vkeaserten4lmp81",
           "sequencer": "0A1B2C3D4E5F678901"
