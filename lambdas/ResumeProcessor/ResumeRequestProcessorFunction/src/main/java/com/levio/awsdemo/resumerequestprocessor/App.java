@@ -62,11 +62,10 @@ public class App implements RequestHandler<SQSEvent, Void> {
 
                 String transcription = s3Service.getFile("resume/transcription/" + keyId + ".txt");
 
-                String dialogue = claudeService.getDialogue(transcription);
                 String filename = extractFileName(attachmentFilename) + "-" + keyId;
-                String dialogueTxtUri = s3Service.saveFile("resume/dialogue/" + filename + ".txt", dialogue.getBytes());
-                String resume = claudeService.getResume(dialogue);
-                String resumeTxtUri = s3Service.saveFile("resume/" + filename + ".txt", resume.getBytes());
+                String dialogueTxtUri = s3Service.saveFile("resume/dialogue/" + "dialogue" + "-" + filename + ".txt", transcription.getBytes());
+                String resume = claudeService.getResume(transcription);
+                String resumeTxtUri = s3Service.saveFile("resume/" + "resume" + "-" + filename + ".txt", resume.getBytes());
 
                 sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, dialogueTxtUri, resumeTxtUri), keyId);
             } catch (MessagingException | IOException e) {
