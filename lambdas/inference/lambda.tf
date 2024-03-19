@@ -34,9 +34,14 @@ module "lambda_function_container_image" {
     TOP_P                         = 0.99
     RELEVANCE_THRESHOLD           = 0.67
     MODEL_ID                      = "anthropic.claude-instant-v1"
-    EMBEDDING_COLLECTION_NAME     = var.embedding_collection_name
-    SYSTEM_PROMPT                 = "Answer in french."
-    CHAT_INTENT_NAME              = "global"
+
+    SYSTEM_PROMPT            = "Answer in french."
+    EMAIL_PROMPT             = "You are currently answering an email so your answer can be more detailed. After you finish answering the initial query generate follow-up questions and answer it too up to 4 questions.\n"
+    CALL_PROMPT              = "Make your answer short and concise.\n"
+    CHAT_PROMPT              = "You are currently answering a message.\n"
+    DOCUMENT_PROMPT          = "Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{docs_context}</quotes>.\n"
+    NO_DOCUMENT_FOUND_PROMPT = "You could not find any relevant quotes to help answer the user's query. Therefore just say that you cannot help furthermore with the user's query, whatever his request is.\n"
+    HISTORY_PROMPT           = "Here is the history of the previous messages history between <history></history> XML tags: <history>{}</history>."
   }
   policy_statements = {
     log_group = {
