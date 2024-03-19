@@ -38,6 +38,7 @@ jobs:
         aws ecr describe-repositories --repository-names ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.RESUME_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.RESUME_ECR_NAME }}
+        aws ecr describe-repositories --repository-names ${{ vars.TRANSCRIPTION_FORMATTER_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.TRANSCRIPTION_FORMATTER_ECR_NAME }}
 
     - name: Generate timestamp
       id: timestamp
@@ -75,6 +76,8 @@ jobs:
         docker push $ECR_REGISTRY/${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}:$IMAGE_TAG
         docker build -t $ECR_REGISTRY/${{ vars.RESUME_ECR_NAME }}:$IMAGE_TAG ./lambdas/ResumeProcessor/ResumeFunction
         docker push $ECR_REGISTRY/${{ vars.RESUME_ECR_NAME }}:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY/${{ vars.TRANSCRIPTION_FORMATTER_ECR_NAME }}:$IMAGE_TAG ./lambdas/TranscriptionProcessor/TranscriptionFormatterFunction
+        docker push $ECR_REGISTRY/${{ vars.TRANSCRIPTION_FORMATTER_ECR_NAME }}:$IMAGE_TAG
 
   deploy-infra:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -116,6 +119,7 @@ jobs:
         -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \
         -var="resume_request_preprocessor_lambda_repository_name=${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}" \
         -var="resume_lambda_repository_name=${{ vars.RESUME_ECR_NAME }}" \
+        -var="transcription_formatter_lambda_repository_name=${{ vars.TRANSCRIPTION_FORMATTER_ECR_NAME }}" \
         -auto-approve -no-color -input=false
   
   

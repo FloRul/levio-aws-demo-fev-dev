@@ -6,7 +6,7 @@ data "aws_ecr_image" "lambda_image" {
 data "aws_caller_identity" "current" {}
 
 module "lambda_function_container_image" {
-  timeout                  = 60
+  timeout                  = 300
   source                   = "terraform-aws-modules/lambda/aws"
   function_name            = var.lambda_function_name
   create_package           = false

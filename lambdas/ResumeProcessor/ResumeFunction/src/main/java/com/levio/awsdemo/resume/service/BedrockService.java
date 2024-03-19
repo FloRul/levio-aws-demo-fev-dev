@@ -4,16 +4,25 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
 
+import java.time.Duration;
+
 public class BedrockService {
 
+    private final SdkHttpClient httpClient = ApacheHttpClient.builder()
+            .connectionTimeout(Duration.ofMinutes(5))
+            .socketTimeout(Duration.ofMinutes(5))
+            .build();
     private final BedrockRuntimeClient client = BedrockRuntimeClient.builder()
             .region(Region.US_EAST_1)
             .credentialsProvider(DefaultCredentialsProvider.create())
+            .httpClient(httpClient)
             .build();
 
     private static final String PROMPT = System.getenv("PROMPT");
