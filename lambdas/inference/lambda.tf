@@ -24,16 +24,12 @@ module "lambda_function_container_image" {
     PGVECTOR_USER                 = var.pg_vector_user
     PGVECTOR_PASSWORD_SECRET_NAME = var.pg_vector_password_secret_name
     MAX_TOKENS                    = 600
-    ENABLE_INFERENCE              = 1
-    ENABLE_HISTORY                = 1
-    ENABLE_RETRIEVAL              = 1
     MEMORY_LAMBDA_NAME            = var.memory_lambda_name
     DYNAMO_TABLE                  = var.dynamo_history_table_name
     TOP_K                         = 10
     TEMPERATURE                   = 0.1
-    TOP_P                         = 0.99
     RELEVANCE_THRESHOLD           = 0.67
-    MODEL_ID                      = "anthropic.claude-instant-v1"
+    MODEL_ID                      = "anthropic.claude-3-haiku-20240307-v1:0"
 
     SYSTEM_PROMPT            = "Answer in french."
     EMAIL_PROMPT             = "You are currently answering an email so your answer can be more detailed. After you finish answering the initial query generate follow-up questions and answer it too up to 4 questions.\n"
@@ -41,8 +37,8 @@ module "lambda_function_container_image" {
     CHAT_PROMPT              = "You are currently answering a message.\n"
     DOCUMENT_PROMPT          = "Here is a set of quotes between <quotes></quotes> XML tags to help you answer: <quotes>{}</quotes>.\n"
     NO_DOCUMENT_FOUND_PROMPT = "You could not find any relevant quotes to help answer the user's query. Therefore just say that you cannot help furthermore with the user's query, whatever his request is.\n"
-    HISTORY_PROMPT           = "Here is the history of the previous messages history between <history></history> XML tags: <history>{}</history>."
   }
+  
   policy_statements = {
     log_group = {
       effect = "Allow"
