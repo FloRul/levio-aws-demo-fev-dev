@@ -69,12 +69,17 @@ variable "sender_email" {
 
 variable "chat_rule_recipient" {
   default = "chat@lab.levio.cloud"
-  type     = string
+  type    = string
 }
 
 variable "resume_rule_recipient" {
   default = "resume@lab.levio.cloud"
-  type     = string
+  type    = string
+}
+
+variable "form_rule_recipient" {
+  default = "formulaire@lab.levio.cloud"
+  type    = string
 }
 
 variable "attachment_saver_lambda_repository_name" {
@@ -108,16 +113,16 @@ variable "transcription_formatter_lambda_repository_name" {
 }
 
 variable "prompt_default" {
-  default  = "Refais ce texte sous forme de dialogues entre un intervenant et ses clients: "
-  type     = string
+  default = "Refais ce texte sous forme de dialogues entre un intervenant et ses clients: "
+  type    = string
 }
 
 variable "dialogue_prompt" {
-  default  = "Refais ce texte sous forme de dialogues entre un intervenant et ses clients: "
-  type     = string
+  default = "Refais ce texte sous forme de dialogues entre un intervenant et ses clients: "
+  type    = string
 }
 
 variable "resume_prompt" {
-  default  = "Tu es un travailleur social. Fais une analyse de ce texte. Ne résume pas trop, permets toi d'avoir du contenu pour soutenir ta réponse"
-  type     = string
+  default = "Tu es un travailleur social. Fais une analyse de ce texte. Ne résume pas trop, permets toi d'avoir du contenu pour soutenir ta réponse"
+  type    = string
 }
