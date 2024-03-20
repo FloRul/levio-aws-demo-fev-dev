@@ -4,7 +4,8 @@ locals {
   chat_key_prefix   = "chat"
   resume_rule_name  = "levio-demo-fev-esta-resume-rule-dev"
   resume_key_prefix = "resume/email"
-  bucket_name       = "levio-demo-fev-esta-ses-bucket-dev"
+  form_rule_name    = "levio-demo-fev-esta-formulaire-rule-dev"
+  form_key_prefix   = "formulaire/email"
 }
 
 resource "aws_ses_receipt_rule_set" "main_rule_set" {
@@ -49,61 +50,17 @@ resource "aws_ses_receipt_rule" "resume_rule" {
 
 }
 
-module "s3_bucket" {
-  source                   = "terraform-aws-modules/s3-bucket/aws"
-  bucket                   = local.bucket_name
-  control_object_ownership = true
-  object_ownership         = "BucketOwnerEnforced"
-  policy                   = data.aws_iam_policy_document.allow_access_from_ses.json
-  attach_policy            = true
-  force_destroy            = true
-}
+resource "aws_ses_receipt_rule" "form_rule" {
+  name          = local.form_rule_name
+  rule_set_name = aws_ses_receipt_rule_set.main_rule_set.rule_set_name
+  recipients    = [var.form_rule_recipient]
+  enabled       = true
+  scan_enabled  = true
 
-data "aws_iam_policy_document" "allow_access_from_ses" {
-  statement {
-    principals {
-      type        = "Service"
-      identifiers = ["ses.amazonaws.com"]
-    }
-
-    actions = [
-      "s3:PutObject"
-    ]
-
-    resources = [
-      module.s3_bucket.s3_bucket_arn,
-      "${module.s3_bucket.s3_bucket_arn}/*",
-    ]
-  }
-}
-
-resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = local.bucket_name
-
-  lambda_function {
-    lambda_function_arn = module.transcription_processor.lambda_function_arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "resume/attachment/"
-  }
-
-  lambda_function {
-    lambda_function_arn = module.attachment_saver.lambda_function_arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "resume/email/"
-  }
-
-  lambda_function {
-    lambda_function_arn = module.resume_request_preprocessor.lambda_function_arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "resume/transcription/"
-    filter_suffix       = ".txt"
-  }
-
-  lambda_function {
-    lambda_function_arn = module.transcription_formatter.lambda_function_arn
-    events              = ["s3:ObjectCreated:*"]
-    filter_prefix       = "resume/transcription/"
-    filter_suffix       = ".json"
+  s3_action {
+    bucket_name       = module.s3_bucket.s3_bucket_id
+    object_key_prefix = local.form_key_prefix
+    position          = 1
   }
 
 }
