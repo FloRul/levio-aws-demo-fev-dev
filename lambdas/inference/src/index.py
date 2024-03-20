@@ -110,7 +110,7 @@ def lambda_handler(event, context):
     source = event.get("queryStringParameters", {}).get("source", "message")
     embedding_collection_name = event["queryStringParameters"]["collectionName"]
 
-    sessionId = uuid.uuid1()
+    sessionId = str(uuid.uuid1())
     
     if "sessionId" in event["queryStringParameters"]:
         sessionId = event["queryStringParameters"]["sessionId"]
