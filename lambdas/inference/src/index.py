@@ -69,9 +69,8 @@ def get_chat_history(history):
 
 def invoke_model(
     system_prompt: str,
-    user_message: str,
     source: str,
-    message_history: list,
+    messages: list,
 ):
     maxtokens = ENV_VARS["max_tokens"]
     if source == "email":
@@ -79,9 +78,8 @@ def invoke_model(
     if source == "call":
         maxtokens //= 2
 
-    message_history.append({"role": "user", "content": user_message})
-    messages = message_history
-    
+    messages.append({"role": "user", "content": user_message})
+
     body = json.dumps(
         {
             "anthropic_version": "bedrock-2023-05-31",
@@ -112,7 +110,7 @@ def lambda_handler(event, context):
     embedding_collection_name = event["queryStringParameters"]["collectionName"]
 
     sessionId = str(uuid.uuid1())
-    
+
     if "sessionId" in event["queryStringParameters"]:
         sessionId = event["queryStringParameters"]["sessionId"]
 
@@ -121,7 +119,6 @@ def lambda_handler(event, context):
     try:
         query = event["queryStringParameters"]["query"]
         docs = []
-        chat_history = []
 
         # fetch documents
         retrieval = Retrieval(
@@ -130,17 +127,17 @@ def lambda_handler(event, context):
         )
         docs = retrieval.fetch_documents(query=query, top_k=ENV_VARS["top_k"])
 
-        # fetch chat history
-        chat_history = json.loads(history.get(limit=5))
 
         # prepare the prompt
         system_prompt = prepare_system_prompt(docs, source)
-        user_message = query
+
+        chat_history = history.get(limit=5)
+        chat_history.append({"role": "user", "content": query})
+
         response = invoke_model(
             system_prompt=system_prompt,
-            user_message=user_message,
             source=source,
-            message_history=get_chat_history(chat_history),
+            messages=chat_history,
         )
 
         # save the conversation history
