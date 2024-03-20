@@ -79,8 +79,9 @@ def invoke_model(
     if source == "call":
         maxtokens //= 2
 
+    
     messages = message_history.append({"role": "user", "content": user_message})
-
+    
     body = json.dumps(
         {
             "anthropic_version": "bedrock-2023-05-31",
@@ -111,7 +112,7 @@ def lambda_handler(event, context):
     embedding_collection_name = event["queryStringParameters"]["collectionName"]
 
     sessionId = str(uuid.uuid1())
-    
+
     if "sessionId" in event["queryStringParameters"]:
         sessionId = event["queryStringParameters"]["sessionId"]
 
