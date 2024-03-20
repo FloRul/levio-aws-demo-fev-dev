@@ -133,7 +133,7 @@ def lambda_handler(event, context):
         chat_history = json.loads(history.get(limit=5))
 
         # prepare the prompt
-        system_prompt = prepare_system_prompt(query, docs, source)
+        system_prompt = prepare_system_prompt(docs, source)
         user_message = query
         response = invoke_model(
             system_prompt=system_prompt,
@@ -172,7 +172,7 @@ def lambda_handler(event, context):
         print(e)
         return {
             "statusCode": 500,
-            "body": json.dumps(e),
+            "body": json.dumps(str(e)),
             "headers": HEADERS,
         }
 
