@@ -21,7 +21,9 @@ class History:
                 InvocationType="RequestResponse",
                 Payload=json.dumps(payload),
             )
-            body = json.loads(response["Payload"].read().decode("utf-8-sig"))["body"]
+            body = json.loads(
+                json.loads(response["Payload"].read().decode("utf-8-sig"))["body"]
+            )
             for x in body:
                 result.append({"role": "user", "content": x["HumanMessage"]})
                 result.append({"role": "assistant", "content": x["AssistantMessage"]})
