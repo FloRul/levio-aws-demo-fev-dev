@@ -111,17 +111,17 @@ def invoke_model(
 @tracer.capture_lambda_handler
 def lambda_handler(event, context):
     response = "this is a dummy response"
-    source = event.get("queryStringParameters", {}).get("source", "message")
-    embedding_collection_name = event["queryStringParameters"]["collectionName"]
-
-    sessionId = str(uuid.uuid1())
-
-    if "sessionId" in event["queryStringParameters"]:
-        sessionId = event["queryStringParameters"]["sessionId"]
-
-    history = History(session_id=sessionId)
-
     try:
+        source = event.get("queryStringParameters", {}).get("source", "message")
+        embedding_collection_name = event["queryStringParameters"]["collectionName"]
+
+        sessionId = str(uuid.uuid1())
+
+        if "sessionId" in event["queryStringParameters"]:
+            sessionId = event["queryStringParameters"]["sessionId"]
+
+        history = History(session_id=sessionId)
+
         query = event["queryStringParameters"]["query"]
         docs = []
 
