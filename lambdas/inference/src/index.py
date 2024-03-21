@@ -100,7 +100,7 @@ def invoke_model(
 
         res = response["body"].read().decode("utf-8")
         logger.info(f"Model response: {res}")
-        return res["content"][0]["text"]
+        return res
     except Exception as e:
         print(f"Model invocation error : {e}")
         raise e
@@ -155,11 +155,18 @@ def lambda_handler(event, context):
 
         logger.info(f"Chat history: {chat_history}")
 
-        response = invoke_model(
+        raw_response = invoke_model(
             system_prompt=system_prompt,
             source=source,
             messages=chat_history,
         )
+
+        response_dict = json.loads(raw_response)
+
+        # Extract the assistant's messages from the response
+        assistant_messages = [item["text"] for item in response_dict["content"]]
+        # Join all the assistant's messages into a single string
+        response = " ".join(assistant_messages)
 
         # save the conversation history
         history.add(
