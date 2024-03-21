@@ -4,3 +4,5 @@ langchain
 psycopg2-binary
 pgvector
 boto3
+aws-lambda-powertools
+aws_xray_sdk

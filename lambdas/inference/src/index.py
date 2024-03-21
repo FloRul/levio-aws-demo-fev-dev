@@ -3,7 +3,12 @@ import os
 import boto3
 from retrieval import Retrieval
 from history import History
+import uuid
+from aws_lambda_powertools import Logger, Metrics, Tracer
 
+tracer = Tracer()
+logger = Logger()
+metrics = Metrics()
 
 HEADERS = {
     "Access-Control-Allow-Origin": "*",
@@ -15,29 +20,19 @@ ENV_VARS = {
     "relevance_treshold": os.environ.get("RELEVANCE_TRESHOLD", 0.5),
     "model_id": os.environ.get("MODEL_ID", "anthropic.claude-instant-v1"),
     "system_prompt": os.environ.get("SYSTEM_PROMPT", "Answer in french."),
-    "enable_history": int(os.environ.get("ENABLE_HISTORY", 1)),
-    "enable_retrieval": int(os.environ.get("ENABLE_RETRIEVAL", 1)),
     "max_tokens": int(os.environ.get("MAX_TOKENS", 100)),
-    "enable_inference": int(os.environ.get("ENABLE_INFERENCE", 1)),
     "top_k": int(os.environ.get("TOP_K", 10)),
-    "top_p": float(os.environ.get("TOP_P", 0.9)),
-    "temperature": float(os.environ.get("TEMPERATURE", 0.3)),
+    "temperature": float(os.environ.get("TEMPERATURE", 0.01)),
 }
 
 
-def prepare_prompt(query: str, docs: list, history: list, source: str):
+def prepare_system_prompt(docs: list, source: str):
     source_prompt = prepare_source_prompt(source)
     document_prompt = prepare_document_prompt(docs)
-    history_prompt = prepare_history_prompt(history)
 
-    final_prompt = f"""{source_prompt}
+    return f"""{source_prompt}
     {document_prompt}
-    {history_prompt}
-    {os.environ.get("SYSTEM_PROMPT", "Answer in french.")}\n
-    \n\nHuman:{query}
-    \n\nAssistant:"""
-
-    return final_prompt
+    {os.environ.get("SYSTEM_PROMPT", "Answer in french.")}"""
 
 
 def prepare_source_prompt(source: str):
@@ -67,83 +62,119 @@ def prepare_document_prompt(docs):
     )
 
 
-def prepare_history_prompt(history):
+def get_chat_history(history):
+    chat_history = []
     if history:
-        history_context = ".\n".join(
-            f"Human:{x['HumanMessage']}\nAssistant:{x['AssistantMessage']}"
-            for x in history
-        )
-        return os.environ.get(
-            "HISTORY_PROMPT", "Here is the conversation history:\n{}\n"
-        ).format(history_context)
-    return ""
+        for x in history:
+            chat_history.append({"role": "user", "content": x["HumanMessage"]})
+            chat_history.append({"role": "assistant", "content": x["AssistantMessage"]})
+    return chat_history
 
 
-def invoke_model(prompt: str, source: str = "message"):
-    maxtokens = ENV_VARS["max_tokens"]
+def invoke_model(
+    system_prompt: str,
+    source: str,
+    messages: list,
+):
+    max_tokens = ENV_VARS["max_tokens"]
     if source == "email":
-        maxtokens *= 2
+        max_tokens *= 2
     if source == "call":
-        maxtokens //= 2
-    body = json.dumps(
-        {
-            "prompt": prompt,
-            "max_tokens_to_sample": maxtokens,
-            "temperature": ENV_VARS["temperature"],
-            "top_p": ENV_VARS["top_p"],
-        }
-    )
+        max_tokens //= 2
+
     try:
         response = boto3.client("bedrock-runtime").invoke_model(
-            body=body,
             modelId=ENV_VARS["model_id"],
             accept="application/json",
             contentType="application/json",
+            body=json.dumps(
+                {
+                    "anthropic_version": "bedrock-2023-05-31",
+                    "max_tokens": max_tokens,
+                    "temperature": ENV_VARS["temperature"],
+                    "system": system_prompt,
+                    "messages": messages,
+                }
+            ),
         )
-        body = response["body"].read().decode("utf-8")
-        json_body = json.loads(body)
-        return json_body["completion"]
+
+        res = response["body"].read().decode("utf-8")
+        logger.info(f"Model response: {res}")
+        return res
     except Exception as e:
         print(f"Model invocation error : {e}")
         raise e
 
 
+@metrics.log_metrics
+@logger.inject_lambda_context
+@tracer.capture_lambda_handler
 def lambda_handler(event, context):
     response = "this is a dummy response"
-    source = event.get("queryStringParameters", {}).get("source", "message")
-    embedding_collection_name = event["queryStringParameters"]["collectionName"]
-
-    enable_history = False
-    if "sessionId" in event["queryStringParameters"]:
-        enable_history = True
-        history = History(event["queryStringParameters"]["sessionId"])
-
     try:
+        source = event.get("queryStringParameters", {}).get("source", "message")
+        embedding_collection_name = event["queryStringParameters"]["collectionName"]
+
+        logger.info(str(event))
+
+        sessionId = str(uuid.uuid1())
+
+        if "sessionId" in event["queryStringParameters"]:
+            sessionId = event["queryStringParameters"]["sessionId"]
+
+        logger.info(f"loading history for session {sessionId}")
+        history = History(session_id=sessionId)
+
         query = event["queryStringParameters"]["query"]
         docs = []
-        chat_history = []
 
-        if ENV_VARS["enable_inference"]:
-            if ENV_VARS["enable_retrieval"]:
-                retrieval = Retrieval(
-                    collection_name=embedding_collection_name,
-                    relevance_treshold=ENV_VARS["relevance_treshold"],
-                )
-                docs = retrieval.fetch_documents(query=query, top_k=ENV_VARS["top_k"])
-            if enable_history:
-                chat_history = json.loads(history.get(limit=5))
+        logger.info(f"intializing retrieval for query {query}")
+        # fetch documents
+        retrieval = Retrieval(
+            collection_name=embedding_collection_name,
+            relevance_treshold=ENV_VARS["relevance_treshold"],
+        )
+        docs = retrieval.fetch_documents(query=query, top_k=ENV_VARS["top_k"])
 
-            # prepare the prompt
-            prompt = prepare_prompt(query, docs, chat_history, source)
-            response = invoke_model(prompt, source=source)
+        system_prompt = prepare_system_prompt(docs, source)
+        logger.info(f"System prompt: {system_prompt}")
 
-            if enable_history:
-                history.add(
-                    human_message=query, assistant_message=response, prompt=prompt
-                )
+        logger.info("fetching chat history...")
+        chat_history = history.get(limit=5)
+        chat_history.append(
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": query,
+                    },
+                ],
+            }
+        )
+
+        logger.info(f"Chat history: {chat_history}")
+
+        raw_response = invoke_model(
+            system_prompt=system_prompt,
+            source=source,
+            messages=chat_history,
+        )
+
+        response_dict = json.loads(raw_response)
+
+        # Extract the assistant's messages from the response
+        assistant_messages = [item["text"] for item in response_dict["content"]]
+        # Join all the assistant's messages into a single string
+        response = " ".join(assistant_messages)
+
+        # save the conversation history
+        history.add(
+            human_message=query, assistant_message=response, prompt=system_prompt
+        )
         result = {
             "completion": response,
-            "final_prompt": prompt,
+            "final_prompt": system_prompt,
             "docs": json.dumps(
                 list(
                     map(
@@ -167,6 +198,30 @@ def lambda_handler(event, context):
         print(e)
         return {
             "statusCode": 500,
-            "body": json.dumps(e),
+            "body": json.dumps(str(e)),
             "headers": HEADERS,
         }
+
+
+# The Anthropic Claude model returns the following fields for a messages inference call.
+# https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html
+
+# {
+#     "id": string,
+#     "model": string,
+#     "type" : "message",
+#     "role" : "assistant",
+#     "content": [
+#         {
+#             "type": "text",
+#             "text": string
+#         }
+#     ],
+#     "stop_reason": string,
+#     "stop_sequence": string,
+#     "usage": {
+#         "input_tokens": integer,
+#         "output_tokens": integer
+#     }
+
+# }
