@@ -19,10 +19,11 @@ public class App implements RequestHandler<Map<String, String>, String> {
     }
 
     public String handleRequest(final Map<String, String> input, final Context context) {
-        String prompt = input.get("prompt");
-        String text = input.get("text");
+        String masterPrompt = input.getOrDefault("master_prompt", null);
+        String prompt = input.getOrDefault("prompt", null);
+        String text = input.getOrDefault("text", null);
 
-        return bedrockService.getClaudeResponse(prompt, text);
+        return bedrockService.getClaudeResponse(masterPrompt, prompt, text);
     }
 
 }

@@ -19,6 +19,8 @@ locals {
   resume_request_preprocessor_lambda_name = "levio-demo-fev-resume-request-preprocessor-dev"
   transcription_formatter_lambda_name     = "levio-demo-fev-transcription-formatter-dev"
   resume_request_processor_queue_name     = "levio-demo-fev-resume-request-processor-queue-dev"
+  form_request_processor_queue_name       = "levio-demo-fev-form-request-processor-queue-dev"
+  form_request_processor_lambda_name      = "levio-demo-fev-form-request-processor-dev"
 }
 
 module "ingestion" {
@@ -191,4 +193,18 @@ module "transcription_formatter" {
   lambda_repository_name = var.transcription_formatter_lambda_repository_name
   bucket_name            = local.bucket_name
   bucket_arn             = module.s3_bucket.s3_bucket_arn
+}
+
+module "form_request_processor" {
+  source                 = "../lambdas/FormProcessor/FormRequestProcessorFunction/iac"
+  lambda_function_name   = local.form_request_processor_lambda_name
+  lambda_repository_name = var.form_request_processor_lambda_repository_name
+  ses_bucket_name        = local.bucket_name
+  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+  resume_function_name   = local.resume_lambda_name
+  resume_function_arn    = module.resume.lambda_function_arn
+  response_queue_arn     = module.email_response_processor.queue_arn
+  queue_url              = module.email_response_processor.queue_url
+  master_prompt          = var.master_prompt
+  sqs_name               = local.form_request_processor_queue_name
 }
