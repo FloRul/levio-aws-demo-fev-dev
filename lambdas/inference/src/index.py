@@ -114,17 +114,21 @@ def lambda_handler(event, context):
     try:
         source = event.get("queryStringParameters", {}).get("source", "message")
         embedding_collection_name = event["queryStringParameters"]["collectionName"]
-
+        
+        logger.info(str(event))
+        
         sessionId = str(uuid.uuid1())
 
         if "sessionId" in event["queryStringParameters"]:
             sessionId = event["queryStringParameters"]["sessionId"]
 
+        logger.info(f"loading history for session {sessionId}")
         history = History(session_id=sessionId)
 
         query = event["queryStringParameters"]["query"]
         docs = []
 
+        logger.info(f"intializing retrieval for query {query}")
         # fetch documents
         retrieval = Retrieval(
             collection_name=embedding_collection_name,
@@ -132,9 +136,11 @@ def lambda_handler(event, context):
         )
         docs = retrieval.fetch_documents(query=query, top_k=ENV_VARS["top_k"])
 
+        logger.info("preparing system prompt...")
         # prepare the prompt
         system_prompt = prepare_system_prompt(docs, source)
 
+        logger.info("fetching chat history...")
         chat_history = history.get(limit=5)
         chat_history.append({"role": "user", "content": query})
 
