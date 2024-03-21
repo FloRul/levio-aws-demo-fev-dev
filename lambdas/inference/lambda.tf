@@ -61,17 +61,13 @@ module "lambda_function_container_image" {
         "logs:PutLogEvents",
       ]
     }
+    
     bedrock_usage = {
       effect = "Allow"
-
-      resources = [
-        "*"
-      ]
-
-      actions = [
-        "bedrock:*"
-      ]
+      resources = ["*"]
+      actions = ["bedrock:*"]
     }
+
     rds_connect_readwrite = {
       effect = "Allow"
 

@@ -4,7 +4,11 @@ import boto3
 from retrieval import Retrieval
 from history import History
 import uuid
+from aws_lambda_powertools import Logger, Metrics, Tracer
 
+tracer = Tracer()
+logger = Logger()
+metrics = Metrics()
 
 HEADERS = {
     "Access-Control-Allow-Origin": "*",
@@ -78,8 +82,6 @@ def invoke_model(
     if source == "call":
         maxtokens //= 2
 
-    messages.append({"role": "user", "content": user_message})
-
     body = json.dumps(
         {
             "anthropic_version": "bedrock-2023-05-31",
@@ -104,6 +106,9 @@ def invoke_model(
         raise e
 
 
+@metrics.log_metrics
+@logger.inject_lambda_context
+@tracer.capture_lambda_handler
 def lambda_handler(event, context):
     response = "this is a dummy response"
     source = event.get("queryStringParameters", {}).get("source", "message")
@@ -127,12 +132,13 @@ def lambda_handler(event, context):
         )
         docs = retrieval.fetch_documents(query=query, top_k=ENV_VARS["top_k"])
 
-
         # prepare the prompt
         system_prompt = prepare_system_prompt(docs, source)
 
         chat_history = history.get(limit=5)
         chat_history.append({"role": "user", "content": query})
+
+        logger.info(f"Chat history: {chat_history}")
 
         response = invoke_model(
             system_prompt=system_prompt,
