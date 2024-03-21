@@ -27,10 +27,10 @@ public class BedrockService {
 
     private static final String PROMPT = System.getenv("PROMPT");
 
-    public String getClaudeResponse(String prompt, String text) {
+    public String getClaudeResponse(String masterPrompt, String prompt, String text) {
         JSONObject content = new JSONObject()
                 .put("type", "text")
-                .put("text", text);
+                .put("text", retrievePrompt(prompt, text));
 
         JSONObject message = new JSONObject()
                 .put("role", "user")
@@ -39,7 +39,7 @@ public class BedrockService {
         JSONObject payload = new JSONObject()
                 .put("anthropic_version", "bedrock-2023-05-31")
                 .put("max_tokens", 4096)
-                .put("system", prompt != null ? prompt : PROMPT)
+                .put("system", masterPrompt != null ? masterPrompt : prompt != null ? prompt : PROMPT)
                 .put("messages", new JSONArray().put(message));
 
         System.out.println("Payload: " + payload);
@@ -61,5 +61,17 @@ public class BedrockService {
 
         return responseBody
                 .getJSONArray("content").getJSONObject(0).getString("text");
+    }
+
+    private String retrievePrompt(String prompt, String text) {
+        String document = "";
+        if (text != null) {
+            document = "<document>" + text + "</document>";
+        }
+
+        if (prompt != null) {
+            return prompt + document;
+        }
+        return PROMPT;
     }
 }
