@@ -114,9 +114,9 @@ def lambda_handler(event, context):
     try:
         source = event.get("queryStringParameters", {}).get("source", "message")
         embedding_collection_name = event["queryStringParameters"]["collectionName"]
-        
+
         logger.info(str(event))
-        
+
         sessionId = str(uuid.uuid1())
 
         if "sessionId" in event["queryStringParameters"]:
@@ -142,7 +142,17 @@ def lambda_handler(event, context):
 
         logger.info("fetching chat history...")
         chat_history = history.get(limit=5)
-        chat_history.append({"role": "user", "content": query})
+        chat_history.append(
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": query,
+                    },
+                ],
+            }
+        )
 
         logger.info(f"Chat history: {chat_history}")
 

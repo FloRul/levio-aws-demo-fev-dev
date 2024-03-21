@@ -25,8 +25,28 @@ class History:
                 json.loads(response["Payload"].read().decode("utf-8-sig"))["body"]
             )
             for x in body:
-                result.append({"role": "user", "content": x["HumanMessage"]})
-                result.append({"role": "assistant", "content": x["AssistantMessage"]})
+                result.append(
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": x["HumanMessage"],
+                            },
+                        ],
+                    }
+                )
+                result.append(
+                    {
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": x["AssistantMessage"],
+                            },
+                        ],
+                    }
+                )
             return result
         except ClientError as e:
             print("Error occurred: ", e.response["Error"]["Message"])
