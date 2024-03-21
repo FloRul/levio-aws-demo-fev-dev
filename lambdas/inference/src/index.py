@@ -76,30 +76,30 @@ def invoke_model(
     source: str,
     messages: list,
 ):
-    maxtokens = ENV_VARS["max_tokens"]
+    max_tokens = ENV_VARS["max_tokens"]
     if source == "email":
-        maxtokens *= 2
+        max_tokens *= 2
     if source == "call":
-        maxtokens //= 2
+        max_tokens //= 2
 
-    body = json.dumps(
-        {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": maxtokens,
-            "temperature": ENV_VARS["temperature"],
-            "system": system_prompt,
-            "messages": messages,
-        }
-    )
     try:
         response = boto3.client("bedrock-runtime").invoke_model(
             modelId=ENV_VARS["model_id"],
             accept="application/json",
             contentType="application/json",
-            body=body,
+            body=json.dumps(
+                {
+                    "anthropic_version": "bedrock-2023-05-31",
+                    "max_tokens": max_tokens,
+                    "temperature": ENV_VARS["temperature"],
+                    "system": system_prompt,
+                    "messages": messages,
+                }
+            ),
         )
 
         res = response["body"].read().decode("utf-8")
+        logger.info(f"Model response: {res}")
         return res["content"][0]["text"]
     except Exception as e:
         print(f"Model invocation error : {e}")
