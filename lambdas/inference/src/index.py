@@ -136,9 +136,8 @@ def lambda_handler(event, context):
         )
         docs = retrieval.fetch_documents(query=query, top_k=ENV_VARS["top_k"])
 
-        logger.info("preparing system prompt...")
-        # prepare the prompt
         system_prompt = prepare_system_prompt(docs, source)
+        logger.info(f"System prompt: {system_prompt}")
 
         logger.info("fetching chat history...")
         chat_history = history.get(limit=5)
