@@ -55,10 +55,12 @@ public class App implements RequestHandler<SQSEvent, Void> {
             try {
                 byte[] fileByteArray = fileInputStream.readAllBytes();
                 String content = new String(fileByteArray);
-                questionsMapper.forEach((filePosition, questionAnswerMap) -> {
-                    String answer = claudeService.getResponse(questionAnswerMap.get("question"), content);
-                    questionAnswerMap.put("answer", answer);
-                });
+                questionsMapper.entrySet().parallelStream()
+                        .forEach(positionQuestionAnswerMapper -> {
+                            Map<String, String> questionAnswerMap = positionQuestionAnswerMapper.getValue();
+                            String answer = claudeService.getResponse(questionAnswerMap.get("question"), content);
+                            questionAnswerMap.put("answer", answer);
+                        });
                 ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper);
                 s3Service.saveFile("formulaire/" + keyId + ".docx", fileOutputStream.toByteArray());
             } catch (IOException e) {
