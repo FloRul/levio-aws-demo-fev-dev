@@ -12,7 +12,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
 public class DocumentService {
@@ -57,11 +56,9 @@ public class DocumentService {
                         int filePosition = positionQuestionAnswerMapper.getKey();
                         Map<String, String> questionAnswerMap = positionQuestionAnswerMapper.getValue();
 
-                        XWPFParagraph answerParagraph = document.getParagraphs().get(filePosition);
+                        XWPFParagraph answerParagraph = document.getParagraphs().get(filePosition + 1);
                         XWPFRun run = answerParagraph.createRun();
                         run.setText("A: " + questionAnswerMap.get("answer"));
-
-//                        document.setParagraph(answerParagraph, filePosition + 1);
                     });
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             document.write(outputStream);
