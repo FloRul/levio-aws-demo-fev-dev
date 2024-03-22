@@ -17,6 +17,7 @@ locals {
   resume_lambda_name                      = "levio-demo-fev-resume-dev"
   resume_request_processor_lambda_name    = "levio-demo-fev-resume-request-processor-dev"
   resume_request_preprocessor_lambda_name = "levio-demo-fev-resume-request-preprocessor-dev"
+  form_request_preprocessor_lambda_name   = "levio-demo-fev-form-request-preprocessor-dev"
   transcription_formatter_lambda_name     = "levio-demo-fev-transcription-formatter-dev"
   resume_request_processor_queue_name     = "levio-demo-fev-resume-request-processor-queue-dev"
   form_request_processor_queue_name       = "levio-demo-fev-form-request-processor-queue-dev"
@@ -207,4 +208,13 @@ module "form_request_processor" {
   queue_url              = module.email_response_processor.queue_url
   master_prompt          = var.master_prompt
   sqs_name               = local.form_request_processor_queue_name
+}
+
+module "form_request_preprocessor" {
+  source                 = "../lambdas/FormProcessor/FormRequestPreProcessorFunction/iac"
+  lambda_function_name   = local.form_request_preprocessor_lambda_name
+  lambda_repository_name = var.form_request_preprocessor_lambda_repository_name
+  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+  request_queue_arn      = module.form_request_processor.queue_arn
+  queue_url              = module.form_request_processor.queue_url
 }
