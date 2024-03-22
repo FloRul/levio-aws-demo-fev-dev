@@ -10,6 +10,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
+import software.amazon.awssdk.services.bedrockruntime.model.ThrottlingException;
 
 import java.time.Duration;
 
@@ -53,14 +54,31 @@ public class BedrockService {
 
         System.out.println("Request: " + request);
 
-        InvokeModelResponse response = client.invokeModel(request);
+        String response = null;
+        boolean success = false;
+        while (!success) {
+            try {
+                InvokeModelResponse invokeModelResponse = client.invokeModel(request);
 
-        JSONObject responseBody = new JSONObject(response.body().asUtf8String());
+                JSONObject responseBody = new JSONObject(invokeModelResponse.body().asUtf8String());
 
-        System.out.println("Response: " + response.body().asUtf8String());
+                System.out.println("Response: " + responseBody);
 
-        return responseBody
-                .getJSONArray("content").getJSONObject(0).getString("text");
+                response = responseBody.getJSONArray("content").getJSONObject(0).getString("text");
+                success = true;
+            } catch (ThrottlingException e) {
+                System.out.println("Too many requests, waiting 30 seconds before retrying...");
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Thread interrupted while waiting to retry", ie);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("An unexpected error occurred", e);
+            }
+        }
+        return response;
     }
 
     private String retrievePrompt(String prompt, String text) {
