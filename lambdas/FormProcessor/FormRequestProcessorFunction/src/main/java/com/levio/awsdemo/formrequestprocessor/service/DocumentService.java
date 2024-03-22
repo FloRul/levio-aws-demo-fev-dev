@@ -23,7 +23,7 @@ public class DocumentService {
     public HashMap<Integer, Map<String, String>> retrieveQuestionsMapper() throws IOException {
         HashMap<Integer, Map<String, String>> questionsMapper = new HashMap<>();
 
-        InputStream fileInputStream = s3Service.getFile(STANDARD_FORM_FILE_KEY);
+        InputStream fileInputStream = s3Service.getInputFileStream(STANDARD_FORM_FILE_KEY);
         try (XWPFDocument document = new XWPFDocument(fileInputStream)) {
 
             List<XWPFParagraph> paragraphs = document.getParagraphs();
@@ -47,7 +47,7 @@ public class DocumentService {
     }
 
     public ByteArrayOutputStream fillFile(HashMap<Integer, Map<String, String>> questionsMapper) throws IOException {
-        InputStream fileInputStream = s3Service.getFile(STANDARD_FORM_FILE_KEY);
+        InputStream fileInputStream = s3Service.getInputFileStream(STANDARD_FORM_FILE_KEY);
         try (XWPFDocument document = new XWPFDocument(fileInputStream)) {
 
             questionsMapper.entrySet().stream()
