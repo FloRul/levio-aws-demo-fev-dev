@@ -6,6 +6,9 @@ locals {
   powertools_layer_arn = "arn:aws:lambda:${var.aws_region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:67"
 }
 
+data "aws_caller_identity" "current" {}
+
+
 module "lambda_function_container_image" {
   source = "terraform-aws-modules/lambda/aws"
 
