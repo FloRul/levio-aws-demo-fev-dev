@@ -218,3 +218,8 @@ module "form_request_preprocessor" {
   request_queue_arn      = module.form_request_processor.queue_arn
   queue_url              = module.form_request_processor.queue_url
 }
+    
+module "email_receipt_confirmation" {
+  source                 = "../lambdas/email_receipt_confirmation"
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
+  aws_region            = var.aws_region
