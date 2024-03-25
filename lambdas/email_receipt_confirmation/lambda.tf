@@ -25,10 +25,6 @@ module "lambda_function_container_image" {
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
 
-  environment_variables = {
-    RECEIPT_REPLY_TEXT = ""
-  }
-
   policy_statements = {
     log_group = {
       effect = "Allow"
