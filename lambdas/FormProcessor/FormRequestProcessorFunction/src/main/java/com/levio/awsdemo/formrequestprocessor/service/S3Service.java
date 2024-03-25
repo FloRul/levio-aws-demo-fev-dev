@@ -18,16 +18,24 @@ public class S3Service {
     private final S3Client s3 = S3Client.builder()
             .region(Region.US_EAST_1)
             .build();
+    public String getFile(String key) {
+        ResponseBytes<GetObjectResponse> objectBytes = getObjectResponseBytes(key);
+        return new String(objectBytes.asByteArray());
+    }
 
-    public InputStream getFile(String key) {
+    public InputStream getInputFileStream(String key) {
+        ResponseBytes<GetObjectResponse> objectBytes = getObjectResponseBytes(key);
+        return objectBytes.asInputStream();
+    }
+
+    private ResponseBytes<GetObjectResponse> getObjectResponseBytes(String key) {
         GetObjectRequest objectRequest = GetObjectRequest
                 .builder()
                 .key(key)
                 .bucket(BUCKET_NAME)
                 .build();
 
-        ResponseBytes<GetObjectResponse> objectBytes = s3.getObjectAsBytes(objectRequest);
-        return objectBytes.asInputStream();
+        return s3.getObjectAsBytes(objectRequest);
     }
 
     public String saveFile(String fileKey, byte[] fileContent) {

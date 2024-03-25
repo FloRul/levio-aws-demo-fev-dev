@@ -12,7 +12,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
 public class DocumentService {
@@ -24,7 +23,7 @@ public class DocumentService {
     public HashMap<Integer, Map<String, String>> retrieveQuestionsMapper() throws IOException {
         HashMap<Integer, Map<String, String>> questionsMapper = new HashMap<>();
 
-        InputStream fileInputStream = s3Service.getFile(STANDARD_FORM_FILE_KEY);
+        InputStream fileInputStream = s3Service.getInputFileStream(STANDARD_FORM_FILE_KEY);
         try (XWPFDocument document = new XWPFDocument(fileInputStream)) {
 
             List<XWPFParagraph> paragraphs = document.getParagraphs();
@@ -48,21 +47,18 @@ public class DocumentService {
     }
 
     public ByteArrayOutputStream fillFile(HashMap<Integer, Map<String, String>> questionsMapper) throws IOException {
-        InputStream fileInputStream = s3Service.getFile(STANDARD_FORM_FILE_KEY);
+        InputStream fileInputStream = s3Service.getInputFileStream(STANDARD_FORM_FILE_KEY);
         try (XWPFDocument document = new XWPFDocument(fileInputStream)) {
 
-            AtomicInteger count = new AtomicInteger();
             questionsMapper.entrySet().stream()
                     .sorted(Comparator.comparingInt(Map.Entry::getKey))
                     .forEach(positionQuestionAnswerMapper -> {
-                        Integer filePosition = positionQuestionAnswerMapper.getKey();
+                        int filePosition = positionQuestionAnswerMapper.getKey();
                         Map<String, String> questionAnswerMap = positionQuestionAnswerMapper.getValue();
 
-                        XWPFParagraph answerParagraph = document.createParagraph();
+                        XWPFParagraph answerParagraph = document.getParagraphs().get(filePosition + 1);
                         XWPFRun run = answerParagraph.createRun();
                         run.setText("A: " + questionAnswerMap.get("answer"));
-
-                        document.setParagraph(answerParagraph, filePosition + count.getAndIncrement() + 1);
                     });
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             document.write(outputStream);
