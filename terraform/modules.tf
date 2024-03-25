@@ -208,3 +208,9 @@ module "form_request_processor" {
   master_prompt          = var.master_prompt
   sqs_name               = local.form_request_processor_queue_name
 }
+
+module "email_receipt_confirmation" {
+  source                 = "../lambdas/email_receipt_confirmation"
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
+  aws_region            = var.aws_region
+}
