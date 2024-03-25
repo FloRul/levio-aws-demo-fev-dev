@@ -19,7 +19,7 @@ def lambda_handler(event, context):
     }
 
     reply_text = os.environ.get(
-        "RECEIPT_REPLY_TEXT", "Nous avons reçu votre demande et elle sera traité sous peut. Merci.\n"
+        "RECEIPT_REPLY_TEXT", "Nous avons reçu votre demande et elle sera traitée sous peu. Merci.\n"
     )
 
     reply_message = {
