@@ -1,6 +1,6 @@
 locals {
   lambda_function_name = "email-receipt-confirmation-dev"
-  ses_arn              = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}/lab.levio.cloud/*:*"
+  ses_arn              = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}/lab.levio.cloud"
   timeout              = 30
   runtime              = "python3.11"
   powertools_layer_arn = "arn:aws:lambda:${var.aws_region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:67"
