@@ -68,7 +68,7 @@ resource "aws_ses_receipt_rule" "form_rule" {
 resource "aws_ses_receipt_rule" "send_confirmation_rule" {
   name          = local.confirmation_rule_name
   rule_set_name = aws_ses_receipt_rule_set.main_rule_set.rule_set_name
-  recipients    = [var.form_rule_recipient, var.resume_rule_recipient, var.chat_rule_recipient,]
+  recipients    = [var.chat_rule_recipient,]
   enabled       = true
   scan_enabled  = true
 
