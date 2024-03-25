@@ -223,4 +223,6 @@ module "email_receipt_confirmation" {
   source                = "../lambdas/email_receipt_confirmation"
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   aws_region            = var.aws_region
+  rule_set_name          = local.rule_set_name
+  chat_rule_name         = local.chat_rule_name
 }
