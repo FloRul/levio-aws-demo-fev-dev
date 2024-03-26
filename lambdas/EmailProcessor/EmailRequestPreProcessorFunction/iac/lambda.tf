@@ -26,7 +26,7 @@ module "lambda_function_container_image" {
   role_name                = "${var.lambda_function_name}-role"
   attach_policy_statements = true
   s3_bucket                = var.lambda_storage_bucket
-  source_path              = "${path.module}/../target"
+  source_path              = "${path.module}/../target/email-request-preprocessor-1.0.jar"
 
 
   environment_variables = {
