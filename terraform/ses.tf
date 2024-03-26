@@ -9,6 +9,12 @@ locals {
   confirmation_rule_name = "levio-demo-fev-esta-rule-dev"
 }
 
+resource "aws_lambda_permission" "ses" {
+  action         = "lambda:InvokeFunction"
+  function_name  = module.email_receipt_confirmation.lambda_function_arn
+  principal      = "ses.amazonaws.com"
+}
+
 resource "aws_ses_receipt_rule_set" "main_rule_set" {
   rule_set_name = local.rule_set_name
 }
@@ -76,4 +82,8 @@ resource "aws_ses_receipt_rule" "send_confirmation_rule" {
     function_arn = module.email_receipt_confirmation.lambda_function_arn
     position     = 1
   }
+
+  depends_on = [
+    aws_lambda_permission.ses
+  ]
 }
