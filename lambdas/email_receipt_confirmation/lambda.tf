@@ -1,6 +1,6 @@
 locals {
   lambda_function_name = "email-receipt-confirmation-dev"
-  ses_arn              = "arn:aws:ses:us-east-1:446872271111:identity/lab.levio.cloud"
+  ses_arn              = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}"
   timeout              = 30
   runtime              = "python3.11"
   powertools_layer_arn = "arn:aws:lambda:${var.aws_region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:67"
@@ -54,8 +54,8 @@ module "lambda_function_container_image" {
 
     ses = {
       effect    = "Allow"
-      resources = [local.ses_arn, "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"]
-      actions   = ["ses:SendEmail", "ses:SendRawEmail"]
+      resources = [local.ses_arn]
+      actions   = ["ses:SendEmail"]
     }
   }
 }
