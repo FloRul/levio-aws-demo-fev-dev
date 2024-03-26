@@ -1,20 +1,17 @@
-data "aws_ecr_image" "lambda_image" {
-  repository_name = var.lambda_repository_name
-  most_recent     = true
-}
-
 data "aws_caller_identity" "current" {}
 
 module "lambda_function_container_image" {
   timeout                  = 60
   source                   = "terraform-aws-modules/lambda/aws"
+  handler                  = "com.levio.awsdemo.emailrequestpreprocessor.App::handleRequest"
+  runtime                  = "java17"
   function_name            = var.lambda_function_name
   create_package           = false
-  image_uri                = data.aws_ecr_image.lambda_image.image_uri
-  package_type             = "Image"
   memory_size              = 1024
   role_name                = "${var.lambda_function_name}-role"
   attach_policy_statements = true
+  s3_bucket                = var.lambda_storage_bucket
+
 
   environment_variables = {
     BUCKET_NAME = var.ses_bucket_name
@@ -24,7 +21,7 @@ module "lambda_function_container_image" {
 
   policy_statements = {
     log_group = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "logs:CreateLogGroup"
       ]
@@ -34,7 +31,7 @@ module "lambda_function_container_image" {
     }
 
     log_write = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "logs:CreateLogStream",
         "logs:PutLogEvents",
@@ -45,7 +42,7 @@ module "lambda_function_container_image" {
     }
 
     request_sqs = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "sqs:SendMessage",
       ]
@@ -55,7 +52,7 @@ module "lambda_function_container_image" {
     }
 
     s3 = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "s3:Get*",
         "s3:List*",

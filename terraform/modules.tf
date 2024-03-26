@@ -131,7 +131,6 @@ module "email_request_processor" {
 module "email_request_preprocessor" {
   source                 = "../lambdas/EmailProcessor/EmailRequestPreProcessorFunction/iac"
   lambda_function_name   = local.email_request_preprocessor_lambda_name
-  lambda_repository_name = var.email_request_preprocessor_lambda_repository_name
   ses_bucket_name        = local.bucket_name
   chat_key_prefix        = local.chat_key_prefix
   request_queue_url      = module.email_request_processor.queue_url
@@ -139,6 +138,7 @@ module "email_request_preprocessor" {
   ses_s3_arn             = module.s3_bucket.s3_bucket_arn
   rule_set_name          = local.rule_set_name
   chat_rule_name         = local.chat_rule_name
+  lambda_storage_bucket  = aws_s3_bucket.lambda_storage.id
 }
 
 module "attachment_saver" {
