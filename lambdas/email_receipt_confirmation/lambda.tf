@@ -51,6 +51,12 @@ module "lambda_function_container_image" {
         "logs:PutLogEvents",
       ]
     }
+
+    ses = {
+      effect    = "Allow"
+      resources = [local.ses_arn, "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"]
+      actions   = ["ses:SendEmail", "ses:SendRawEmail"]
+    }
   }
 
 
