@@ -57,15 +57,15 @@ module "lambda_function_container_image" {
       resources = [local.ses_arn, "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"]
       actions   = ["ses:SendEmail", "ses:SendRawEmail"]
     }
+  }
 
 
-    create_current_version_allowed_triggers = false
+  create_current_version_allowed_triggers = false
 
-    allowed_triggers = {
-      ses = {
-        principal  = "ses.amazonaws.com"
-        source_arn = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:receipt-rule-set/${var.rule_set_name}:receipt-rule/${var.chat_rule_name}"
-      }
+  allowed_triggers = {
+    ses = {
+      principal  = "ses.amazonaws.com"
+      source_arn = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:receipt-rule-set/${var.rule_set_name}:receipt-rule/${var.chat_rule_name}"
     }
   }
 }
