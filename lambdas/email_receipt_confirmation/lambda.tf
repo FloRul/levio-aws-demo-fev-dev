@@ -54,10 +54,12 @@ module "lambda_function_container_image" {
 
     ses = {
       effect    = "Allow"
-      resources = [local.ses_arn]
+      resources = [local.ses_arn, "${local.ses_arn}/*"]
       actions   = ["ses:SendEmail"]
     } 
   }
+
+  create_current_version_allowed_triggers = false
 
 
   allowed_triggers = {
