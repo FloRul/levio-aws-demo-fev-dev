@@ -16,17 +16,17 @@ module "lambda_function_container_image" {
 
 
 
-  source  = "terraform-aws-modules/lambda/aws"
-  handler = "com.levio.awsdemo.emailrequestpreprocessor.App::handleRequest"
-  publish = true
-  runtime = "java17"
-  timeout = 60
+  source                   = "terraform-aws-modules/lambda/aws"
+  handler                  = "com.levio.awsdemo.emailrequestpreprocessor.App::handleRequest"
+  publish                  = true
+  runtime                  = "java17"
+  timeout                  = 60
   function_name            = var.lambda_function_name
   memory_size              = 1024
   role_name                = "${var.lambda_function_name}-role"
   attach_policy_statements = true
   s3_bucket                = var.lambda_storage_bucket
-  source_path              = "${path.module}/target"
+  source_path              = "${path.module}/../target"
 
 
   environment_variables = {
