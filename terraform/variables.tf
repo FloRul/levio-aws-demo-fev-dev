@@ -45,11 +45,6 @@ variable "email_response_processor_lambda_repository_name" {
   nullable = false
 }
 
-variable "email_request_preprocessor_lambda_repository_name" {
-  type     = string
-  nullable = false
-}
-
 variable "api_name" {
   default = "levio-demo-fev-api"
   type    = string
