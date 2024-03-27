@@ -1,6 +1,6 @@
 data "aws_caller_identity" "current" {}
 
-module "lambda_function_existing_package_local" {
+module "lambda_function_container_image" {
   # source = "terraform-aws-modules/lambda/aws"
   # function_name = local.lambda_function_name
   # handler       = "index.lambda_handler"
