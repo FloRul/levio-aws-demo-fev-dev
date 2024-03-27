@@ -85,6 +85,8 @@ jobs:
 
 
   deploy-infra:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [deploy_lambda]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
