@@ -12,7 +12,7 @@ locals {
   email_request_processor_queue_name      = "levio-demo-fev-email-request-processor-queue-dev"
   email_response_processor_lambda_name    = "levio-demo-fev-email-response-processor-dev"
   email_response_processor_queue_name     = "levio-demo-fev-email-response-processor-queue-dev"
-  attachment_saver_lambda_name            = "levio-demo-fev-attachment-saver-dev"
+  attachment_saver_lambda_name            = "levio-demo-fev-attachment2-saver-dev"
   transcription_processor_lambda_name     = "levio-demo-fev-transcription-processor-dev"
   resume_lambda_name                      = "levio-demo-fev-resume-dev"
   resume_request_processor_lambda_name    = "levio-demo-fev-resume-request-processor-dev"
@@ -142,11 +142,11 @@ module "email_request_preprocessor" {
 }
 
 module "attachment_saver" {
-  source                 = "../lambdas/AttachmentSaver/AttachmentSaverFunction/iac"
-  lambda_function_name   = local.attachment_saver_lambda_name
-  ses_bucket_name        = local.bucket_name
-  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
-  lambda_storage_bucket  = aws_s3_bucket.lambda_storage.id
+  source                = "../lambdas/AttachmentSaver/AttachmentSaverFunction/iac"
+  lambda_function_name  = local.attachment_saver_lambda_name
+  ses_bucket_name       = local.bucket_name
+  ses_bucket_arn        = module.s3_bucket.s3_bucket_arn
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
 }
 
 module "transcription_processor" {
