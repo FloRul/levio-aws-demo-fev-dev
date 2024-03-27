@@ -12,7 +12,7 @@ locals {
   email_request_processor_queue_name      = "levio-demo-fev-email-request-processor-queue-dev"
   email_response_processor_lambda_name    = "levio-demo-fev-email-response-processor-dev"
   email_response_processor_queue_name     = "levio-demo-fev-email-response-processor-queue-dev"
-  attachment_saver_lambda_name            = "levio-demo-fev-attachment2-saver-dev"
+  attachment_saver_lambda_name            = "levio-demo-fev-attachment-saver-dev"
   transcription_processor_lambda_name     = "levio-demo-fev-transcription-processor-dev"
   resume_lambda_name                      = "levio-demo-fev-resume-dev"
   resume_request_processor_lambda_name    = "levio-demo-fev-resume-request-processor-dev"
