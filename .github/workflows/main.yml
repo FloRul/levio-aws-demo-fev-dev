@@ -82,6 +82,22 @@ jobs:
         docker build -t $ECR_REGISTRY/${{ vars.FORM_REQUEST_PREPROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/FormProcessor/FormRequestPreProcessorFunction
         docker push $ECR_REGISTRY/${{ vars.FORM_REQUEST_PREPROCESSOR_ECR_NAME }}:$IMAGE_TAG
 
+
+  package-lambdas:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Package Java lambdas
+        run: |
+          mvn -f ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction package
+
+
   deploy-infra:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [deploy_lambda]
@@ -102,16 +118,6 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-
-    - name: Setup Java 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'corretto'
-        java-version: '17'
-
-    - name: Package Java lambdas
-      run: |
-        mvn -f ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction package
 
     - name: Terraform Init
       id: init
