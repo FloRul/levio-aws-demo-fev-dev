@@ -82,12 +82,6 @@ variable "rfp_rule_recipient" {
   type    = string
 }
 
-
-variable "attachment_saver_lambda_repository_name" {
-  type     = string
-  nullable = false
-}
-
 variable "transcription_processor_lambda_repository_name" {
   type     = string
   nullable = false
