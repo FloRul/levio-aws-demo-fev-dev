@@ -1,19 +1,6 @@
 data "aws_caller_identity" "current" {}
 
 module "lambda_function_container_image" {
-  # source                   = "terraform-aws-modules/lambda/aws"
-  # handler                  = "com.levio.awsdemo.emailrequestpreprocessor.App::handleRequest"
-  # publish                  = true
-  # runtime                  = "java17"
-  # timeout                  = 60
-  # function_name            = var.lambda_function_name
-  # memory_size              = 1024
-  # role_name                = "${var.lambda_function_name}-role"
-  # attach_policy_statements = true
-  # s3_bucket                = var.lambda_storage_bucket
-  # local_existing_package   = "${path.module}/../target/email-request-preprocessor-1.0.jar"
-  # create_package           = false
-
   timeout                  = 60
   handler                  = "com.levio.awsdemo.attachmentsaver.App::handleRequest"
   runtime                  = "java17"
