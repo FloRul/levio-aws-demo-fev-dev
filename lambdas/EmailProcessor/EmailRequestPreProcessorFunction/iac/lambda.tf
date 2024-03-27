@@ -1,6 +1,6 @@
 data "aws_caller_identity" "current" {}
 
-module "lambda_function_container_image" {
+module "lambda_function_existing_package_local" {
   # source = "terraform-aws-modules/lambda/aws"
   # function_name = local.lambda_function_name
   # handler       = "index.lambda_handler"
@@ -26,7 +26,7 @@ module "lambda_function_container_image" {
   role_name                = "${var.lambda_function_name}-role"
   attach_policy_statements = true
   s3_bucket                = var.lambda_storage_bucket
-  image_uri                = "${path.module}/../target/email-request-preprocessor-1.0.jar"
+  local_existing_package   = "${path.module}/../target/email-request-preprocessor-1.0.jar"
   create_package           = false
 
   environment_variables = {
