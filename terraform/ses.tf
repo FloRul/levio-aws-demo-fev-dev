@@ -6,6 +6,8 @@ locals {
   resume_key_prefix      = "resume/email"
   form_rule_name         = "levio-demo-fev-esta-formulaire-rule-dev"
   form_key_prefix        = "formulaire/email"
+  rfp_rule_name          = "levio-demo-fev-esta-rfp-rule-dev"
+  rfp_key_prefix         = "rfp/email"
   confirmation_rule_name = "levio-demo-fev-esta-confirmation-rule-dev"
 }
 
@@ -67,6 +69,20 @@ resource "aws_ses_receipt_rule" "form_rule" {
   s3_action {
     bucket_name       = module.s3_bucket.s3_bucket_id
     object_key_prefix = local.form_key_prefix
+    position          = 1
+  }
+}
+
+resource "aws_ses_receipt_rule" "rfp_rule" {
+  name          = local.rfp_rule_name
+  rule_set_name = aws_ses_receipt_rule_set.main_rule_set.rule_set_name
+  recipients    = [var.rfp_rule_recipient]
+  enabled       = true
+  scan_enabled  = true
+
+  s3_action {
+    bucket_name       = module.s3_bucket.s3_bucket_id
+    object_key_prefix = local.rfp_key_prefix
     position          = 1
   }
 }
