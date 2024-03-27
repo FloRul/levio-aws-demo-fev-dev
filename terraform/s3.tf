@@ -32,7 +32,7 @@ data "aws_iam_policy_document" "allow_access_from_ses" {
 
 resource "aws_s3_object" "examplebucket_object" {
   key    = "formulaire/standard/formulaire.docx"
-  bucket =  module.s3_bucket.s3_bucket_id
+  bucket = module.s3_bucket.s3_bucket_id
   source = "formulaire.docx"
 }
 
@@ -75,6 +75,12 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     lambda_function_arn = module.form_request_preprocessor.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "formulaire/attachment/"
+  }
+
+  lambda_function {
+    lambda_function_arn = module.attachment_saver.lambda_function_arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "rfp/email/"
   }
 
 }
