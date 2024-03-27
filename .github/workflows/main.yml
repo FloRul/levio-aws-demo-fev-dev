@@ -32,7 +32,6 @@ jobs:
         aws ecr describe-repositories --repository-names ${{ vars.MEMORY_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.MEMORY_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}
-        aws ecr describe-repositories --repository-names ${{ vars.ATTACHMENT_SAVER_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.ATTACHMENT_SAVER_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}
         aws ecr describe-repositories --repository-names ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }} || aws ecr create-repository --repository-name ${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}
@@ -65,8 +64,6 @@ jobs:
         docker push $ECR_REGISTRY/${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}:$IMAGE_TAG
         docker build -t $ECR_REGISTRY/${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/EmailProcessor/EmailResponseProcessorFunction
         docker push $ECR_REGISTRY/${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}:$IMAGE_TAG
-        docker build -t $ECR_REGISTRY/${{ vars.ATTACHMENT_SAVER_ECR_NAME }}:$IMAGE_TAG ./lambdas/AttachmentSaver/AttachmentSaverFunction
-        docker push $ECR_REGISTRY/${{ vars.ATTACHMENT_SAVER_ECR_NAME }}:$IMAGE_TAG
         docker build -t $ECR_REGISTRY/${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/TranscriptionProcessor/TranscriptionFunction
         docker push $ECR_REGISTRY/${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}:$IMAGE_TAG
         docker build -t $ECR_REGISTRY/${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}:$IMAGE_TAG ./lambdas/ResumeProcessor/ResumeRequestProcessorFunction
@@ -133,7 +130,6 @@ jobs:
         -var="email_request_processor_lambda_repository_name=${{ vars.EMAIL_REQUEST_PROCESSOR_ECR_NAME }}" \
         -var="email_response_processor_lambda_repository_name=${{ vars.EMAIL_RESPONSE_PROCESSOR_ECR_NAME }}" \
         -var="sender_email=${{ vars.SENDER_EMAIL }}" \
-        -var="attachment_saver_lambda_repository_name=${{ vars.ATTACHMENT_SAVER_ECR_NAME }}" \
         -var="transcription_processor_lambda_repository_name=${{ vars.TRANSCRIPTION_PROCESSOR_ECR_NAME }}" \
         -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \
         -var="resume_request_preprocessor_lambda_repository_name=${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}" \
