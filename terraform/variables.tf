@@ -77,6 +77,12 @@ variable "form_rule_recipient" {
   type    = string
 }
 
+variable "rfp_rule_recipient" {
+  default = "rfp@lab.levio.cloud"
+  type    = string
+}
+
+
 variable "attachment_saver_lambda_repository_name" {
   type     = string
   nullable = false
