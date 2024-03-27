@@ -109,7 +109,6 @@ jobs:
     - name: Package Java lambdas
       run: |
         mvn -f ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction package
-        zip -r  ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction/iac/lambda.zip  ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction/target/email-request-preprocessor-1.0.jar
 
     - name: Terraform Init
       id: init
