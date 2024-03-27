@@ -103,6 +103,16 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Setup Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'corretto'
+        java-version: '17'
+
+    - name: Package Java lambdas
+      run: |
+        mvn -f ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction package
+
     - name: Terraform Init
       id: init
       run: terraform init -no-color -upgrade
