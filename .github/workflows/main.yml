@@ -83,31 +83,8 @@ jobs:
         docker push $ECR_REGISTRY/${{ vars.FORM_REQUEST_PREPROCESSOR_ECR_NAME }}:$IMAGE_TAG
 
 
-  package-lambdas:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'corretto'
-          java-version: '17'
-
-      - name: Package Java lambdas
-        run: |
-          mvn -f ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction package
-          zip -r  ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction/iac/lambda.zip  ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction/target/email-request-preprocessor-1.0.jar
-
 
   deploy-infra:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [deploy_lambda]
-    defaults:
-      run:
-        working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -123,14 +100,27 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Set up Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'corretto'
+        java-version: '17'
+
+    - name: Package Java lambdas
+      run: |
+        mvn -f ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction package
+        zip -r  ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction/iac/lambda.zip  ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction/target/email-request-preprocessor-1.0.jar
+
     - name: Terraform Init
       id: init
+      working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
       run: terraform init -no-color -upgrade
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
     
     - name: Terraform Apply
+      working-directory: ${{ vars.TF_ACTIONS_WORKING_DIR }}
       run: | 
         terraform apply \
         -var="ingestion_repository_name=${{ vars.INGESTION_ECR_NAME }}" \
