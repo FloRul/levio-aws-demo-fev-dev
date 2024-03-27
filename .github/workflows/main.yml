@@ -111,6 +111,7 @@ jobs:
     - name: Package Java lambdas
       run: |
         mvn -f ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction package
+        mvn -f ./lambdas/AttachmentSaver/AttachmentSaverFunction package
 
     - name: Terraform Init
       id: init

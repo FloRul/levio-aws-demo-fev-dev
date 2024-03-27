@@ -3,11 +3,6 @@ variable "lambda_function_name" {
   nullable = false
 }
 
-variable "lambda_repository_name" {
-  type     = string
-  nullable = false
-}
-
 variable "ses_bucket_name" {
   type     = string
   nullable = false
@@ -21,4 +16,9 @@ variable "ses_bucket_arn" {
 variable "aws_region" {
   type    = string
   default = "us-east-1"
+}
+
+variable "lambda_storage_bucket" {
+  type     = string
+  nullable = false
 }
