@@ -104,6 +104,7 @@ jobs:
       with:
         distribution: 'corretto'
         java-version: '17'
+        cache: maven
 
     - name: Package Java lambdas
       run: |
