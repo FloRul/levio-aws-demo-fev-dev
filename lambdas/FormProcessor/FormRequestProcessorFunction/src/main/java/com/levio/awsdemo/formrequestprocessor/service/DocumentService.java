@@ -23,7 +23,7 @@ public class DocumentService {
     public HashMap<Integer, Map<String, String>> retrieveQuestionsMapper(String formKey) throws IOException {
         HashMap<Integer, Map<String, String>> questionsMapper = new HashMap<>();
 
-        var formDocumentPath = formKey.equalsIgnoreCase("form") ?   STANDARD_FORM_FILE_KEY : "";
+        var formDocumentPath = formKey.equalsIgnoreCase("formulaire") ?   STANDARD_FORM_FILE_KEY : "";
 
         InputStream fileInputStream = s3Service.getInputFileStream(formDocumentPath);
         try (XWPFDocument document = new XWPFDocument(fileInputStream)) {
