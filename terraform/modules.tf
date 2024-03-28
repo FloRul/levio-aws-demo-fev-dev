@@ -191,7 +191,7 @@ module "resume_request_preprocessor" {
 module "transcription_formatter" {
   source                 = "../lambdas/TranscriptionProcessor/TranscriptionFormatterFunction/iac"
   lambda_function_name   = local.transcription_formatter_lambda_name
-  lambda_repository_name = var.transcription_formatter_lambda_repository_name
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   bucket_name            = local.bucket_name
   bucket_arn             = module.s3_bucket.s3_bucket_arn
 }
