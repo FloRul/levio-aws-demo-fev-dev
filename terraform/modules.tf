@@ -199,7 +199,7 @@ module "transcription_formatter" {
 module "form_request_processor" {
   source                 = "../lambdas/FormProcessor/FormRequestProcessorFunction/iac"
   lambda_function_name   = local.form_request_processor_lambda_name
-  lambda_repository_name = var.form_request_processor_lambda_repository_name
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   ses_bucket_name        = local.bucket_name
   ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
   resume_function_name   = local.resume_lambda_name
