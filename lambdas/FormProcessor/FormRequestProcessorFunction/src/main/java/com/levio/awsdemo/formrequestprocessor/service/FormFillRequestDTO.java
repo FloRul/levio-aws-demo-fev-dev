@@ -1,24 +1,17 @@
 package com.levio.awsdemo.formrequestprocessor.service;
 
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class FormFillRequestDTO {
-    String emailId;
-    String formKey;
+    @JsonProperty("emailId") // Map JSON property to field
+    private String emailId;
 
-
-    public FormFillRequestDTO(String emailId, String formKey) {
-        this.emailId = emailId;
-        this.formKey = formKey;
-    }
-
-    public String toJson() {
-        return "{" +
-                "\"emailId\":\"" + emailId + "\"," +
-                "\"formKey\":\"" + formKey + "\"" +
-                "}";
-    }
-
+    @JsonProperty("formKey") // Map JSON property to field
+    private String formKey;
 }
