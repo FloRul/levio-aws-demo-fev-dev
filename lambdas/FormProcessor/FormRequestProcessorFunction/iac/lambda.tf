@@ -6,6 +6,7 @@ module "lambda_function_container_image" {
   function_name            = var.lambda_function_name
   create_package           = false
   handler                  = "com.levio.awsdemo.formrequestprocessor.App::handleRequest"
+  runtime                  = "java17"
   memory_size              = 1024
   role_name                = "${var.lambda_function_name}-role"
   attach_policy_statements = true
