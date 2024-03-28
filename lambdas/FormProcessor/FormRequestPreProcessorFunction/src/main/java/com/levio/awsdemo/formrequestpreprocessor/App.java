@@ -6,6 +6,7 @@ import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotificatio
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.levio.awsdemo.formrequestpreprocessor.service.FormFillRequestDTO;
 import com.levio.awsdemo.formrequestpreprocessor.service.SqsProducerService;
 
 public class App implements RequestHandler<S3EventNotification, Void> {
@@ -29,8 +30,12 @@ public class App implements RequestHandler<S3EventNotification, Void> {
             throw new RuntimeException(e);
         }
 
-        input.getRecords().forEach(s3EventNotificationRecord ->
-                sqsProducerService.send(extractEmailId(s3EventNotificationRecord.getS3().getObject().getKey()))
+        input.getRecords().forEach(s3EventNotificationRecord -> {
+                var key = s3EventNotificationRecord.getS3().getObject().getKey();
+                var formFillRequest = new FormFillRequestDTO(extractEmailId(key), extractFormKey(key));
+                sqsProducerService.send(formFillRequest);
+        }
+
         );
 
         return null;
@@ -41,4 +46,10 @@ public class App implements RequestHandler<S3EventNotification, Void> {
         int lastSlashIndex = key.lastIndexOf('/', lastDotIndex - 1);
         return key.substring(lastSlashIndex + 1, lastDotIndex);
     }
+
+    private String extractFormKey(String key) {
+        return key.split("/")[0];
+    }
+
+
 }

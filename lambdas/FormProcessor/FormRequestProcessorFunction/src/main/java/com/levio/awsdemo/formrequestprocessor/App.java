@@ -3,12 +3,10 @@ package com.levio.awsdemo.formrequestprocessor;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
-import com.levio.awsdemo.formrequestprocessor.service.ClaudeService;
-import com.levio.awsdemo.formrequestprocessor.service.DocumentService;
-import com.levio.awsdemo.formrequestprocessor.service.LambdaService;
-import com.levio.awsdemo.formrequestprocessor.service.MailService;
-import com.levio.awsdemo.formrequestprocessor.service.S3Service;
-import com.levio.awsdemo.formrequestprocessor.service.SqsProducerService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.levio.awsdemo.formrequestprocessor.service.*;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -32,7 +30,9 @@ public class App implements RequestHandler<SQSEvent, Void> {
 
     private final MailService mailService;
 
-    private final HashMap<Integer, Map<String, String>> questionsMapper;
+
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JodaModule());
+
 
     public App() {
         this.mailService = new MailService();
@@ -40,11 +40,6 @@ public class App implements RequestHandler<SQSEvent, Void> {
         this.s3Service = new S3Service();
         this.documentService = new DocumentService(s3Service);
         this.claudeService = new ClaudeService(new LambdaService());
-        try {
-            this.questionsMapper = documentService.retrieveQuestionsMapper();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public App(S3Service s3Service,
@@ -56,23 +51,32 @@ public class App implements RequestHandler<SQSEvent, Void> {
         this.claudeService = claudeService;
         this.sqsProducerService = sqsProducerService;
         this.mailService = mailService;
-        this.questionsMapper = questionsMapper;
     }
 
     public Void handleRequest(final SQSEvent input, final Context context) {
         input.getRecords().forEach(record -> {
             System.out.println("Record: " + record);
 
-            String keyId = record.getBody();
+            FormFillRequestDTO formFillRequest = null;
+            try {
+                formFillRequest = objectMapper.readValue(record.getBody(), FormFillRequestDTO.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
 
-            String email = s3Service.getFile("formulaire/email/" + keyId);
+            var emailId = formFillRequest.getEmailId();
+            var formKey = formFillRequest.getFormKey();
+            var questionsMapper = retrieveDocumentMapper(formKey);
+
+            String email = s3Service.getFile(formKey + "/email/" + formFillRequest.getEmailId());
             try {
                 MimeMessage message = mailService.getMimeMessage(new ByteArrayInputStream(email.getBytes(StandardCharsets.UTF_8)));
                 String emailBody = "Formulaire response";
                 String sender = ((InternetAddress) message.getFrom()[0]).getAddress();
                 String subject = message.getSubject();
 
-                String content = s3Service.getFile("formulaire/attachment/" + keyId + ".txt");
+                String content = s3Service.getFile(formKey +"/attachment/" + emailId + ".txt");
+
                 questionsMapper.entrySet().parallelStream()
                         .forEach(positionQuestionAnswerMapper -> {
                             Map<String, String> questionAnswerMap = positionQuestionAnswerMapper.getValue();
@@ -80,8 +84,8 @@ public class App implements RequestHandler<SQSEvent, Void> {
                             questionAnswerMap.put("answer", answer);
                         });
                 ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper);
-                String formDocxUri = s3Service.saveFile("formulaire/" + keyId + ".docx", fileOutputStream.toByteArray());
-                sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, formDocxUri), keyId);
+                String formDocxUri = s3Service.saveFile(formKey+"/" + emailId + ".docx", fileOutputStream.toByteArray());
+                sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, formDocxUri), emailId);
             } catch (IOException | MessagingException e) {
                 throw new RuntimeException(e);
             }
@@ -110,5 +114,13 @@ public class App implements RequestHandler<SQSEvent, Void> {
         }
 
         return messageAttributes;
+    }
+
+    private HashMap<Integer, Map<String, String>> retrieveDocumentMapper(String formKey) {
+        try {
+            return documentService.retrieveQuestionsMapper(formKey);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
