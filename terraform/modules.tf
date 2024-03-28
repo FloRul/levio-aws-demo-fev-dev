@@ -213,7 +213,7 @@ module "form_request_processor" {
 module "form_request_preprocessor" {
   source                 = "../lambdas/FormProcessor/FormRequestPreProcessorFunction/iac"
   lambda_function_name   = local.form_request_preprocessor_lambda_name
-  lambda_repository_name = var.form_request_preprocessor_lambda_repository_name
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
   request_queue_arn      = module.form_request_processor.queue_arn
   queue_url              = module.form_request_processor.queue_url
