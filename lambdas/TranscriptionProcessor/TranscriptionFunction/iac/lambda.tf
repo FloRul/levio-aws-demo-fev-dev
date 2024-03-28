@@ -13,6 +13,7 @@ module "lambda_function_container_image" {
   local_existing_package = "${path.module}/../target/transcription-1.0.jar"
   attach_policy_statements = true
 
+
   environment_variables = {
     DATA_ACCESS_ROLE_ARN = module.lambda_function_container_image.lambda_role_arn
   }
