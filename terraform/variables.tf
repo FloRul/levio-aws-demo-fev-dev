@@ -107,11 +107,6 @@ variable "transcription_formatter_lambda_repository_name" {
   nullable = false
 }
 
-variable "form_request_processor_lambda_repository_name" {
-  type     = string
-  nullable = false
-}
-
 variable "prompt_default" {
   default = "Refais ce texte sous forme de dialogues entre un intervenant et ses clients: "
   type    = string

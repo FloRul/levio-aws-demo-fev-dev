@@ -3,7 +3,7 @@ variable "lambda_function_name" {
   nullable = false
 }
 
-variable "lambda_repository_name" {
+variable "lambda_storage_bucket" {
   type     = string
   nullable = false
 }
