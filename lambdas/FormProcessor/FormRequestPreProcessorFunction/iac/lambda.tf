@@ -3,6 +3,7 @@ data "aws_caller_identity" "current" {}
 module "lambda_function_container_image" {
   timeout                  = 60
   source                   = "terraform-aws-modules/lambda/aws"
+  handler                  = "com.levio.awsdemo.formrequestpreprocessor.App::handleRequest"
   runtime                  = "java17"
   function_name            = var.lambda_function_name
   create_package           = false
