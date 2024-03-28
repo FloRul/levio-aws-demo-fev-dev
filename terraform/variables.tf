@@ -102,11 +102,6 @@ variable "resume_request_preprocessor_lambda_repository_name" {
   nullable = false
 }
 
-variable "form_request_preprocessor_lambda_repository_name" {
-  type     = string
-  nullable = false
-}
-
 variable "transcription_formatter_lambda_repository_name" {
   type     = string
   nullable = false
