@@ -1,28 +1,25 @@
-data "aws_ecr_image" "lambda_image" {
-  repository_name = var.lambda_repository_name
-  most_recent     = true
-}
-
 data "aws_caller_identity" "current" {}
 
 module "lambda_function_container_image" {
   timeout                  = 60
   source                   = "terraform-aws-modules/lambda/aws"
+  handler                  = "com.levio.awsdemo.transcriptionformatter.App::handleRequest"
   function_name            = var.lambda_function_name
+  runtime                  = "java17"
   create_package           = false
-  image_uri                = data.aws_ecr_image.lambda_image.image_uri
-  package_type             = "Image"
   memory_size              = 1024
   role_name                = "${var.lambda_function_name}-role"
+  s3_bucket                = var.lambda_storage_bucket
+  local_existing_package   = "${path.module}/../target/transcription-formatter-1.0.jar"
   attach_policy_statements = true
 
   environment_variables = {
-    BUCKET_NAME       = var.bucket_name
+    BUCKET_NAME = var.bucket_name
   }
 
   policy_statements = {
     log_group = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "logs:CreateLogGroup"
       ]
@@ -32,7 +29,7 @@ module "lambda_function_container_image" {
     }
 
     log_write = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "logs:CreateLogStream",
         "logs:PutLogEvents",
@@ -43,7 +40,7 @@ module "lambda_function_container_image" {
     }
 
     s3 = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "s3:Get*",
         "s3:List*",
