@@ -152,7 +152,7 @@ module "attachment_saver" {
 module "transcription_processor" {
   source                 = "../lambdas/TranscriptionProcessor/TranscriptionFunction/iac"
   lambda_function_name   = local.transcription_processor_lambda_name
-  lambda_repository_name = var.transcription_processor_lambda_repository_name
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   ses_bucket_name        = local.bucket_name
   ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
 }
