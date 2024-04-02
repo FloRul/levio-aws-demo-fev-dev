@@ -81,6 +81,7 @@ public class App implements RequestHandler<SQSEvent, Void> {
                 questionsMapper.entrySet().parallelStream()
                         .forEach(positionQuestionAnswerMapper -> {
                             Map<String, String> questionAnswerMap = positionQuestionAnswerMapper.getValue();
+                            System.out.print(questionAnswerMap.toString());
                             String answer = claudeService.getResponse(questionAnswerMap.get("question"), content);
                             questionAnswerMap.put("answer", answer);
                         });
