@@ -41,3 +41,4 @@ terraform.rc
 *.env
 **/target
 **/.aws-sam
+.DS_Store
