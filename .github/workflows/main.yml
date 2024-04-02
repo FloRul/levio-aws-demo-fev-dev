@@ -87,6 +87,7 @@ jobs:
         java-version: '17'
         cache: maven
 
+        
     - name: Package Java lambdas
       run: |
         mvn -f ./lambdas/EmailProcessor/EmailRequestPreProcessorFunction package
