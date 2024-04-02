@@ -1,19 +1,18 @@
-data "aws_ecr_image" "lambda_image" {
-  repository_name = var.lambda_repository_name
-  most_recent     = true
-}
-
 data "aws_caller_identity" "current" {}
 
 module "lambda_function_container_image" {
-  timeout                  = 60
-  source                   = "terraform-aws-modules/lambda/aws"
-  function_name            = var.lambda_function_name
-  create_package           = false
-  image_uri                = data.aws_ecr_image.lambda_image.image_uri
-  package_type             = "Image"
-  memory_size              = 1024
-  role_name                = "${var.lambda_function_name}-role"
+  timeout                = 60
+  source                 = "terraform-aws-modules/lambda/aws"
+  function_name          = var.lambda_function_name
+  runtime                = "java17"
+  handler                = "com.levio.awsdemo.emailresponseprocessor.App::handleRequest"
+  create_package         = false
+  memory_size            = 1024
+  role_name              = "${var.lambda_function_name}-role"
+  s3_bucket              = var.lambda_storage_bucket
+  local_existing_package = "${path.module}/../target/email-response-processor-1.0.jar"
+
+
   attach_policy_statements = true
 
   environment_variables = {
@@ -22,7 +21,7 @@ module "lambda_function_container_image" {
 
   policy_statements = {
     log_group = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "logs:CreateLogGroup"
       ]
@@ -32,7 +31,7 @@ module "lambda_function_container_image" {
     }
 
     log_write = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "logs:CreateLogStream",
         "logs:PutLogEvents",
@@ -43,7 +42,7 @@ module "lambda_function_container_image" {
     }
 
     sqs = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "sqs:ReceiveMessage",
         "sqs:DeleteMessage",
@@ -55,7 +54,7 @@ module "lambda_function_container_image" {
     }
 
     ses = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "ses:SendEmail",
         "ses:SendRawEmail"
@@ -66,7 +65,7 @@ module "lambda_function_container_image" {
     }
 
     s3 = {
-      effect  = "Allow"
+      effect = "Allow"
       actions = [
         "s3:Get*",
         "s3:List*",
