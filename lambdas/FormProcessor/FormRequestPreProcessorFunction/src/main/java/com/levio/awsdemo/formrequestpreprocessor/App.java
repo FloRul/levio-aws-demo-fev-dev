@@ -32,7 +32,7 @@ public class App implements RequestHandler<S3EventNotification, Void> {
 
         input.getRecords().forEach(s3EventNotificationRecord -> {
                 var key = s3EventNotificationRecord.getS3().getObject().getKey();
-                var formFillRequest = new FormFillRequestDTO(extractEmailId(key), extractFormKey(key));
+                var formFillRequest = new FormFillRequestDTO(extractEmailId(key), extractFormKey(key), key);
                 sqsProducerService.send(formFillRequest);
         }
 

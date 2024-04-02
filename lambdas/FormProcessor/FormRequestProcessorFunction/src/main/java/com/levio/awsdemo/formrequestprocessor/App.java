@@ -65,6 +65,7 @@ public class App implements RequestHandler<SQSEvent, Void> {
             }
 
             var emailId = formFillRequest.getEmailId();
+            var attachmentKey = formFillRequest.getAttachmentKey();
             var formKey = formFillRequest.getFormKey();
             var questionsMapper = retrieveDocumentMapper(formKey);
 
@@ -75,7 +76,7 @@ public class App implements RequestHandler<SQSEvent, Void> {
                 String sender = ((InternetAddress) message.getFrom()[0]).getAddress();
                 String subject = message.getSubject();
 
-                String content = s3Service.getFile(formKey +"/attachment/" + emailId + ".txt");
+                String content = s3Service.getFile(attachmentKey);
 
                 questionsMapper.entrySet().parallelStream()
                         .forEach(positionQuestionAnswerMapper -> {

@@ -14,4 +14,7 @@ public class FormFillRequestDTO {
 
     @JsonProperty("formKey") // Map JSON property to field
     private String formKey;
+
+    @JsonProperty("attachmentKey")
+    private String attachmentKey;
 }
