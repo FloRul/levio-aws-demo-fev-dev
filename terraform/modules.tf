@@ -109,12 +109,12 @@ module "lex_router" {
 }
 
 module "email_response_processor" {
-  source                 = "../lambdas/EmailProcessor/EmailResponseProcessorFunction/iac"
-  lambda_function_name   = local.email_response_processor_lambda_name
-  lambda_repository_name = var.email_response_processor_lambda_repository_name
-  sqs_name               = local.email_response_processor_queue_name
-  sender_email           = var.sender_email
-  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+  source                = "../lambdas/EmailProcessor/EmailResponseProcessorFunction/iac"
+  lambda_function_name  = local.email_response_processor_lambda_name
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
+  sqs_name              = local.email_response_processor_queue_name
+  sender_email          = var.sender_email
+  ses_bucket_arn        = module.s3_bucket.s3_bucket_arn
 }
 
 module "email_request_processor" {
@@ -150,11 +150,11 @@ module "attachment_saver" {
 }
 
 module "transcription_processor" {
-  source                 = "../lambdas/TranscriptionProcessor/TranscriptionFunction/iac"
-  lambda_function_name   = local.transcription_processor_lambda_name
+  source                = "../lambdas/TranscriptionProcessor/TranscriptionFunction/iac"
+  lambda_function_name  = local.transcription_processor_lambda_name
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
-  ses_bucket_name        = local.bucket_name
-  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+  ses_bucket_name       = local.bucket_name
+  ses_bucket_arn        = module.s3_bucket.s3_bucket_arn
 }
 
 module "resume" {
@@ -189,34 +189,34 @@ module "resume_request_preprocessor" {
 }
 
 module "transcription_formatter" {
-  source                 = "../lambdas/TranscriptionProcessor/TranscriptionFormatterFunction/iac"
-  lambda_function_name   = local.transcription_formatter_lambda_name
+  source                = "../lambdas/TranscriptionProcessor/TranscriptionFormatterFunction/iac"
+  lambda_function_name  = local.transcription_formatter_lambda_name
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
-  bucket_name            = local.bucket_name
-  bucket_arn             = module.s3_bucket.s3_bucket_arn
+  bucket_name           = local.bucket_name
+  bucket_arn            = module.s3_bucket.s3_bucket_arn
 }
 
 module "form_request_processor" {
-  source                 = "../lambdas/FormProcessor/FormRequestProcessorFunction/iac"
-  lambda_function_name   = local.form_request_processor_lambda_name
+  source                = "../lambdas/FormProcessor/FormRequestProcessorFunction/iac"
+  lambda_function_name  = local.form_request_processor_lambda_name
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
-  ses_bucket_name        = local.bucket_name
-  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
-  resume_function_name   = local.resume_lambda_name
-  resume_function_arn    = module.resume.lambda_function_arn
-  response_queue_arn     = module.email_response_processor.queue_arn
-  queue_url              = module.email_response_processor.queue_url
-  master_prompt          = var.master_prompt
-  sqs_name               = local.form_request_processor_queue_name
+  ses_bucket_name       = local.bucket_name
+  ses_bucket_arn        = module.s3_bucket.s3_bucket_arn
+  resume_function_name  = local.resume_lambda_name
+  resume_function_arn   = module.resume.lambda_function_arn
+  response_queue_arn    = module.email_response_processor.queue_arn
+  queue_url             = module.email_response_processor.queue_url
+  master_prompt         = var.master_prompt
+  sqs_name              = local.form_request_processor_queue_name
 }
 
 module "form_request_preprocessor" {
-  source                 = "../lambdas/FormProcessor/FormRequestPreProcessorFunction/iac"
-  lambda_function_name   = local.form_request_preprocessor_lambda_name
+  source                = "../lambdas/FormProcessor/FormRequestPreProcessorFunction/iac"
+  lambda_function_name  = local.form_request_preprocessor_lambda_name
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
-  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
-  request_queue_arn      = module.form_request_processor.queue_arn
-  queue_url              = module.form_request_processor.queue_url
+  ses_bucket_arn        = module.s3_bucket.s3_bucket_arn
+  request_queue_arn     = module.form_request_processor.queue_arn
+  queue_url             = module.form_request_processor.queue_url
 }
 
 module "email_receipt_confirmation" {
