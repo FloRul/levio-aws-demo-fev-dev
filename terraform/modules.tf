@@ -120,7 +120,7 @@ module "email_response_processor" {
 module "email_request_processor" {
   source                 = "../lambdas/EmailProcessor/EmailRequestProcessorFunction/iac"
   lambda_function_name   = local.email_request_processor_lambda_name
-  lambda_repository_name = var.email_request_processor_lambda_repository_name
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   sqs_name               = local.email_request_processor_queue_name
   api_key                = aws_api_gateway_api_key.this.value
   api_url                = "${aws_api_gateway_deployment.this.invoke_url}${aws_api_gateway_stage.this.stage_name}/${module.inference.path_part}"
