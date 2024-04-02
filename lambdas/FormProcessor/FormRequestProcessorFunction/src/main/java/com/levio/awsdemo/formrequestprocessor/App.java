@@ -83,7 +83,7 @@ public class App implements RequestHandler<SQSEvent, Void> {
                             String answer = claudeService.getResponse(questionAnswerMap.get("question"), content);
                             questionAnswerMap.put("answer", answer);
                         });
-                ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper);
+                ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper, formKey);
                 String formDocxUri = s3Service.saveFile(formKey+"/" + emailId + ".docx", fileOutputStream.toByteArray());
                 sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, formDocxUri), emailId);
             } catch (IOException | MessagingException e) {
