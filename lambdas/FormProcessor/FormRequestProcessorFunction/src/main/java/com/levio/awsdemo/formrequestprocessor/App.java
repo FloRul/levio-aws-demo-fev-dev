@@ -7,17 +7,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.levio.awsdemo.formrequestprocessor.service.*;
-import com.levio.awsdemo.formrequestprocessor.utils.PDF;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.io.RandomAccessRead;
-import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,14 +69,14 @@ public class App implements RequestHandler<SQSEvent, Void> {
             var formKey = formFillRequest.getFormKey();
             var questionsMapper = retrieveDocumentMapper(formKey);
 
-            String email = s3Service.getObjectAsString(formKey + "/email/" + formFillRequest.getEmailId());
+            String email = s3Service.getFile(formKey + "/email/" + formFillRequest.getEmailId());
             try {
                 MimeMessage message = mailService.getMimeMessage(new ByteArrayInputStream(email.getBytes(StandardCharsets.UTF_8)));
                 String emailBody = "Formulaire response";
                 String sender = ((InternetAddress) message.getFrom()[0]).getAddress();
                 String subject = message.getSubject();
 
-                String content = getS3ObjectContent(attachmentKey);
+                String content = s3Service.getFile(attachmentKey);
 
                 questionsMapper.entrySet().parallelStream()
                         .forEach(positionQuestionAnswerMapper -> {
@@ -120,24 +116,6 @@ public class App implements RequestHandler<SQSEvent, Void> {
         }
 
         return messageAttributes;
-    }
-
-
-    private String getS3ObjectContent(String key) {
-        final var isPDF = key.endsWith(".pdf");
-
-        try {
-            if (isPDF) {
-                final var file = s3Service.getObjectAsFile(key);
-                return PDF.generateTextFromPDF(file);
-            } else {
-                return s3Service.getObjectAsString(key);
-            }
-        } catch(IOException e) {
-            System.out.print(e);
-        }
-
-        return s3Service.getObjectAsString(key);
     }
 
     private HashMap<Integer, Map<String, String>> retrieveDocumentMapper(String formKey) {
