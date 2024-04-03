@@ -28,10 +28,6 @@ public class S3Service {
         try {
             ResponseBytes<GetObjectResponse> objectBytes = getObjectResponseBytes(key);
             final var file = new File("/tmp/"+key);
-            if (file.exists()) {
-                file.delete();
-            }
-            file.createNewFile();
             OutputStream os = new FileOutputStream(file);
             os.write(objectBytes.asByteArray());
             os.close();
