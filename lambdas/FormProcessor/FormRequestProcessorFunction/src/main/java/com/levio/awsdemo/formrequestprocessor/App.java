@@ -128,11 +128,9 @@ public class App implements RequestHandler<SQSEvent, Void> {
 
         try {
             if (isPDF) {
-                System.out.print("is PDF");
                 final var file = s3Service.getObjectAsFile(key);
                 return PDF.generateTextFromPDF(file);
             } else {
-                System.out.print("is other file extension");
                 return s3Service.getObjectAsString(key);
             }
         } catch(IOException e) {
