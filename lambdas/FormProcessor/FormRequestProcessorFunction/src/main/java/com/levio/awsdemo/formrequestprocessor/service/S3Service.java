@@ -9,7 +9,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
-import java.io.InputStream;
+import java.io.*;
 
 public class S3Service {
 
@@ -18,9 +18,25 @@ public class S3Service {
     private final S3Client s3 = S3Client.builder()
             .region(Region.US_EAST_1)
             .build();
-    public String getFile(String key) {
+
+    public String getObjectAsString(String key) {
         ResponseBytes<GetObjectResponse> objectBytes = getObjectResponseBytes(key);
         return new String(objectBytes.asByteArray());
+    }
+
+    public File getObjectAsFile(String key) {
+        try {
+            ResponseBytes<GetObjectResponse> objectBytes = getObjectResponseBytes(key);
+            final var file = new File("/tmp/"+key);
+            OutputStream os = new FileOutputStream(file);
+            os.write(objectBytes.asByteArray());
+            os.close();
+            return file;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public InputStream getInputFileStream(String key) {
@@ -36,7 +52,9 @@ public class S3Service {
                 .build();
 
         return s3.getObjectAsBytes(objectRequest);
+
     }
+
 
     public String saveFile(String fileKey, byte[] fileContent) {
         PutObjectResponse objectResponse = s3.putObject(
