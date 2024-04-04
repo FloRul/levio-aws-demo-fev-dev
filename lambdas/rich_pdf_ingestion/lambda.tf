@@ -7,6 +7,11 @@ locals {
 
 data "aws_caller_identity" "current" {}
 
+data "aws_ecr_image" "lambda_image" {
+  repository_name = var.lambda_repository_name
+  most_recent     = true
+}
+
 
 module "lambda_function_container_image" {
   source                   = "terraform-aws-modules/lambda/aws"
@@ -19,9 +24,9 @@ module "lambda_function_container_image" {
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
 
-  create_package           = false
-  image_uri                = data.aws_ecr_image.lambda_image.image_uri
-  package_type             = "Image"
+  create_package = false
+  image_uri      = data.aws_ecr_image.lambda_image.image_uri
+  package_type   = "Image"
 
   policy_statements = {
     log_group = {
