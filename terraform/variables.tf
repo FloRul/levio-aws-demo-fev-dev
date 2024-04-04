@@ -77,6 +77,11 @@ variable "resume_lambda_repository_name" {
   nullable = false
 }
 
+variable "rich_pdf_ingestion_repository_name" {
+  type     = string
+  nullable = false
+}
+
 variable "resume_request_processor_lambda_repository_name" {
   type     = string
   nullable = false

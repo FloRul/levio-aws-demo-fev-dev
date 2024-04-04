@@ -3,7 +3,7 @@ variable "aws_region" {
   nullable = false
 }
 
-variable "lambda_storage_bucket" {
+variable "lambda_repository_name" {
   type     = string
   nullable = false
 }
