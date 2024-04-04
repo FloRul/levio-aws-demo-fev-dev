@@ -10,16 +10,15 @@ data "aws_caller_identity" "current" {}
 
 
 module "lambda_function_container_image" {
-  create_package           = false
-  image_uri                = data.aws_ecr_image.lambda_image.image_uri
-  package_type             = "Image"
-  source = "terraform-aws-modules/lambda/aws"
-  function_name = local.lambda_function_name
-  publish       = true
-  runtime = local.runtime
-  timeout = local.timeout
-  layers  = [local.powertools_layer_arn]
-  source_path = "${path.module}/src"
+  source                   = "terraform-aws-modules/lambda/aws"
+  function_name            = local.lambda_function_name
+  handler                  = "index.lambda_handler"
+  publish                  = true
+  runtime                  = local.runtime
+  timeout                  = local.timeout
+  layers                   = [local.powertools_layer_arn]
+  source_path              = "${path.module}/src"
+  s3_bucket                = var.lambda_storage_bucket
   memory_size              = 256
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
