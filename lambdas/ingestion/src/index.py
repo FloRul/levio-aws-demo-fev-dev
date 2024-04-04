@@ -5,7 +5,7 @@ import boto3
 from langchain_community.embeddings import BedrockEmbeddings
 from langchain_community.vectorstores.pgvector import PGVector
 from botocore.exceptions import ClientError
-from botocore.exceptions import NoCredentialsError, BotoCoreError
+from botocore.exceptions import NoCredentialsError, BotoCoreError, ClientError
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
