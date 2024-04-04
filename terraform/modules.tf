@@ -227,6 +227,5 @@ module "email_receipt_confirmation" {
 
 module "rich_pdf_ingestion" {
   source                = "../lambdas/rich_pdf_ingestion"
-  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   aws_region            = var.aws_region
 }
