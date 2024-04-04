@@ -1,0 +1,4 @@
+pypdf
+tabula-py
+pandas
+boto3
