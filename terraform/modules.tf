@@ -118,14 +118,14 @@ module "email_response_processor" {
 }
 
 module "email_request_processor" {
-  source                 = "../lambdas/EmailProcessor/EmailRequestProcessorFunction/iac"
-  lambda_function_name   = local.email_request_processor_lambda_name
+  source                = "../lambdas/EmailProcessor/EmailRequestProcessorFunction/iac"
+  lambda_function_name  = local.email_request_processor_lambda_name
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
-  sqs_name               = local.email_request_processor_queue_name
-  api_key                = aws_api_gateway_api_key.this.value
-  api_url                = "${aws_api_gateway_deployment.this.invoke_url}${aws_api_gateway_stage.this.stage_name}/${module.inference.path_part}"
-  response_queue_url     = module.email_response_processor.queue_url
-  response_queue_arn     = module.email_response_processor.queue_arn
+  sqs_name              = local.email_request_processor_queue_name
+  api_key               = aws_api_gateway_api_key.this.value
+  api_url               = "${aws_api_gateway_deployment.this.invoke_url}${aws_api_gateway_stage.this.stage_name}/${module.inference.path_part}"
+  response_queue_url    = module.email_response_processor.queue_url
+  response_queue_arn    = module.email_response_processor.queue_arn
 }
 
 module "email_request_preprocessor" {
@@ -228,4 +228,6 @@ module "email_receipt_confirmation" {
 module "rich_pdf_ingestion" {
   source                = "../lambdas/rich_pdf_ingestion"
   aws_region            = var.aws_region
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
+
 }
