@@ -35,15 +35,33 @@ def fetch_file(bucket, key):
 
 
 def upload_text(extracted_text, bucket, key):
-    file_name = key.split('/')[-1].split('.')[0]+"_pdf_extracted_text.txt"
-    local_file_path = "/tmp/"+file_name
-    s3_object_key = f"rfp/{EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX}/{file_name}"
+    file_name = os.path.splitext(os.path.basename(key))[
+        0] + "_pdf_extracted_text.txt"
+    local_file_path = "/tmp/" + file_name
+    # build a new object key in an adjacent folder
+    s3_object_key = os.path.join(os.path.dirname(
+        key), EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX, file_name)
 
     with open(local_file_path, "w") as f:
         f.write(extracted_text)
 
-    s3.upload_file(local_file_path, bucket, s3_object_key)
+    with open(local_file_path, "rb") as f:
+        s3.upload_fileobj(f, bucket, s3_object_key)
+
     print(f"Stored file {s3_object_key} in bucket {bucket}")
+
+
+def add_adjacent_folder(file_path, adjacent_folder_name):
+    """Modifies the given file_path to that is has an adjecent folder"""
+    parts = file_path.split('/')
+
+    if len(parts) > 1:
+        new_file_path = '/'.join(parts[:-1]) + '/' + \
+            adjacent_folder_name + '/' + parts[-1]
+    else:
+        new_file_path = adjacent_folder_name + '/' + parts[-1]
+
+    return new_file_path
 
 
 def lambda_handler(event, context):
