@@ -3,8 +3,6 @@ import os
 import boto3
 from pypdf import PdfReader
 from botocore.exceptions import NoCredentialsError, BotoCoreError, ClientError
-from aws_lambda_powertools.utilities.typing import LambdaContext
-
 
 OBJECT_CREATED = "ObjectCreated"
 
