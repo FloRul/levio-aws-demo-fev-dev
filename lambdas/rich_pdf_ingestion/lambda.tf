@@ -23,10 +23,9 @@ module "lambda_function_container_image" {
   memory_size              = 256
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
-
-  create_package = false
-  image_uri      = data.aws_ecr_image.lambda_image.image_uri
-  package_type   = "Image"
+  create_package           = false
+  image_uri                = data.aws_ecr_image.lambda_image.image_uri
+  package_type             = "Image"
 
   policy_statements = {
     log_group = {
