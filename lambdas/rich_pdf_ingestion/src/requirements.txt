@@ -1,4 +1,5 @@
 pypdf
 tabula-py
 boto3
+# required by tabula-py when running in the aws docker, not exactly sure why
 JPype1

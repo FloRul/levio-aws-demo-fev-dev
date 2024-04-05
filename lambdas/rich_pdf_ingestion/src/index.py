@@ -4,11 +4,11 @@ import boto3
 from pypdf import PdfReader
 
 OBJECT_CREATED = "ObjectCreated"
-EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX = 'pdf_extracted_text'
+EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX = 'pdf_extraction_result'
 s3 = boto3.client("s3")
 
 
-def generate_text_form_pdf(pdf_file_path):
+def extract_text_from_pdf(pdf_file_path):
     text = ""
 
     reader = PdfReader(pdf_file_path)
@@ -35,12 +35,16 @@ def fetch_file(bucket, key):
 
 
 def upload_text(extracted_text, bucket, key):
-    file_name = os.path.splitext(os.path.basename(key))[
-        0] + "_pdf_extracted_text.txt"
+    file_name = os.path.splitext(
+        os.path.basename(key)
+    )[0] + "_pdf_extracted_text.txt"
+
     local_file_path = "/tmp/" + file_name
+
     # build a new object key in an adjacent folder
-    s3_object_key = os.path.join(os.path.dirname(
-        key), EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX, file_name)
+    parts = key.split('/')
+    parts.insert(-1, EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX)
+    s3_object_key = '/'.join(parts[:-1] + [file_name])
 
     with open(local_file_path, "w") as f:
         f.write(extracted_text)
@@ -49,19 +53,6 @@ def upload_text(extracted_text, bucket, key):
         s3.upload_fileobj(f, bucket, s3_object_key)
 
     print(f"Stored file {s3_object_key} in bucket {bucket}")
-
-
-def add_adjacent_folder(file_path, adjacent_folder_name):
-    """Modifies the given file_path to that is has an adjecent folder"""
-    parts = file_path.split('/')
-
-    if len(parts) > 1:
-        new_file_path = '/'.join(parts[:-1]) + '/' + \
-            adjacent_folder_name + '/' + parts[-1]
-    else:
-        new_file_path = adjacent_folder_name + '/' + parts[-1]
-
-    return new_file_path
 
 
 def lambda_handler(event, context):
@@ -79,9 +70,9 @@ def lambda_handler(event, context):
             if eventName.startswith(OBJECT_CREATED) and os.path.splitext(key)[1][1:] == "pdf":
                 local_filename = fetch_file(bucket, key)
                 print("Extracting text from pdf")
-                document_text = generate_text_form_pdf(local_filename)
+                extracted_text = extract_text_from_pdf(local_filename)
                 print("Finished extracting text from pdf")
-                upload_text(document_text, bucket, key)
+                upload_text(extracted_text, bucket, key)
 
         except Exception as e:
             print(e)
