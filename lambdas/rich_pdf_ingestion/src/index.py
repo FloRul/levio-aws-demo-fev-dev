@@ -41,30 +41,26 @@ def fetch_file(bucket, key):
     except ClientError as e:
         print(e)
         raise e
+    
     return local_filename
 
 
-def lambda_handler(event, context):
+def lambda_handler(event, context): 
     print(event)
     records = event["Records"]
     for record in records:
         eventName = record["eventName"]
         print(f"eventName: {eventName}")
+
         try:
             bucket, key = get_bucket_and_key(record)
             print(f"source_bucket: {bucket}, source_key: {key}")
 
-            if eventName.startswith(OBJECT_CREATED):
+            if eventName.startswith(OBJECT_CREATED) and os.path.splitext(key)[1][1:] == "pdf":
                 local_filename = fetch_file(bucket, key)
-                
-
-                # collection_name = bucket + "-"
-                # collection_name += os.path.dirname(key).replace("/", "-")
-
-                if os.path.splitext(key)[1][1:] == "pdf":
-                    print("Extracting text from pdf")
-                    document_text = generate_text_form_pdf(local_filename)
-                    print(f"Extracted: {document_text}")
+                print("Extracting text from pdf")
+                document_text = generate_text_form_pdf(local_filename)
+                print(f"Extracted: {document_text}")
 
         except Exception as e:
             print(e)
