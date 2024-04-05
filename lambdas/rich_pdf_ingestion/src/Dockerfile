@@ -4,7 +4,8 @@ FROM public.ecr.aws/lambda/python:3.11
 COPY requirements.txt ${LAMBDA_TASK_ROOT}
 
 # Install the specified packages
-RUN pip install -r requirements.txt
+# Tabula has a peer dependency on java
+RUN yum install java-17-amazon-corretto-headless && pip install -r requirements.txt 
 
 # Copy function code
 COPY index.py ${LAMBDA_TASK_ROOT}
