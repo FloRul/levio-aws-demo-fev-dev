@@ -126,5 +126,5 @@ jobs:
         -var="resume_request_processor_lambda_repository_name=${{ vars.RESUME_REQUEST_PROCESSOR_ECR_NAME }}" \
         -var="resume_request_preprocessor_lambda_repository_name=${{ vars.RESUME_REQUEST_PREPROCESSOR_ECR_NAME }}" \
         -var="resume_lambda_repository_name=${{ vars.RESUME_ECR_NAME }}" \
-        -var="rich_pdf_ingestion_repository_name=${{ env.RICH_PDF_INGESTION_ECR_NAME }} \
+        -var="rich_pdf_ingestion_repository_name=${{ env.RICH_PDF_INGESTION_ECR_NAME }}" \
         -auto-approve -no-color -input=false
