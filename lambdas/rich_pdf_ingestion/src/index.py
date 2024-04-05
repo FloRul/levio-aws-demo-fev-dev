@@ -5,6 +5,7 @@ from pypdf import PdfReader
 from botocore.exceptions import NoCredentialsError, BotoCoreError, ClientError
 
 OBJECT_CREATED = "ObjectCreated"
+s3 = boto3.client("s3")
 
 
 def generate_text_form_pdf(pdf_file_path):
@@ -26,7 +27,6 @@ def get_bucket_and_key(record):
     return bucket, key
 
 def fetch_file(bucket, key):
-    s3 = boto3.client("s3")
     local_filename = f"/tmp/{key.split('/')[-1]}"
 
     try:
@@ -43,6 +43,18 @@ def fetch_file(bucket, key):
     
     return local_filename
 
+def upload_text(extracted_text, bucket, key):
+    file_name = key.split('/')[-1].split('.')[0]
+    local_filename = f"/tmp/{file_name}_pdf_extracted_text.txt"
+
+    with open(local_filename, "w") as f:
+        f.write(extracted_text)
+
+    try:
+        s3.upload_file(local_filename, bucket+'/pdf_extracted_text', file_name)
+    except Exception as e:
+        print(e)
+        raise e
 
 def lambda_handler(event, context): 
     print(event)
@@ -61,6 +73,7 @@ def lambda_handler(event, context):
                 print("Extracting text from pdf")
                 document_text = generate_text_form_pdf(local_filename)
                 print("Finished extracting text from pdf")
+                upload_text(document_text, bucket)
 
         except Exception as e:
             print(e)
