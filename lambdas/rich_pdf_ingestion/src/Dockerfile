@@ -7,6 +7,10 @@ COPY requirements.txt ${LAMBDA_TASK_ROOT}
 # Tabula has a peer dependency on java
 RUN yum -y install java-17-amazon-corretto-headless && pip install -r requirements.txt 
 
+# Set JAVA_HOME environment variable
+ENV JAVA_HOME /usr/lib/jvm/java-17-amazon-corretto
+ENV PATH "$JAVA_HOME/bin:$PATH"
+
 # Copy function code
 COPY index.py ${LAMBDA_TASK_ROOT}
 
