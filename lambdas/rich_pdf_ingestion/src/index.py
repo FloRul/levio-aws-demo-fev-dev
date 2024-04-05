@@ -2,7 +2,7 @@ import tabula
 import os
 import boto3
 from pypdf import PdfReader
-import json
+from botocore.exceptions import NoCredentialsError, BotoCoreError, ClientError
 
 
 OBJECT_CREATED = "ObjectCreated"
@@ -30,17 +30,17 @@ def fetch_file(bucket, key):
     s3 = boto3.client("s3")
     local_filename = f"/tmp/{key.split('/')[-1]}"
 
-
-    s3.download_file(bucket, key, local_filename)
-    # except NoCredentialsError as e:
-    #     print(e)
-    #     raise e
-    # except BotoCoreError as e:
-    #     print(e)
-    #     raise e
-    # except ClientError as e:
-    #     print(e)
-    #     raise e
+    try:
+        s3.download_file(bucket, key, local_filename)
+    except NoCredentialsError as e:
+        print(e)
+        raise e
+    except BotoCoreError as e:
+        print(e)
+        raise e
+    except ClientError as e:
+        print(e)
+        raise e
     return local_filename
 
 
@@ -56,6 +56,7 @@ def lambda_handler(event, context):
 
             if eventName.startswith(OBJECT_CREATED):
                 local_filename = fetch_file(bucket, key)
+                
 
                 # collection_name = bucket + "-"
                 # collection_name += os.path.dirname(key).replace("/", "-")
