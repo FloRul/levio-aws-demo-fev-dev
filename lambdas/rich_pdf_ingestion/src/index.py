@@ -44,14 +44,14 @@ def fetch_file(bucket, key):
     return local_filename
 
 def upload_text(extracted_text, bucket, key):
-    file_name = key.split('/')[-1].split('.')[0]
-    local_filename = f"/tmp/{file_name}_pdf_extracted_text.txt"
+    file_name = key.split('/')[-1].split('.')[0]+"_pdf_extracted_text.txt"
+    local_file_path = "/tmp/"+file_name
 
-    with open(local_filename, "w") as f:
+    with open(local_file_path, "w") as f:
         f.write(extracted_text)
 
     try:
-        s3.upload_file(local_filename, bucket+'/pdf_extracted_text', file_name)
+        s3.upload_file(local_file_path, bucket+'/pdf_extracted_text', file_name)
     except Exception as e:
         print(e)
         raise e
