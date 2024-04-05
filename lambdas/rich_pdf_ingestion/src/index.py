@@ -46,7 +46,7 @@ def fetch_file(bucket, key):
 
 def lambda_handler(event, context):
     print(event)
-    records = json.loads(event["Records"])
+    records = event["Records"]
     for record in records:
         eventName = record["eventName"]
         print(f"eventName: {eventName}")
