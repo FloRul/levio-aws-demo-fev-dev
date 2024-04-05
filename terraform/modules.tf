@@ -229,4 +229,5 @@ module "rich_pdf_ingestion" {
   source                 = "../lambdas/rich_pdf_ingestion"
   aws_region             = var.aws_region
   lambda_repository_name = var.rich_pdf_ingestion_repository_name
+  ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
 }
