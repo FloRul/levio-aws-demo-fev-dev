@@ -59,7 +59,7 @@ def upload_text(extracted_text, bucket, key):
 def lambda_handler(event, context): 
     print(event)
     records = event["Records"]
-    print(tabula.environment_info())
+
     for record in records:
         eventName = record["eventName"]
         print(f"eventName: {eventName}")
@@ -73,7 +73,7 @@ def lambda_handler(event, context):
                 print("Extracting text from pdf")
                 document_text = generate_text_form_pdf(local_filename)
                 print("Finished extracting text from pdf")
-                upload_text(document_text, bucket)
+                upload_text(document_text, bucket, key)
 
         except Exception as e:
             print(e)
