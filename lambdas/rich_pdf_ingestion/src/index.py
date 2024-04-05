@@ -47,6 +47,7 @@ def fetch_file(bucket, key):
 def lambda_handler(event, context): 
     print(event)
     records = event["Records"]
+    print(tabula.environment_info())
     for record in records:
         eventName = record["eventName"]
         print(f"eventName: {eventName}")
