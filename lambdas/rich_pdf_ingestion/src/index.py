@@ -5,6 +5,7 @@ from pypdf import PdfReader
 from botocore.exceptions import NoCredentialsError, BotoCoreError, ClientError
 
 OBJECT_CREATED = "ObjectCreated"
+EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX = 'pdf_extracted_text'
 s3 = boto3.client("s3")
 
 
@@ -46,12 +47,13 @@ def fetch_file(bucket, key):
 def upload_text(extracted_text, bucket, key):
     file_name = key.split('/')[-1].split('.')[0]+"_pdf_extracted_text.txt"
     local_file_path = "/tmp/"+file_name
+    s3_object_key = f"{EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX}/{file_name}"
 
     with open(local_file_path, "w") as f:
         f.write(extracted_text)
 
     try:
-        s3.upload_file(local_file_path, bucket+'/pdf_extracted_text', file_name)
+        s3.upload_file(local_file_path, bucket, s3_object_key)
     except Exception as e:
         print(e)
         raise e
