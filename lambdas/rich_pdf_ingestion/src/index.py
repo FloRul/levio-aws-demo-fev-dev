@@ -60,7 +60,7 @@ def lambda_handler(event, context):
                 local_filename = fetch_file(bucket, key)
                 print("Extracting text from pdf")
                 document_text = generate_text_form_pdf(local_filename)
-                print(f"Extracted: {document_text}")
+                print("Finished extracting text from pdf")
 
         except Exception as e:
             print(e)
