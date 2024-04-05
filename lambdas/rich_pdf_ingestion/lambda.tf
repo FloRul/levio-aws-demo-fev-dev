@@ -48,7 +48,7 @@ module "lambda_function_container_image" {
         "logs:PutLogEvents",
       ]
     }
-    
+
     s3 = {
       effect = "Allow"
       actions = [
@@ -60,11 +60,20 @@ module "lambda_function_container_image" {
         "s3-object-lambda:List*",
         "s3-object-lambda:WriteGetObjectResponse"
       ]
-      
+
       resources = [
         var.ses_bucket_arn,
         "${var.ses_bucket_arn}/*"
       ]
+    }
+  }
+
+  create_current_version_allowed_triggers = false
+
+  allowed_triggers = {
+    s3 = {
+      principal  = "s3.amazonaws.com"
+      source_arn = var.ses_bucket_arn
     }
   }
 }
