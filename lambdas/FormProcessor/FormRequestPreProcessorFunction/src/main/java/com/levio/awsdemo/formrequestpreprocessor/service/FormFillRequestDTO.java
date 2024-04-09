@@ -14,19 +14,19 @@ public class FormFillRequestDTO {
     /**
      * The key to the attachment to parse
      */
-    String attachmentKey;
+    String formS3URI;
 
-    public FormFillRequestDTO(String emailId, String formKey, String attachmentKey) {
+    public FormFillRequestDTO(String emailId, String formKey, String formS3ObjectKey) {
         this.emailId = emailId;
         this.formKey = formKey;
-        this.attachmentKey = attachmentKey;
+        this.formS3URI = formS3URI;
     }
 
     public String toJson() {
         return "{" +
                 "\"emailId\":\"" + emailId + "\"," +
                 "\"formKey\":\"" + formKey + "\"," +
-                "\"attachmentKey\":\"" + attachmentKey + "\"" +
+                "\"formS3URI\":\"" + formS3URI + "\"" +
                 "}";
     }
 }

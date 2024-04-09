@@ -22,6 +22,9 @@ locals {
   resume_request_processor_queue_name     = "levio-demo-fev-resume-request-processor-queue-dev"
   form_request_processor_queue_name       = "levio-demo-fev-form-request-processor-queue-dev"
   form_request_processor_lambda_name      = "levio-demo-fev-form-request-processor-dev"
+  form_s3_uri                             = "s3://levio-demo-fev-esta-ses-bucket-dev/formulaire/standard/formulaire.docx"
+  rfp_form_s3_uri                         = "s3://levio-demo-fev-esta-ses-bucket-dev/rfp/standard/rfp.docx"
+  rfp_form_request_preprocessor_lambda_name = "levio-demo-fev-rfp-form-request-preprocessor-dev"
 }
 
 module "ingestion" {
@@ -217,6 +220,7 @@ module "form_request_preprocessor" {
   ses_bucket_arn        = module.s3_bucket.s3_bucket_arn
   request_queue_arn     = module.form_request_processor.queue_arn
   queue_url             = module.form_request_processor.queue_url
+  form_s3_uri           = local.form_s3_uri
 }
 
 module "email_receipt_confirmation" {
@@ -230,4 +234,14 @@ module "rich_pdf_ingestion" {
   aws_region             = var.aws_region
   lambda_repository_name = var.rich_pdf_ingestion_repository_name
   ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+}
+
+module "rfp_form_request_preprocessor" {
+  source                = "../lambdas/FormProcessor/FormRequestPreProcessorFunction/iac"
+  lambda_function_name  = local.rfp_form_request_preprocessor_lambda_name
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
+  ses_bucket_arn        = module.s3_bucket.s3_bucket_arn
+  request_queue_arn     = module.form_request_processor.queue_arn
+  queue_url             = module.form_request_processor.queue_url
+  form_s3_uri           = local.rfp_form_s3_uri
 }

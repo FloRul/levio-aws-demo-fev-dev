@@ -43,6 +43,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     lambda_function_arn = module.transcription_processor.lambda_function_arn
     events              = ["s3:ObjectCreated:*"]
     filter_prefix       = "resume/attachment/"
+    
   }
 
   lambda_function {

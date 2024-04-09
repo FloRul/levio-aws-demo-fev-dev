@@ -65,9 +65,9 @@ public class App implements RequestHandler<SQSEvent, Void> {
             }
 
             var emailId = formFillRequest.getEmailId();
-            var attachmentKey = formFillRequest.getAttachmentKey();
             var formKey = formFillRequest.getFormKey();
-            var questionsMapper = retrieveDocumentMapper(formKey);
+            var formS3URI = formFillRequest.getFormS3URI();
+            var questionsMapper = retrieveDocumentMapper(formS3URI);
 
             String email = s3Service.getFile(formKey + "/email/" + formFillRequest.getEmailId());
             try {
@@ -76,7 +76,7 @@ public class App implements RequestHandler<SQSEvent, Void> {
                 String sender = ((InternetAddress) message.getFrom()[0]).getAddress();
                 String subject = message.getSubject();
 
-                String content = s3Service.getFile(attachmentKey);
+                String content = s3Service.getFile(formS3URI);
 
                 questionsMapper.entrySet().parallelStream()
                         .forEach(positionQuestionAnswerMapper -> {
@@ -85,7 +85,7 @@ public class App implements RequestHandler<SQSEvent, Void> {
                             String answer = claudeService.getResponse(questionAnswerMap.get("question"), content);
                             questionAnswerMap.put("answer", answer);
                         });
-                ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper, formKey);
+                ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper, formS3URI);
                 String formDocxUri = s3Service.saveFile(formKey+"/" + emailId + ".docx", fileOutputStream.toByteArray());
                 sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, formDocxUri), emailId);
             } catch (IOException | MessagingException e) {
@@ -118,9 +118,9 @@ public class App implements RequestHandler<SQSEvent, Void> {
         return messageAttributes;
     }
 
-    private HashMap<Integer, Map<String, String>> retrieveDocumentMapper(String formKey) {
+    private HashMap<Integer, Map<String, String>> retrieveDocumentMapper(String formUri) {
         try {
-            return documentService.retrieveQuestionsMapper(formKey);
+            return documentService.retrieveQuestionsMapper(formUri);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

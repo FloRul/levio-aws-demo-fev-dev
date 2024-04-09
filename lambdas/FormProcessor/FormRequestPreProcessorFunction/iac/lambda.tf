@@ -16,6 +16,7 @@ module "lambda_function_container_image" {
 
   environment_variables = {
     QUEUE_URL = var.queue_url
+    FORM_S3_URI = var.form_s3_uri
   }
 
   policy_statements = {

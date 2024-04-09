@@ -5,6 +5,7 @@ from pypdf import PdfReader
 
 OBJECT_CREATED = "ObjectCreated"
 EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX = 'pdf_extraction_result'
+PATH_TO_WRITE_FILES = "/tmp"
 s3 = boto3.client("s3")
 
 
@@ -29,7 +30,7 @@ def get_bucket_and_key(record):
 
 
 def fetch_file(bucket, key):
-    local_filename = f"/tmp/{key.split('/')[-1]}"
+    local_filename = f"{PATH_TO_WRITE_FILES}/{key.split('/')[-1]}"
     s3.download_file(bucket, key, local_filename)
     return local_filename
 
@@ -39,7 +40,7 @@ def upload_text(extracted_text, bucket, key):
         os.path.basename(key)
     )[0] + "_pdf_extracted_text.txt"
 
-    local_file_path = "/tmp/" + file_name
+    local_file_path = f"{PATH_TO_WRITE_FILES}/{file_name}"
 
     # build a new object key in an adjacent folder
     parts = key.split('/')
