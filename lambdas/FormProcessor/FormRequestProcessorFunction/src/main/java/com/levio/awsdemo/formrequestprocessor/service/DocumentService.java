@@ -16,17 +16,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DocumentService {
 
-    private final static String STANDARD_FORM_FILE_KEY = "formulaire/standard/formulaire.docx";
-
-
     private final S3Service s3Service;
 
-    public HashMap<Integer, Map<String, String>> retrieveQuestionsMapper(String formKey) throws IOException {
+    public HashMap<Integer, Map<String, String>> retrieveQuestionsMapper(String formUri) throws IOException {
         HashMap<Integer, Map<String, String>> questionsMapper = new HashMap<>();
 
-        var formDocumentPath = getFormPath(formKey);
 
-        InputStream fileInputStream = s3Service.getInputFileStream(formDocumentPath);
+        InputStream fileInputStream = s3Service.getInputFileStream(formUri);
         try (XWPFDocument document = new XWPFDocument(fileInputStream)) {
 
             List<XWPFParagraph> paragraphs = document.getParagraphs();
@@ -49,9 +45,9 @@ public class DocumentService {
         return questionsMapper;
     }
 
-    public ByteArrayOutputStream fillFile(HashMap<Integer, Map<String, String>> questionsMapper, String formKey) throws IOException {
-        var formDocumentPath = getFormPath(formKey);
-        InputStream fileInputStream = s3Service.getInputFileStream(formDocumentPath);
+    public ByteArrayOutputStream fillFile(HashMap<Integer, Map<String, String>> questionsMapper, String formUri)
+            throws IOException {
+        InputStream fileInputStream = s3Service.getInputFileStream(formUri);
 
         try (XWPFDocument document = new XWPFDocument(fileInputStream)) {
             questionsMapper.entrySet().stream()
@@ -68,9 +64,5 @@ public class DocumentService {
             document.write(outputStream);
             return outputStream;
         }
-    }
-
-    private String getFormPath(String formKey) {
-        return formKey + "/standard/" + formKey + ".docx";
     }
 }
