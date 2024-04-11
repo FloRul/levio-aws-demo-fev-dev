@@ -6,8 +6,8 @@ from pypdf import PdfReader
 OBJECT_CREATED = "ObjectCreated"
 EXTRACTED_TEXT_S3_OBJECT_KEY_PREFIX = 'pdf_extraction_result'
 PATH_TO_WRITE_FILES = "/tmp"
+S3_EXTRACTED_FILES_FOLDER_URI = os.environ.get('S3_EXTRACTED_FILES_FOLDER_URI')
 s3 = boto3.client("s3")
-
 
 def extract_text_from_pdf(pdf_file_path):
     text = ""
