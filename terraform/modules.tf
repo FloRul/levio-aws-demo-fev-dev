@@ -245,3 +245,9 @@ module "rfp_form_request_preprocessor" {
   queue_url             = module.form_request_processor.queue_url
   form_s3_uri           = local.rfp_form_s3_uri
 }
+
+module "step_function_invoker" {
+  source = "../lambdas/step_function_invoker"
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
+  aws_region            = var.aws_region
+}
