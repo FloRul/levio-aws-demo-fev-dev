@@ -12,9 +12,9 @@ locals {
 }
 
 resource "aws_lambda_permission" "ses" {
-  action         = "lambda:InvokeFunction"
-  function_name  = module.email_receipt_confirmation.lambda_function_arn
-  principal      = "ses.amazonaws.com"
+  action        = "lambda:InvokeFunction"
+  function_name = module.email_receipt_confirmation.lambda_function_arn
+  principal     = "ses.amazonaws.com"
 }
 
 resource "aws_ses_receipt_rule_set" "main_rule_set" {
@@ -84,6 +84,11 @@ resource "aws_ses_receipt_rule" "rfp_rule" {
     bucket_name       = module.s3_bucket.s3_bucket_id
     object_key_prefix = local.rfp_key_prefix
     position          = 1
+  }
+
+  lambda_action {
+    function_arn = module.step_function_invoker.lambda_function_arn
+    position     = 2
   }
 }
 

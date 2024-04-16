@@ -36,14 +36,21 @@ module "lambda_function_container_image" {
 
     log_write = {
       effect = "Allow"
-
       resources = [
         "arn:aws:logs:*:*:log-group:/aws/${local.lambda_function_name}/*:*"
       ]
-
       actions = [
         "logs:CreateLogStream",
         "logs:PutLogEvents",
+      ]
+    }
+
+    step_functions = {
+      effect    = "Allow"
+      resources = ["*"]
+      actions = [
+        "states:ListStateMachines",
+        "states:StartExecution"
       ]
     }
   }
