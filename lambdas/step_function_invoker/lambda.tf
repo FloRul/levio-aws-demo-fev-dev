@@ -23,6 +23,10 @@ module "lambda_function_container_image" {
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
 
+  environment_variables = {
+    STATE_MACHINE_ARN = var.state_machine_arn
+  }
+
   policy_statements = {
     log_group = {
       effect = "Allow"

@@ -1,29 +1,29 @@
 locals {
-  memory_lambda_name                      = "levio-demo-fev-memory-dev"
-  dynamo_history_table_name               = "levio-demo-fev-chat-history-dev"
-  storage_bucket_name                     = "levio-demo-fev-storage-dev"
-  queue_name                              = "levio-demo-fev-ingestion-queue-dev"
-  ingestion_lambda_name                   = "levio-demo-fev-ingestion-dev"
-  inference_lambda_name                   = "levio-demo-fev-inference-dev"
-  list_collections_lambda_name            = "levio-demo-fev-list-collections-dev"
-  lex_router_lambda_name                  = "levio-demo-fev-lex-router-dev"
-  email_request_preprocessor_lambda_name  = "levio-demo-fev-email-request-preprocessor-dev"
-  email_request_processor_lambda_name     = "levio-demo-fev-email-request-processor-dev"
-  email_request_processor_queue_name      = "levio-demo-fev-email-request-processor-queue-dev"
-  email_response_processor_lambda_name    = "levio-demo-fev-email-response-processor-dev"
-  email_response_processor_queue_name     = "levio-demo-fev-email-response-processor-queue-dev"
-  attachment_saver_lambda_name            = "levio-demo-fev-attachment-saver-dev"
-  transcription_processor_lambda_name     = "levio-demo-fev-transcription-processor-dev"
-  resume_lambda_name                      = "levio-demo-fev-resume-dev"
-  resume_request_processor_lambda_name    = "levio-demo-fev-resume-request-processor-dev"
-  resume_request_preprocessor_lambda_name = "levio-demo-fev-resume-request-preprocessor-dev"
-  form_request_preprocessor_lambda_name   = "levio-demo-fev-form-request-preprocessor-dev"
-  transcription_formatter_lambda_name     = "levio-demo-fev-transcription-formatter-dev"
-  resume_request_processor_queue_name     = "levio-demo-fev-resume-request-processor-queue-dev"
-  form_request_processor_queue_name       = "levio-demo-fev-form-request-processor-queue-dev"
-  form_request_processor_lambda_name      = "levio-demo-fev-form-request-processor-dev"
-  form_s3_uri                             = "s3://levio-demo-fev-esta-ses-bucket-dev/formulaire/standard/formulaire.docx"
-  rfp_form_s3_uri                         = "s3://levio-demo-fev-esta-ses-bucket-dev/rfp/standard/rfp.docx"
+  memory_lambda_name                        = "levio-demo-fev-memory-dev"
+  dynamo_history_table_name                 = "levio-demo-fev-chat-history-dev"
+  storage_bucket_name                       = "levio-demo-fev-storage-dev"
+  queue_name                                = "levio-demo-fev-ingestion-queue-dev"
+  ingestion_lambda_name                     = "levio-demo-fev-ingestion-dev"
+  inference_lambda_name                     = "levio-demo-fev-inference-dev"
+  list_collections_lambda_name              = "levio-demo-fev-list-collections-dev"
+  lex_router_lambda_name                    = "levio-demo-fev-lex-router-dev"
+  email_request_preprocessor_lambda_name    = "levio-demo-fev-email-request-preprocessor-dev"
+  email_request_processor_lambda_name       = "levio-demo-fev-email-request-processor-dev"
+  email_request_processor_queue_name        = "levio-demo-fev-email-request-processor-queue-dev"
+  email_response_processor_lambda_name      = "levio-demo-fev-email-response-processor-dev"
+  email_response_processor_queue_name       = "levio-demo-fev-email-response-processor-queue-dev"
+  attachment_saver_lambda_name              = "levio-demo-fev-attachment-saver-dev"
+  transcription_processor_lambda_name       = "levio-demo-fev-transcription-processor-dev"
+  resume_lambda_name                        = "levio-demo-fev-resume-dev"
+  resume_request_processor_lambda_name      = "levio-demo-fev-resume-request-processor-dev"
+  resume_request_preprocessor_lambda_name   = "levio-demo-fev-resume-request-preprocessor-dev"
+  form_request_preprocessor_lambda_name     = "levio-demo-fev-form-request-preprocessor-dev"
+  transcription_formatter_lambda_name       = "levio-demo-fev-transcription-formatter-dev"
+  resume_request_processor_queue_name       = "levio-demo-fev-resume-request-processor-queue-dev"
+  form_request_processor_queue_name         = "levio-demo-fev-form-request-processor-queue-dev"
+  form_request_processor_lambda_name        = "levio-demo-fev-form-request-processor-dev"
+  form_s3_uri                               = "s3://levio-demo-fev-esta-ses-bucket-dev/formulaire/standard/formulaire.docx"
+  rfp_form_s3_uri                           = "s3://levio-demo-fev-esta-ses-bucket-dev/rfp/standard/rfp.docx"
   rfp_form_request_preprocessor_lambda_name = "levio-demo-fev-rfp-form-request-preprocessor-dev"
 }
 
@@ -247,7 +247,13 @@ module "rfp_form_request_preprocessor" {
 }
 
 module "step_function_invoker" {
-  source = "../lambdas/step_function_invoker"
+  source                = "../lambdas/step_function_invoker"
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   aws_region            = var.aws_region
+  state_machine_arn     = module.email_formfiller_state_machine.arn
+}
+
+module "email_formfiller_state_machine" {
+  source                       = "../state_machines/email_form_fill"
+  attachment_saver_lambda_name = module.attachment_saver.lambda_function_name
 }
