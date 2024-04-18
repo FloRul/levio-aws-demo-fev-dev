@@ -250,7 +250,7 @@ module "step_function_invoker" {
   source                = "../lambdas/step_function_invoker"
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   aws_region            = var.aws_region
-  state_machine_arn     = module.email_formfiller_state_machine.arn
+  state_machine_arn     = module.email_formfiller_state_machine.state_machine_arn
 }
 
 module "email_formfiller_state_machine" {
