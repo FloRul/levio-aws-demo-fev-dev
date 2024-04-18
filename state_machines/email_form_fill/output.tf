@@ -1,3 +1,3 @@
 output "state_machine_arn" {
-  value = module.aws_sfn_state_machine.arn
+  value = aws_sfn_state_machine.sfn_state_machine.arn
 }
