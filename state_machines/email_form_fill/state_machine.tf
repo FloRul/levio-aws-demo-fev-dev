@@ -12,16 +12,24 @@ resource "aws_iam_role" "iam_for_sfn" {
         "Effect": "Allow",
         "Sid": ""
       },
+  
+    ]
+  }
+  EOF
+}
+
+resource "aws_iam_role_policy" "sfn_lambda_s3_access" {
+  name   = "sfn_lambda_s3_access"
+  role   = aws_iam_role.iam_for_sfn.id
+
+  policy = <<EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
       {
         "Effect": "Allow",
         "Action": [
-          "lambda:InvokeFunction"
-        ],
-        "Resource": "*"
-      },
-      {
-        "Effect": "Allow",
-        "Action": [
+          "lambda:InvokeFunction",
           "s3:PutObject",
           "s3:GetObject",
           "s3:AbortMultipartUpload",
