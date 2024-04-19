@@ -1,7 +1,13 @@
 package com.levio.awsdemo.attachmentsaver.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Properties;
+
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
 import com.levio.awsdemo.attachmentsaver.util.EmailUtils;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.Part;
 import jakarta.mail.Session;
@@ -14,11 +20,6 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Properties;
 
 public class S3Service {
 
@@ -45,18 +46,20 @@ public class S3Service {
         return EmailUtils.extractAttachments(message);
     }
 
-    public void saveAttachment(Part part, S3EventNotification.S3Entity s3Entity) throws MessagingException, IOException {
+    public PutObjectResponse saveAttachment(Part part, S3EventNotification.S3Entity s3Entity) throws MessagingException, IOException {
         try (InputStream inputStream = part.getInputStream()) {
             String key = getKey(part, s3Entity);
-            PutObjectResponse objectResponse = s3.putObject(
-                    PutObjectRequest.builder()
-                            .bucket(s3Entity.getBucket().getName())
-                            .key(key)
-                            .build(),
-                    RequestBody.fromBytes(inputStream.readAllBytes()));
+            var attachment =  RequestBody.fromBytes(inputStream.readAllBytes());
+            var putRequest =  PutObjectRequest.builder()
+                .bucket(s3Entity.getBucket().getName())
+                .key(key)
+                .build();
+            PutObjectResponse objectResponse = s3.putObject(putRequest, attachment);
             if (objectResponse.sdkHttpResponse().isSuccessful()) {
                 System.out.println("File " + key + " created" );
             }
+
+            return objectResponse;
         }
     }
 
