@@ -21,18 +21,21 @@ def lambda_handler(event, context):
             input=event,
         )
 
+        logger.info(state_machine_execution_result)
         return {
             "statusCode": 200,
             "body": json.dumps(state_machine_execution_result),
         }
-    
+
     except ParamValidationError as e:
+        logger.error(e)
         return {
             "statusCode": 400,
             "body": json.dumps({"error": "Parameter validation error", "details": str(e)}),
         }
-    
+
     except Exception as e:
+        logger.error(e)
         return {
             "statusCode": 400,
             "body": json.dumps(e),

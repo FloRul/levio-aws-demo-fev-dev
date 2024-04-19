@@ -12,16 +12,28 @@ def lambda_handler(event, context):
     """
     This lambda saves email attachments to S3. 
 
-    It expects to receive the s3 bucket and folder where the attachments will be saved
+    It expects the following event structure:
+    {
+        "bucket": "the s3 bucket to store the attachments in",
+        "s3_folder": "s3 folder to store the attachments in",
+        "Records": [
+            {
+                "ses": {
+                    "mail": {
+                        "content": "base64 encoded email"
+                    }
+                }
+            }
+        ]
+    }
+
+    Returns: A dictionary containing the status code, a message, and the list of attachment ARNs
     """
-    
     logger.info(event)
     bucket = event['bucket']
     s3_folder = event['s3_folder']
     raw_email_data = event['Records'][0]['ses']['mail']['content']
-    
     msg = email.message_from_bytes(base64.b64decode(raw_email_data))
-
 
     attachment_arns = []
 
