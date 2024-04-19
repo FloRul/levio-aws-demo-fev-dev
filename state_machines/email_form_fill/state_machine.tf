@@ -1,34 +1,42 @@
 resource "aws_iam_role" "iam_for_sfn" {
-  name               = "my_role"
-  assume_role_policy = <<EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Action": "sts:AssumeRole",
-        "Principal": {
-          "Service": "states.amazonaws.com"
+  name = "my_role"
+  assume_role_policy = jsondecode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : "sts:AssumeRole",
+          "Principal" : {
+            "Service" : "states.amazonaws.com"
+          },
+          "Effect" : "Allow",
+          "Sid" : ""
         },
-        "Effect": "Allow",
-        "Sid": ""
-      },
-      {
-        "Effect": "Allow",
-        "Action": [
-          "lambda:InvokeFunction"
-        ],
-        "Resource": "*"
-      },
-      {
-        "Effect": "Allow",
-        "Action": [
-          "s3:PutObject"
-        ],
-        "Resource": "arn:aws:s3:::*/*"
-      }
-    ]
-  }
-  EOF
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "lambda:InvokeFunction"
+          ],
+          "Resource" : "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:AbortMultipartUpload",
+                "s3:ListBucket",
+                "s3:DeleteObject",
+                "s3:GetObjectVersion",
+                "s3:ListMultipartUploadParts"
+            ],
+            "Resource": [
+                "arn:aws:s3:::*/*"
+            ]
+        }
+      ]
+    }
+  )
 }
 
 
