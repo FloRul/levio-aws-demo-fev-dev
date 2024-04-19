@@ -8,7 +8,7 @@ logger = Logger()
 metrics = Metrics()
 
 step_functions_client = boto3.client("stepfunctions")
-STATE_MACHINE_ARN = os.environ.get("STATE_MACHINE_ARN"),
+STATE_MACHINE_ARN = os.environ.get("STATE_MACHINE_ARN")
 
 
 @metrics.log_metrics
@@ -17,7 +17,7 @@ def lambda_handler(event, context):
 
     try:
         state_machine_execution_result = step_functions_client.start_execution(
-            stateMachineArn=STATE_MACHINE_ARN[0],
+            stateMachineArn=STATE_MACHINE_ARN,
             input=event,
         )
 
