@@ -58,8 +58,8 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
         "Next" : "Lambda Invoke",
         "Parameters" : {
           "Body" : {
-            "sender_email" : "joel.balcaen@levio.ca",
-            "destination_email" : "bla",
+            "sender_email" : "$.ses.mail.source",
+            "destination_email" : "$.ses.mail.destination",
             "prompts" : [
               {
                 "key" : "A",
