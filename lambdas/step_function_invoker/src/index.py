@@ -17,7 +17,7 @@ def lambda_handler(event, context):
 
     try:
         state_machine_execution_result = step_functions_client.start_execution(
-            stateMachineArn=STATE_MACHINE_ARN,
+            stateMachineArn=STATE_MACHINE_ARN[0],
             input=event,
         )
 
