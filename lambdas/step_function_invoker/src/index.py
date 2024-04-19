@@ -13,12 +13,16 @@ STATE_MACHINE_ARN = os.environ.get("STATE_MACHINE_ARN")
 
 @metrics.log_metrics
 def lambda_handler(event, context):
+    """
+    This function is responsible for invoking the state machine with the given event.
+    The state machine arn is defined in the environment variable STATE_MACHINE_ARN.
+    """
     logger.info(event)
 
     try:
         state_machine_execution_result = step_functions_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,
-            input=event,
+            input=json.dumps(event),
         )
 
         logger.info(state_machine_execution_result)
