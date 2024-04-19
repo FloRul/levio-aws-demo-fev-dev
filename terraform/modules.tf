@@ -256,7 +256,7 @@ module "step_function_invoker" {
 module "email_formfiller_state_machine" {
   source                       = "../state_machines/email_form_fill"
   attachment_saver_lambda_name = module.attachment_saver.lambda_function_name
-  workspace_bucket_name        = module.s3_bucket.s3_bucket_arn
+  workspace_bucket_name        = module.s3_bucket.s3_bucket_id
 }
 
 
