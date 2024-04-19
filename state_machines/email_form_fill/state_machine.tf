@@ -69,7 +69,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
             }
           ]
         },
-        "Bucket": "${var.workspace_bucket_name}",
+        "Bucket": "MyData",
         "Key": "MyData"
       },
       "Resource": "arn:aws:states:::aws-sdk:s3:putObject"
@@ -80,7 +80,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
       "OutputPath": "$.Payload",
       "Parameters": {
         "Payload.$": "$",
-        "FunctionName": "${var.attachment_saver_lambda_name}",
+        "FunctionName": "levio-demo-fev-attachment-saver-dev"
       },
       "Retry": [
         {
