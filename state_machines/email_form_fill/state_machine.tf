@@ -52,9 +52,9 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
   definition = <<EOF
 {
   "Comment": "A description of my state machine",
-  "StartAt": "Lambda Invoke",
+  "StartAt": "Store Email Medata",
   "States": {
-      "Store Email Medata": {
+    "Store Email Medata": {
       "Type": "Task",
       "Next": "Lambda Invoke",
       "Parameters": {
@@ -80,7 +80,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
       "OutputPath": "$.Payload",
       "Parameters": {
         "Payload.$": "$",
-        "FunctionName": "${var.attachment_saver_lambda_name}"
+        "FunctionName": "${var.attachment_saver_lambda_name}",
       },
       "Retry": [
         {
