@@ -3,12 +3,21 @@ import boto3
 import os
 from aws_lambda_powertools import Logger, Metrics
 from botocore.exceptions import ParamValidationError
+from datetime import date, datetime
 
 logger = Logger()
 metrics = Metrics()
 
 step_functions_client = boto3.client("stepfunctions")
 STATE_MACHINE_ARN = os.environ.get("STATE_MACHINE_ARN")
+DISABLE_EVENT_PASS_THROUGH = os.environ.get("DISABLE_EVENT_PASS_THROUGH", False)
+
+def json_serializer(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
 
 
 @metrics.log_metrics
@@ -16,13 +25,15 @@ def lambda_handler(event, context):
     """
     This function is responsible for invoking the state machine with the given event.
     The state machine arn is defined in the environment variable STATE_MACHINE_ARN.
+    The state machine can be invoked without passing the event to the state machine by setting the environment variable DISABLE_EVENT_PASS_THROUGH to True.
     """
     logger.info(event)
 
     try:
         state_machine_execution_result = step_functions_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,
-            input=json.dumps(event, default=str),
+            # default to str to get around the datetime serialization issue
+            input = json.dumps(event, default=json_serializer) if not DISABLE_EVENT_PASS_THROUGH else {},
         )
 
         logger.info(state_machine_execution_result)
@@ -37,7 +48,14 @@ def lambda_handler(event, context):
             "statusCode": 400,
             "body": json.dumps({"error": "Parameter validation error", "details": str(e)}),
         }
-
+    
+    except TypeError as e:
+        logger.error(e)
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "Type error", "details": str(e)}),
+        }
+    
     except Exception as e:
         logger.error(e)
         return {
