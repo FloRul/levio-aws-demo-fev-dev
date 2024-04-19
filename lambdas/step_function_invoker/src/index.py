@@ -22,7 +22,7 @@ def lambda_handler(event, context):
     try:
         state_machine_execution_result = step_functions_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,
-            input=json.dumps(event),
+            input=json.dumps(event, default=str),
         )
 
         logger.info(state_machine_execution_result)
