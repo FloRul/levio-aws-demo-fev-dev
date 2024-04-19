@@ -18,6 +18,13 @@ resource "aws_iam_role" "iam_for_sfn" {
           "lambda:InvokeFunction"
         ],
         "Resource": "*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:PutObject"
+        ],
+        "Resource": "arn:aws:s3:::*/*"
       }
     ]
   }
@@ -33,6 +40,26 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
   "Comment": "A description of my state machine",
   "StartAt": "Lambda Invoke",
   "States": {
+      "Store Email Medata": {
+      "Type": "Task",
+      "Next": "Lambda Invoke",
+      "Parameters": {
+        "Body": {
+          "sender_email": "joel.balcaen@levio.ca",
+          "destination_email": "bla",
+          "prompts": [
+            {
+              "key": "A",
+              "prompt": "",
+              "answer": ""
+            }
+          ]
+        },
+        "Bucket": "${var.workspace_bucket_name}",
+        "Key": "MyData"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:s3:putObject"
+    },
     "Lambda Invoke": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",

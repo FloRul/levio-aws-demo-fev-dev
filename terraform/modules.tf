@@ -256,6 +256,7 @@ module "step_function_invoker" {
 module "email_formfiller_state_machine" {
   source                       = "../state_machines/email_form_fill"
   attachment_saver_lambda_name = module.attachment_saver.lambda_function_name
+  workspace_bucket_name        = module.s3_bucket.s3_bucket_arn
 }
 
 
@@ -263,6 +264,6 @@ module "email_attachment_saver" {
   source                = "../lambdas/email_attachment_saver"
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   aws_region            = var.aws_region
-  allowed_s3_resources = [module.s3_bucket.s3_bucket_arn]
+  allowed_s3_resources  = [module.s3_bucket.s3_bucket_arn]
 }
 
