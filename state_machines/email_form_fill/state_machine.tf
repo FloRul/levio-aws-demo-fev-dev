@@ -37,7 +37,7 @@ resource "aws_iam_role_policy" "sfn_lambda_s3_access" {
                     "s3:ListMultipartUploadParts"
                 ],
                 "Resource": [
-                    "arn:aws:s3:::*/*",
+                    "arn:aws:s3:::*/*"
                 ]
             }
         ]
