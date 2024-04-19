@@ -60,7 +60,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
           "Body" : {
             "sender_email.$" : "$.Records[0].ses.mail.source",
             "destination_email.$" : "$.Records[0].ses.mail.destination",
-            "email_id.$" : "$.Records[0].ses.mail.source",
+            "email_id.$" : "$.Records[0].ses.mail.messageId",
             "prompts" : [
               {
                 "key" : "A",
@@ -70,8 +70,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
             ]
           },
           "Bucket" : var.workspace_bucket_name,
-          "Key" : "MyData"
-        },
+        "Key.$" : "States.Format('{}.email', $.Records[0].ses.mail.messageId)", },
         "Resource" : "arn:aws:states:::aws-sdk:s3:putObject"
       },
       "Lambda Invoke" : {
