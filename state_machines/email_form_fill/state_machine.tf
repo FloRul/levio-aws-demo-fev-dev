@@ -11,6 +11,13 @@ resource "aws_iam_role" "iam_for_sfn" {
         },
         "Effect": "Allow",
         "Sid": ""
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "lambda:InvokeFunction"
+        ],
+        "Resource": "*"
       }
     ]
   }
@@ -19,8 +26,8 @@ resource "aws_iam_role" "iam_for_sfn" {
 
 
 resource "aws_sfn_state_machine" "sfn_state_machine" {
-  name     = "my-state-machine"
-  role_arn = aws_iam_role.iam_for_sfn.arn
+  name       = "my-state-machine"
+  role_arn   = aws_iam_role.iam_for_sfn.arn
   definition = <<EOF
 {
   "Comment": "A description of my state machine",
