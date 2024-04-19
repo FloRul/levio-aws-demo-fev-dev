@@ -27,8 +27,8 @@ def lambda_handler(event, context):
     The state machine arn is defined in the environment variable STATE_MACHINE_ARN.
     """
     logger.info(event)
-
     try:
+
         state_machine_execution_result = step_functions_client.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,
             # default to str to get around the datetime serialization issue
@@ -38,7 +38,7 @@ def lambda_handler(event, context):
         logger.info(state_machine_execution_result)
         return {
             "statusCode": 200,
-            "body": json.dumps(state_machine_execution_result),
+            "body": json.dumps(state_machine_execution_result, default=json_serializer),
         }
 
     except (ParamValidationError, TypeError, Exception) as e:
