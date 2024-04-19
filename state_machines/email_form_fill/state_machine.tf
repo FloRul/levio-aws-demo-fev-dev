@@ -58,8 +58,9 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
         "Next" : "Lambda Invoke",
         "Parameters" : {
           "Body" : {
-            "sender_email" : "$.ses.mail.source",
-            "destination_email" : "$.ses.mail.destination",
+            "sender_email.$" : "$.ses.mail.source",
+            "destination_email.$" : "$.ses.mail.destination",
+            "email_id.$" : "$.ses.mail.messageId",
             "prompts" : [
               {
                 "key" : "A",
