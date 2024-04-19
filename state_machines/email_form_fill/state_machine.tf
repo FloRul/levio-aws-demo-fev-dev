@@ -18,8 +18,8 @@ resource "aws_iam_role" "iam_for_sfn" {
 }
 
 resource "aws_iam_role_policy" "sfn_lambda_s3_access" {
-  name   = "sfn_lambda_s3_access"
-  role   = aws_iam_role.iam_for_sfn.id
+  name = "sfn_lambda_s3_access"
+  role = aws_iam_role.iam_for_sfn.id
 
   policy = <<EOF
     {
@@ -47,57 +47,55 @@ resource "aws_iam_role_policy" "sfn_lambda_s3_access" {
 
 
 resource "aws_sfn_state_machine" "sfn_state_machine" {
-  name       = "my-state-machine"
-  role_arn   = aws_iam_role.iam_for_sfn.arn
-  definition = <<EOF
-{
-  "Comment": "A description of my state machine",
-  "StartAt": "Store Email Medata",
-  "States": {
-    "Store Email Medata": {
-      "Type": "Task",
-      "Next": "Lambda Invoke",
-      "Parameters": {
-        "Body": {
-          "sender_email": "joel.balcaen@levio.ca",
-          "destination_email": "bla",
-          "prompts": [
-            {
-              "key": "A",
-              "prompt": "",
-              "answer": ""
-            }
-          ]
+  name     = "my-state-machine"
+  role_arn = aws_iam_role.iam_for_sfn.arn
+  definition = jsonencode({
+    "Comment" : "A description of my state machine",
+    "StartAt" : "Store Email Medata",
+    "States" : {
+      "Store Email Medata" : {
+        "Type" : "Task",
+        "Next" : "Lambda Invoke",
+        "Parameters" : {
+          "Body" : {
+            "sender_email" : "joel.balcaen@levio.ca",
+            "destination_email" : "bla",
+            "prompts" : [
+              {
+                "key" : "A",
+                "prompt" : "",
+                "answer" : ""
+              }
+            ]
+          },
+          "Bucket" : var.workspace_bucket_name,
+          "Key" : "MyData"
         },
-        "Bucket": "MyData",
-        "Key": "MyData"
+        "Resource" : "arn:aws:states:::aws-sdk:s3:putObject"
       },
-      "Resource": "arn:aws:states:::aws-sdk:s3:putObject"
-    },
-    "Lambda Invoke": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke",
-      "OutputPath": "$.Payload",
-      "Parameters": {
-        "Payload.$": "$",
-        "FunctionName": "levio-demo-fev-attachment-saver-dev"
-      },
-      "Retry": [
-        {
-          "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException",
-            "Lambda.TooManyRequestsException"
-          ],
-          "IntervalSeconds": 1,
-          "MaxAttempts": 3,
-          "BackoffRate": 2
-        }
-      ],
-      "End": true
+      "Lambda Invoke" : {
+        "Type" : "Task",
+        "Resource" : "arn:aws:states:::lambda:invoke",
+        "OutputPath" : "$.Payload",
+        "Parameters" : {
+          "Payload.$" : "$",
+          "FunctionName" : var.attachment_saver_lambda_name
+        },
+        "Retry" : [
+          {
+            "ErrorEquals" : [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds" : 1,
+            "MaxAttempts" : 3,
+            "BackoffRate" : 2
+          }
+        ],
+        "End" : true
+      }
     }
-  }
-}
-EOF
+  })
 }
