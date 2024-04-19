@@ -31,13 +31,6 @@ public class App implements RequestHandler<S3EventNotification, String> {
     }
 
     public String handleRequest(final S3EventNotification input, final Context context) {
-        try {
-            String json = objectMapper.writeValueAsString(input);
-            System.out.println(json);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
         List<PutObjectResponse> responses = new ArrayList<>();
 
         input.getRecords().forEach(s3EventNotificationRecord -> {
@@ -57,9 +50,12 @@ public class App implements RequestHandler<S3EventNotification, String> {
         });
 
         try {
-            return objectMapper.writeValueAsString(
-                    new Response(200, responses.stream().map(PutObjectResponse::toString).toList())
-                );
+            var response = objectMapper.writeValueAsString(
+                new Response(200, responses.stream().map(PutObjectResponse::toString).toList())
+            );
+            System.out.println(response);
+            return response;
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             new Response(400, List.of("Error processing request"));

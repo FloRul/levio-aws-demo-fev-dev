@@ -35,7 +35,6 @@ public class S3Service {
                 .build();
 
         ResponseBytes<GetObjectResponse> objectBytes = s3.getObjectAsBytes(objectRequest);
-        System.out.println(new String(objectBytes.asByteArray()));
         InputStream inputStream = objectBytes.asInputStream();
 
         Properties props = new Properties();
