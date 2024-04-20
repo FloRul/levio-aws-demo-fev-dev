@@ -45,6 +45,28 @@ resource "aws_iam_role_policy" "sfn_lambda_s3_access" {
   EOF
 }
 
+resource "aws_iam_role_policy" "sfn_lambda_invoke_access" {
+  name = "sfn_lambda_invoke_access"
+  role = aws_iam_role.iam_for_sfn.id
+
+  policy = <<EOF
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "lambda:InvokeFunction"
+                ],
+                "Resource": [
+                    "arn:aws:lambda:*:*:function:*"
+                ]
+            }
+        ]
+    }
+  EOF
+}
+
 
 resource "aws_sfn_state_machine" "sfn_state_machine" {
   name     = "my-state-machine"
