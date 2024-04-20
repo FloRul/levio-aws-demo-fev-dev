@@ -50,52 +50,73 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
   name     = "my-state-machine"
   role_arn = aws_iam_role.iam_for_sfn.arn
   definition = jsonencode({
-    "Comment" : "A description of my state machine",
-    "StartAt" : "Store Email Medata",
-    "States" : {
-      "Store Email Medata" : {
-        "Type" : "Task",
-        "Next" : "Lambda Invoke",
-        "Parameters" : {
-          "Body" : {
-            "sender_email.$" : "$.Records[0].ses.mail.source",
-            "destination_email.$" : "$.Records[0].ses.mail.destination",
-            "email_id.$" : "$.Records[0].ses.mail.messageId",
-            "prompts" : [
-              {
-                "key" : "A",
-                "prompt" : "",
-                "answer" : ""
-              }
-            ]
-          },
-          "Bucket" : var.workspace_bucket_name,
-        "Key.$" : "States.Format('{}/email', $.Records[0].ses.mail.messageId)", },
-        "Resource" : "arn:aws:states:::aws-sdk:s3:putObject"
-      },
-      "Lambda Invoke" : {
-        "Type" : "Task",
-        "Resource" : "arn:aws:states:::lambda:invoke",
-        "OutputPath" : "$.Payload",
-        "Parameters" : {
-          "Payload.$" : "$",
-          "FunctionName" : var.attachment_saver_lambda_name
-        },
-        "Retry" : [
-          {
-            "ErrorEquals" : [
-              "Lambda.ServiceException",
-              "Lambda.AWSLambdaException",
-              "Lambda.SdkClientException",
-              "Lambda.TooManyRequestsException"
-            ],
-            "IntervalSeconds" : 1,
-            "MaxAttempts" : 3,
-            "BackoffRate" : 2
+  "Comment": "A description of my state machine",
+  "StartAt": "Parallel",
+  "States": {
+    "Parallel": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "Store Email Medata",
+          "States": {
+            "Store Email Medata": {
+              "Parameters": {
+                "Body": {
+                  "destination_email.$": "$.Records[0].ses.mail.destination",
+                  "email_id.$": "$.Records[0].ses.mail.messageId",
+                  "prompts": [
+                    {
+                      "answer": "",
+                      "key": "A",
+                      "prompt": ""
+                    }
+                  ],
+                  "sender_email.$": "$.Records[0].ses.mail.source"
+                },
+                "Bucket": var.workspace_bucket_name,
+                "Key.$": "States.Format('{}/email', $.Records[0].ses.mail.messageId)"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
+              "Type": "Task",
+              "End": true
+            }
           }
-        ],
-        "End" : true
-      }
+        },
+        {
+          "StartAt": "Extract and store email attachments in S3",
+          "States": {
+            "Extract and store email attachments in S3": {
+              "End": true,
+              "OutputPath": "$.Payload",
+              "Parameters": {
+                "FunctionName": var.attachment_saver_lambda_name,
+                "Payload": {
+                  "email_content.$": "$.Records[0].ses.mail.content",
+                  "s3_folder_key.$ ": "$.Records[0].ses.mail.messageId",
+                  "bucket": var.workspace_bucket_name
+                }
+              },
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Retry": [
+                {
+                  "BackoffRate": 2,
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 3
+                }
+              ],
+              "Type": "Task"
+            }
+          }
+        }
+      ],
+      "End": true
     }
-  })
+  }
+})
 }
