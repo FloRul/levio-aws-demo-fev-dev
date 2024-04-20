@@ -70,7 +70,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
             ]
           },
           "Bucket" : var.workspace_bucket_name,
-        "Key.$" : "States.Format('{}.email', $.Records[0].ses.mail.messageId)", },
+        "Key.$" : "States.Format('{}/email', $.Records[0].ses.mail.messageId)", },
         "Resource" : "arn:aws:states:::aws-sdk:s3:putObject"
       },
       "Lambda Invoke" : {
