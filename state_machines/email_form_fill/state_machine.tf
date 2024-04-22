@@ -110,6 +110,8 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
           "States": {
             "Download email attachments": {
               "Comment": "Extract attachments from a raw email MIME file and stores them in S3",
+              "Next": "Filter PDF attachments",
+              "OutputPath": "$.Payload",
               "Parameters": {
                 "FunctionName": "email-attachment-saver-dev",
                 "Payload": {
@@ -132,17 +134,10 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                   "MaxAttempts": 3
                 }
               ],
-              "Type": "Task",
-              "OutputPath": "$.Payload",
-              "Next": "Filter PDF attachments"
-            },
-            "Filter PDF attachments": {
-              "Type": "Pass",
-              "Next": "Extract Text/Tables/Images from PDF attachments",
-              "InputPath": "$..attachment_arns[?(@.extensio ==pdf)]"
+              "Type": "Task"
             },
             "Extract Text/Tables/Images from PDF attachments": {
-              "Type": "Map",
+              "End": true,
               "ItemProcessor": {
                 "ProcessorConfig": {
                   "Mode": "INLINE"
@@ -150,15 +145,16 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                 "StartAt": "Rich PDF Ingestion",
                 "States": {
                   "Rich PDF Ingestion": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "End": true,
                     "OutputPath": "$.Payload",
                     "Parameters": {
-                      "Payload.$": "$",
-                      "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST"
+                      "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST",
+                      "Payload.$": "$"
                     },
+                    "Resource": "arn:aws:states:::lambda:invoke",
                     "Retry": [
                       {
+                        "BackoffRate": 2,
                         "ErrorEquals": [
                           "Lambda.ServiceException",
                           "Lambda.AWSLambdaException",
@@ -166,16 +162,19 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                           "Lambda.TooManyRequestsException"
                         ],
                         "IntervalSeconds": 1,
-                        "MaxAttempts": 3,
-                        "BackoffRate": 2
+                        "MaxAttempts": 3
                       }
                     ],
-                    "End": true
+                    "Type": "Task"
                   }
                 }
               },
-              "End": true,
-              "ItemsPath": "$.attachment_arns"
+              "Type": "Map"
+            },
+            "Filter PDF attachments": {
+              "InputPath": "$..attachment_arns[?(@.extension==pdf)]",
+              "Next": "Extract Text/Tables/Images from PDF attachments",
+              "Type": "Pass"
             }
           }
         }

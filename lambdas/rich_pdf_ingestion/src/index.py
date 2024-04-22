@@ -58,23 +58,20 @@ def upload_text(extracted_text, bucket, key):
 
 def lambda_handler(event, context):
     print(event)
-    records = event["Records"]
+    attachment_path = event['path']
 
-    for record in records:
-        eventName = record["eventName"]
-        print(f"eventName: {eventName}")
 
-        try:
-            bucket, key = get_bucket_and_key(record)
-            print(f"source_bucket: {bucket}, source_key: {key}")
+    try:
+        bucket, key = get_bucket_and_key(attachment_path)
+        print(f"source_bucket: {bucket}, source_key: {key}")
 
-            if eventName.startswith(OBJECT_CREATED) and os.path.splitext(key)[1][1:] == "pdf":
-                local_filename = fetch_file(bucket, key)
-                print("Extracting text from pdf")
-                extracted_text = extract_text_from_pdf(local_filename)
-                print("Finished extracting text from pdf")
-                upload_text(extracted_text, bucket, key)
+        if os.path.splitext(key)[1][1:] == "pdf":
+            local_filename = fetch_file(bucket, key)
+            print("Extracting text from pdf")
+            extracted_text = extract_text_from_pdf(local_filename)
+            print("Finished extracting text from pdf")
+            upload_text(extracted_text, bucket, key)
 
-        except Exception as e:
-            print(e)
-            raise e
+    except Exception as e:
+        print(e)
+        raise e
