@@ -7,7 +7,7 @@ locals {
   form_rule_name         = "levio-demo-fev-esta-formulaire-rule-dev"
   form_key_prefix        = "formulaire/email"
   rfp_rule_name          = "levio-demo-fev-esta-rfp-rule-dev"
-  rfp_key_prefix         = "rfp/email"
+  rfp_key_prefix         = "rfp/raw_emails"
   confirmation_rule_name = "levio-demo-fev-esta-confirmation-rule-dev"
 }
 
