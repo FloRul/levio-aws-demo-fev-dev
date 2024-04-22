@@ -264,6 +264,6 @@ module "email_attachment_saver" {
   source                = "../lambdas/email_attachment_saver"
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   aws_region            = var.aws_region
-  allowed_s3_resources  = ["${module.s3_bucket.s3_bucket_arn}/*"]
+  allowed_s3_resources  = [module.s3_bucket.s3_bucket_arn, "${module.s3_bucket.s3_bucket_arn}/*"]
 }
 
