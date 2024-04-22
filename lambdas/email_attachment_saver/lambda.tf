@@ -44,7 +44,7 @@ module "lambda_function_container_image" {
         "s3-object-lambda:List*",
         "s3-object-lambda:WriteGetObjectResponse"
       ]
-      resources = ["${var.allowed_s3_resources}/*"]
+      resources = var.allowed_s3_resources
     }
 
     log_write = {
