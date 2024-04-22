@@ -76,16 +76,16 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
   "StartAt": "Map SES email",
   "States": {
     "Map SES email": {
-      "Type": "Pass",
+      "Comment": "Map an SES email for easier consumption later on in the sate machine:\n\nemail_id: the ID of the email\ndestination_email: the destination of the email\nsender_email: the sender of the email\nbucket: the  S3 bucket in which all operations should take place in\nraw_email_key: the s3 key to the raw email. See the SES \"Deliver to S3 Bucket\" action",
       "Next": "Parallel",
       "Parameters": {
-        "email_id.$": "$.Records[0].ses.mail.messageId",
+        "bucket": "levio-demo-fev-esta-ses-bucket-dev",
         "destination_email.$": "$.Records[0].ses.mail.destination",
-        "sender_email.$": "$.Records[0].ses.mail.source",
-        "bucket": var.workspace_bucket_name,
-        "raw_email_key.$": "States.Format('rfp/raw_emails/{}', $.Records[0].ses.mail.messageId)"
+        "email_id.$": "$.Records[0].ses.mail.messageId",
+        "raw_email_key.$": "States.Format('rfp/raw_emails/{}', $.Records[0].ses.mail.messageId)",
+        "sender_email.$": "$.Records[0].ses.mail.source"
       },
-      "Comment": "Map an SES email for easier consumption later on in the sate machine:\n\nemail_id: the ID of the email\ndestination_email: the destination of the email\nsender_email: the sender of the email\nbucket: the  S3 bucket in which all operations should take place in\nraw_email_key: the s3 key to the raw email. See the SES \"Deliver to S3 Bucket\" action"
+      "Type": "Pass"
     },
     "Parallel": {
       "Branches": [
@@ -93,6 +93,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
           "StartAt": "Store Email Medata",
           "States": {
             "Store Email Medata": {
+              "Comment": "Stores the input in the specified bucket/key",
               "End": true,
               "Parameters": {
                 "Body.$": "$",
@@ -100,8 +101,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                 "Key.$": "States.Format('rfp/{}/email', $.email_id)"
               },
               "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
-              "Type": "Task",
-              "Comment": "Stores the input in the specified bucket/key"
+              "Type": "Task"
             }
           }
         },
@@ -109,19 +109,19 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
           "StartAt": "Download email attachments",
           "States": {
             "Download email attachments": {
-              "Type": "Task",
-              "Resource": "arn:aws:states:::lambda:invoke",
-              "OutputPath": "$.Payload",
+              "Comment": "Extract attachments from a raw email MIME file and stores them in S3",
               "Parameters": {
-                "FunctionName": var.attachment_saver_lambda_name,
+                "FunctionName": "email-attachment-saver-dev",
                 "Payload": {
-                  "s3_folder_key.$": "States.Format('rfp/{}/attachments', $.email_id)",
                   "bucket.$": "$.bucket",
-                  "s3_email_key.$": "$.raw_email_key"
+                  "s3_email_key.$": "$.raw_email_key",
+                  "s3_folder_key.$": "States.Format('rfp/{}/attachments', $.email_id)"
                 }
               },
+              "Resource": "arn:aws:states:::lambda:invoke",
               "Retry": [
                 {
+                  "BackoffRate": 2,
                   "ErrorEquals": [
                     "Lambda.ServiceException",
                     "Lambda.AWSLambdaException",
@@ -129,12 +129,53 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                     "Lambda.TooManyRequestsException"
                   ],
                   "IntervalSeconds": 1,
-                  "MaxAttempts": 3,
-                  "BackoffRate": 2
+                  "MaxAttempts": 3
                 }
               ],
+              "Type": "Task",
+              "OutputPath": "$.Payload",
+              "Next": "Filter PDF attachments"
+            },
+            "Filter PDF attachments": {
+              "Type": "Pass",
+              "Next": "Extract Text/Tables/Images from PDF attachments",
+              "InputPath": "$..attachment_arns[?(@.extensio ==pdf)]"
+            },
+            "Extract Text/Tables/Images from PDF attachments": {
+              "Type": "Map",
+              "ItemProcessor": {
+                "ProcessorConfig": {
+                  "Mode": "INLINE"
+                },
+                "StartAt": "Rich PDF Ingestion",
+                "States": {
+                  "Rich PDF Ingestion": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "OutputPath": "$.Payload",
+                    "Parameters": {
+                      "Payload.$": "$",
+                      "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST"
+                    },
+                    "Retry": [
+                      {
+                        "ErrorEquals": [
+                          "Lambda.ServiceException",
+                          "Lambda.AWSLambdaException",
+                          "Lambda.SdkClientException",
+                          "Lambda.TooManyRequestsException"
+                        ],
+                        "IntervalSeconds": 1,
+                        "MaxAttempts": 3,
+                        "BackoffRate": 2
+                      }
+                    ],
+                    "End": true
+                  }
+                }
+              },
               "End": true,
-              "Comment": "Extract attachments from a raw email MIME file and stores them in S3"
+              "ItemsPath": "$.attachment_arns"
             }
           }
         }
