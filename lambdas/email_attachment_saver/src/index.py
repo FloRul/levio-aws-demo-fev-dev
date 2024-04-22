@@ -39,8 +39,11 @@ def lambda_handler(event, context):
                     key = part.get_filename()
                     s3.put_object(Bucket=bucket, Key=s3_folder +
                                   key, Body=part.get_payload(decode=True))
-                    attachment_arns.append(
-                        'arn:aws:s3:::' + bucket + '/' + s3_folder + '/' + key)
+                    file_extension = key.split('.')[-1] if '.' in key else None
+                    attachment_arns.append({
+                        'path': 'arn:aws:s3:::' + bucket + '/' + s3_folder + '/' + key,
+                        'extension': file_extension
+                    })
 
                 except NoCredentialsError:
                     logger.error('No AWS credentials found')
