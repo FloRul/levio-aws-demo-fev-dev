@@ -36,12 +36,12 @@ def lambda_handler(event, context):
         for part in msg.walk():
             if part.get_content_maintype() != 'multipart' and part['Content-Disposition'] is not None:
                 try:
-                    key = part.get_filename()
-                    s3.put_object(Bucket=bucket, Key=s3_folder +
-                                  key, Body=part.get_payload(decode=True))
+                    key = "/".join([s3_folder,part.get_filename()])
+                    logger.info(f"Putting object in bucket:{bucket} and key:{key}")
+                    s3.put_object(Bucket=bucket, Key=key, Body=part.get_payload(decode=True))
                     file_extension = key.split('.')[-1] if '.' in key else None
                     attachment_arns.append({
-                        'path': 'arn:aws:s3:::' + bucket + '/' + s3_folder + '/' + key,
+                        'path': 'arn:aws:s3:::' + bucket + '/' + key,
                         'extension': file_extension
                     })
 
