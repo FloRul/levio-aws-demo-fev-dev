@@ -110,7 +110,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
           "States": {
             "Download email attachments": {
               "Comment": "Extract attachments from a raw email MIME file and stores them in S3",
-              "Next": "Filter PDF attachments",
+              "Next": "Map",
               "OutputPath": "$.Payload",
               "Parameters": {
                 "FunctionName": "email-attachment-saver-dev",
@@ -136,16 +136,30 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
               ],
               "Type": "Task"
             },
-            "Extract Text/Tables/Images from PDF attachments": {
-              "End": true,
+            "Map": {
+              "Type": "Map",
               "ItemProcessor": {
                 "ProcessorConfig": {
                   "Mode": "INLINE"
                 },
-                "StartAt": "Rich PDF Ingestion",
+                "StartAt": "Choice",
                 "States": {
+                  "Choice": {
+                    "Type": "Choice",
+                    "Choices": [
+                      {
+                        "Variable": "$.extension",
+                        "StringEquals": "pdf",
+                        "Next": "Rich PDF Ingestion"
+                      }
+                    ],
+                    "Default": "Pass"
+                  },
+                  "Pass": {
+                    "Type": "Pass",
+                    "End": true
+                  },
                   "Rich PDF Ingestion": {
-                    "End": true,
                     "OutputPath": "$.Payload",
                     "Parameters": {
                       "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST",
@@ -165,16 +179,13 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                         "MaxAttempts": 3
                       }
                     ],
-                    "Type": "Task"
+                    "Type": "Task",
+                    "End": true
                   }
                 }
               },
-              "Type": "Map"
-            },
-            "Filter PDF attachments": {
-              "InputPath": "$..attachment_arns[?(@.extension==pdf)]",
-              "Next": "Extract Text/Tables/Images from PDF attachments",
-              "Type": "Pass"
+              "ItemsPath": "$.attachment_arns",
+              "End": true
             }
           }
         }
