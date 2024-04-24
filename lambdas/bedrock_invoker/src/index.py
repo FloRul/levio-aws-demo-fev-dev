@@ -6,6 +6,9 @@ s3 = boto3.client('s3')
 bedrock = boto3.client('bedrock')
 
 def lambda_handler(event, context):
+    """
+    Invokes a bedrock model with the given parameters and s3 text object
+    """
     s3_arn = event['s3_arn']
     bedrock_params = event['bedrock_params']
     prompt = event['prompt']
