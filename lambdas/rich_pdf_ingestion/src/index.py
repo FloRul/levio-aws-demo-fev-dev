@@ -10,6 +10,54 @@ PATH_TO_WRITE_FILES = "/tmp"
 s3 = boto3.client("s3")
 
 
+def lambda_handler(event, context):
+    """
+    Etract text/tables from a PDF and store in a s3 object
+    """
+    print(event)
+    attachment_s3_arn = event['path']
+
+    try:
+        attachment_s3_info = parse_s3_arn(attachment_s3_arn)
+        print("Attachment s3 arn parsed info: ", attachment_s3_info)
+        bucket = attachment_s3_info["bucket"]
+        folder = attachment_s3_info['folder']
+        key = attachment_s3_info["key"]
+        filename_without_extension = attachment_s3_info['filename_without_extension']
+        extracted_files_s3_arns = []
+
+        if os.path.splitext(key)[1][1:] == "pdf":
+            local_filename = fetch_file(bucket, key)
+            print("Extracting text from pdf")
+            extracted_text = extract_text_from_pdf(local_filename)
+            extracted_text_local_file = store_extracted_text_in_local_file(
+                extracted_text)
+            print("Finished extracting text from pdf")
+            extracted_text_s3_key = "/".join(
+                [folder, filename_without_extension+"_extracted_pdf_content", str(uuid.uuid4())+".txt"])
+            print("Uploading file to ", extracted_text_s3_key)
+            upload_file(
+                file_to_upload=extracted_text_local_file,
+                bucket=bucket,
+                key=extracted_text_s3_key
+            )
+            extracted_files_s3_arns.append(
+                f"arn:aws:s3:::{bucket}/{extracted_text_s3_key}")
+
+            return {
+                'statusCode': 200,
+                'body': 'PDF text content extracted and saved',
+                'attachment_arns': extracted_files_s3_arns
+            }
+
+    except Exception as e:
+        print(e)
+        return {
+            'statusCode': 400,
+            'body': e
+        }
+
+
 def extract_text_from_pdf(pdf_file_path):
     text = ""
 
@@ -67,48 +115,3 @@ def store_extracted_text_in_local_file(extracted_text):
         f.write(extracted_text)
 
     return local_file_path
-
-
-def lambda_handler(event, context):
-    print(event)
-    attachment_s3_arn = event['path']
-
-    try:
-        attachment_s3_info = parse_s3_arn(attachment_s3_arn)
-        print("Attachment s3 arn parsed info: ", attachment_s3_info)
-        bucket = attachment_s3_info["bucket"]
-        folder = attachment_s3_info['folder']
-        key = attachment_s3_info["key"]
-        filename_without_extension = attachment_s3_info['filename_without_extension']
-        extracted_files_s3_arns = []
-
-        if os.path.splitext(key)[1][1:] == "pdf":
-            local_filename = fetch_file(bucket, key)
-            print("Extracting text from pdf")
-            extracted_text = extract_text_from_pdf(local_filename)
-            extracted_text_local_file = store_extracted_text_in_local_file(
-                extracted_text)
-            print("Finished extracting text from pdf")
-            extracted_text_s3_key = "/".join(
-                [folder, filename_without_extension+"_extracted_pdf_content", str(uuid.uuid4())+".txt"])
-            print("Uploading file to ", extracted_text_s3_key)
-            upload_file(
-                file_to_upload=extracted_text_local_file,
-                bucket=bucket,
-                key=extracted_text_s3_key
-            )
-            extracted_files_s3_arns.append(
-                f"arn:aws:s3:::{bucket}/{extracted_text_s3_key}")
-
-            return {
-                'statusCode': 200,
-                'body': 'PDF text content extracted and saved',
-                'attachment_arns': extracted_files_s3_arns
-            }
-
-    except Exception as e:
-        print(e)
-        return {
-            'statusCode': 400,
-            'body': e
-        }
