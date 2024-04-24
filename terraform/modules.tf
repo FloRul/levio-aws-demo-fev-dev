@@ -269,7 +269,7 @@ module "email_attachment_saver" {
 
 
 module "bedrock_invoker" {
-  source                = "../lambdas/berock_invoker"
+  source                = "../lambdas/bedrock_invoker"
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   aws_region            = var.aws_region
   allowed_s3_resources  = [module.s3_bucket.s3_bucket_arn, "${module.s3_bucket.s3_bucket_arn}/*"]
