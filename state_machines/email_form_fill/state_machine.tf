@@ -137,7 +137,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
               "Type": "Task"
             },
             "Map": {
-              "Type": "Map",
+              "End": true,
               "ItemProcessor": {
                 "ProcessorConfig": {
                   "Mode": "INLINE"
@@ -145,21 +145,22 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                 "StartAt": "Choice",
                 "States": {
                   "Choice": {
-                    "Type": "Choice",
                     "Choices": [
                       {
-                        "Variable": "$.extension",
-                        "StringEquals": "pdf",
+                        "Variable": "$",
+                        "StringMatches": "*.pdf",
                         "Next": "Rich PDF Ingestion"
                       }
                     ],
-                    "Default": "Pass"
+                    "Default": "Pass",
+                    "Type": "Choice"
                   },
                   "Pass": {
-                    "Type": "Pass",
-                    "End": true
+                    "End": true,
+                    "Type": "Pass"
                   },
                   "Rich PDF Ingestion": {
+                    "End": true,
                     "OutputPath": "$.Payload",
                     "Parameters": {
                       "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST",
@@ -179,13 +180,12 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                         "MaxAttempts": 3
                       }
                     ],
-                    "Type": "Task",
-                    "End": true
+                    "Type": "Task"
                   }
                 }
               },
               "ItemsPath": "$.attachment_arns",
-              "End": true
+              "Type": "Map"
             }
           }
         }

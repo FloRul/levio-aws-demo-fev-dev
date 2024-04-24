@@ -1,13 +1,12 @@
 import boto3
 import email
 from botocore.exceptions import NoCredentialsError
-from aws_lambda_powertools import Logger, Metrics
+from aws_lambda_powertools import Logger
 
 logger = Logger()
-metrics = Metrics()
 s3 = boto3.client('s3')
 
-
+@logger.inject_lambda_context
 def lambda_handler(event, context):
     """
     This lambda downloads an email MIME file from S3, extracts its attachments, and saves them to another S3 folder.
@@ -39,11 +38,7 @@ def lambda_handler(event, context):
                     key = "/".join([s3_folder,part.get_filename()])
                     logger.info(f"Putting object in bucket:{bucket} and key:{key}")
                     s3.put_object(Bucket=bucket, Key=key, Body=part.get_payload(decode=True))
-                    file_extension = key.split('.')[-1] if '.' in key else None
-                    attachment_arns.append({
-                        'path': 'arn:aws:s3:::' + bucket + '/' + key,
-                        'extension': file_extension
-                    })
+                    attachment_arns.append('arn:aws:s3:::' + bucket + '/' + key,)
 
                 except NoCredentialsError:
                     logger.error('No AWS credentials found')
