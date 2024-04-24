@@ -23,29 +23,31 @@ def lambda_handler(event, context):
         print("Attachment s3 arn parsed info: ", attachment_s3_info)
         bucket = attachment_s3_info["bucket"]
         key = attachment_s3_info["key"]
-        extracted_files_s3_arns = []
 
-        if os.path.splitext(key)[1][1:] == "pdf":
-            local_filename = fetch_file(bucket, key)
-            print("Extracting text from pdf")
-            extracted_text = extract_text_from_pdf(local_filename)
-            extracted_text_local_file = store_extracted_text_in_local_file(extracted_text)
-            print("Finished extracting text from pdf")
-            base_name = Path(key).stem
-            new_key = f"{base_name}_extracted_pdf_content.txt"
-            print("Uploading file to ", new_key)
-            upload_file(
-                file_to_upload=extracted_text_local_file,
-                bucket=bucket,
-                key=new_key
-            )
-            extracted_files_s3_arns.append(f"arn:aws:s3:::{bucket}/{new_key}")
-
+        if os.path.splitext(key)[1][1:] != "pdf":
             return {
-                'statusCode': 200,
-                'body': 'PDF text content extracted and saved',
-                'attachment_arns': extracted_files_s3_arns
+                'statusCode': 400,
+                'body': 'Invalid file format. Only PDF files are supported.'
             }
+
+        local_filename = fetch_file(bucket, key)
+        extracted_text = extract_text_from_pdf(local_filename)
+        extracted_text_local_file = store_extracted_text_in_local_file(extracted_text)
+        base_name = Path(key).stem
+        new_key = f"{base_name}_extracted_pdf_content.txt"
+        upload_file(
+            file_to_upload=extracted_text_local_file,
+            bucket=bucket,
+            key=new_key
+        )
+        extracted_files_s3_arns = []
+        extracted_files_s3_arns.append(f"arn:aws:s3:::{bucket}/{new_key}")
+
+        return {
+            'statusCode': 200,
+            'body': 'PDF text content extracted and saved',
+            'attachment_arns': extracted_files_s3_arns
+        }
 
     except Exception as e:
         print(e)
@@ -79,18 +81,13 @@ def parse_s3_arn(s3_arn):
     # The first component is the bucket
     bucket = components[0]
 
-    # The rest of the components form the key
-    key = "/".join(components[1:])
 
     # The folder is all components of the key except the last one
     folder = "/".join(components[1:-1])
-    filename_without_extension = os.path.splitext(os.path.basename(s3_path))[0]
 
     return {
         "bucket": bucket,
         "folder": folder,
-        "filename_without_extension": filename_without_extension,
-        "key": key
     }
 
 

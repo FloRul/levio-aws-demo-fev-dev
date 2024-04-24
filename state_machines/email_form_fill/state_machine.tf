@@ -106,18 +106,33 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
           }
         },
         {
-          "StartAt": "Create copy of the RFP Form",
+          "StartAt": "Create copy of the RFP Form doc",
           "States": {
-            "Create copy of the RFP Form": {
-              "Type": "Task",
+            "Create copy of the RFP Form doc": {
+              "Comment": "Copy the form to be filled into this execution's email folder",
               "End": true,
               "Parameters": {
-                "CopySource.$": "States.Format('{}/rfp/standard/rfp.docx', $.bucket)",
                 "Bucket.$": "$.bucket",
+                "CopySource.$": "States.Format('{}/rfp/standard/rfp.docx', $.bucket)",
                 "Key.$": "States.Format('rfp/{}/formulaire_ao.docx', $.email_id)"
               },
               "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
-              "Comment": "Copy the form to be filled into this execution's email folder"
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "Create copy of the RFP prompts and answers JSON",
+          "States": {
+            "Create copy of the RFP prompts and answers JSON": {
+              "Type": "Task",
+              "End": true,
+              "Parameters": {
+                "Bucket.$": "$.bucket",
+                "CopySource.$": "States.Format('{}/rfp/standard/rfp_prompts.json', $.bucket)",
+                "Key.$": "States.Format('rfp/{}/rfp_prompts.json', $.email_id)"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:s3:copyObject"
             }
           }
         },
@@ -172,13 +187,16 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                     "Type": "Choice"
                   },
                   "Pass": {
+                    "Comment": "Attachment is not PDF, no other processing needed. Map the input to an array just so it's easier to flatten the results of the map state.",
                     "End": true,
                     "Type": "Pass",
-                    "Comment": "Attachment is not PDF, no other processing needed."
+                    "Parameters": {
+                      "arrr.$": "States.Array($)"
+                    },
+                    "OutputPath": "$.arrr"
                   },
                   "Rich PDF Ingestion": {
-                    "End": true,
-                    "OutputPath": "$.Payload",
+                    "OutputPath": "$.Payload.attachment_arns",
                     "Parameters": {
                       "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST",
                       "Payload": {
@@ -199,12 +217,16 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                         "MaxAttempts": 3
                       }
                     ],
-                    "Type": "Task"
+                    "Type": "Task",
+                    "End": true
                   }
                 }
               },
               "ItemsPath": "$.attachment_arns",
-              "Type": "Map"
+              "Type": "Map",
+              "ResultSelector": {
+                "attachment_arns.$": "$[*][*]"
+              }
             }
           }
         }
