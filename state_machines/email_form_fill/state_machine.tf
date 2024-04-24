@@ -69,10 +69,10 @@ resource "aws_iam_role_policy" "sfn_lambda_invoke_access" {
 
 
 resource "aws_sfn_state_machine" "sfn_state_machine" {
-  name     = "my-state-machine"
+  name     = "esta-rfp-form-filler"
   role_arn = aws_iam_role.iam_for_sfn.arn
   definition = jsonencode({
-  "Comment": "A description of my state machine",
+  "Comment": "Retrieves attachments from an email and invokes an AI with the email attachments and a predefied set of promts. A form document is then filled with the AI responses and sent back to the user.",
   "StartAt": "Map SES email",
   "States": {
     "Map SES email": {
@@ -238,8 +238,9 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
               "Next": "Get promps responses",
               "ResultPath": "$.Body",
               "ResultSelector": {
-                "Body.$": "States.StringToJson($.Body)"
-              }
+                "parsed_JSON.$": "States.StringToJson($.Body)"
+              },
+              "Comment": "Gets the promps s3 object and convert the escaped JSON to JSON"
             },
             "Get promps responses": {
               "Type": "Map",
@@ -282,7 +283,7 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                 }
               },
               "End": true,
-              "ItemsPath": "$.Body.Body.prompts"
+              "ItemsPath": "$.Body.parsed_JSON.prompts"
             }
           }
         }
