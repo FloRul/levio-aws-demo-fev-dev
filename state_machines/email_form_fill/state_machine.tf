@@ -106,6 +106,22 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
           }
         },
         {
+          "StartAt": "Create copy of the RFP Form",
+          "States": {
+            "Create copy of the RFP Form": {
+              "Type": "Task",
+              "End": true,
+              "Parameters": {
+                "CopySource.$": "States.Format('{}/rfp/standard/rfp.docx', $.bucket)",
+                "Bucket.$": "$.bucket",
+                "Key.$": "States.Format('rfp/{}/formulaire_ao.docx', $.email_id)"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
+              "Comment": "Copy the form to be filled into this execution's email folder"
+            }
+          }
+        },
+        {
           "StartAt": "Download email attachments",
           "States": {
             "Download email attachments": {
@@ -147,9 +163,9 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                   "Choice": {
                     "Choices": [
                       {
-                        "Variable": "$",
+                        "Next": "Rich PDF Ingestion",
                         "StringMatches": "*.pdf",
-                        "Next": "Rich PDF Ingestion"
+                        "Variable": "$"
                       }
                     ],
                     "Default": "Pass",
@@ -157,14 +173,17 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                   },
                   "Pass": {
                     "End": true,
-                    "Type": "Pass"
+                    "Type": "Pass",
+                    "Comment": "Attachment is not PDF, no other processing needed."
                   },
                   "Rich PDF Ingestion": {
                     "End": true,
                     "OutputPath": "$.Payload",
                     "Parameters": {
                       "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST",
-                      "Payload.$": "$"
+                      "Payload": {
+                        "path.$": "$"
+                      }
                     },
                     "Resource": "arn:aws:states:::lambda:invoke",
                     "Retry": [
