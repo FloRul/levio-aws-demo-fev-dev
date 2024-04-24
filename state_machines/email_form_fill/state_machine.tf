@@ -126,13 +126,13 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
           "States": {
             "Create copy of the RFP prompts and answers JSON": {
               "Type": "Task",
-              "End": true,
               "Parameters": {
                 "Bucket.$": "$.bucket",
                 "CopySource.$": "States.Format('{}/rfp/standard/rfp_prompts.json', $.bucket)",
                 "Key.$": "States.Format('rfp/{}/rfp_prompts.json', $.email_id)"
               },
-              "Resource": "arn:aws:states:::aws-sdk:s3:copyObject"
+              "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
+              "End": true
             }
           }
         },
@@ -142,7 +142,6 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
             "Download email attachments": {
               "Comment": "Extract attachments from a raw email MIME file and stores them in S3",
               "Next": "Map",
-              "OutputPath": "$.Payload",
               "Parameters": {
                 "FunctionName": "email-attachment-saver-dev",
                 "Payload": {
@@ -165,10 +164,10 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
                   "MaxAttempts": 3
                 }
               ],
-              "Type": "Task"
+              "Type": "Task",
+              "OutputPath": "$.Payload"
             },
             "Map": {
-              "End": true,
               "ItemProcessor": {
                 "ProcessorConfig": {
                   "Mode": "INLINE"
@@ -226,13 +225,43 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
               "Type": "Map",
               "ResultSelector": {
                 "attachment_arns.$": "$[*][*]"
-              }
+              },
+              "Next": "Prompts S3 Object -> JSON"
+            },
+            "Prompts S3 Object -> JSON": {
+              "Type": "Task",
+              "Parameters": {
+                "Bucket": "levio-demo-fev-esta-ses-bucket-dev",
+                "Key": "rfp/standard/rfp_prompts.json"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+              "ResultSelector": {
+                "Body.$": "States.StringToJson($.Body)"
+              },
+              "Next": "Map (1)",
+              "OutputPath": "$.Body.prompts"
+            },
+            "Map (1)": {
+              "Type": "Map",
+              "ItemProcessor": {
+                "ProcessorConfig": {
+                  "Mode": "INLINE"
+                },
+                "StartAt": "Pass (1)",
+                "States": {
+                  "Pass (1)": {
+                    "Type": "Pass",
+                    "End": true
+                  }
+                }
+              },
+              "End": true
             }
           }
         }
       ],
-      "End": true,
-      "Type": "Parallel"
+      "Type": "Parallel",
+      "End": true
     }
   }
 })
