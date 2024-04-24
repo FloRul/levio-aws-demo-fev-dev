@@ -226,36 +226,63 @@ resource "aws_sfn_state_machine" "sfn_state_machine" {
               "ResultSelector": {
                 "attachment_arns.$": "$[*][*]"
               },
-              "Next": "Prompts S3 Object -> JSON"
+              "Next": "Get Prompts"
             },
-            "Prompts S3 Object -> JSON": {
+            "Get Prompts": {
               "Type": "Task",
               "Parameters": {
                 "Bucket": "levio-demo-fev-esta-ses-bucket-dev",
                 "Key": "rfp/standard/rfp_prompts.json"
               },
               "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+              "Next": "Get promps responses",
+              "ResultPath": "$.Body",
               "ResultSelector": {
                 "Body.$": "States.StringToJson($.Body)"
-              },
-              "Next": "Map (1)",
-              "OutputPath": "$.Body.prompts"
+              }
             },
-            "Map (1)": {
+            "Get promps responses": {
               "Type": "Map",
               "ItemProcessor": {
                 "ProcessorConfig": {
                   "Mode": "INLINE"
                 },
-                "StartAt": "Pass (1)",
+                "StartAt": "Invoke Claude",
                 "States": {
-                  "Pass (1)": {
-                    "Type": "Pass",
+                  "Invoke Claude": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "OutputPath": "$.Payload",
+                    "Parameters": {
+                      "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:levio-esta-bedrock-invoker:$LATEST",
+                      "Payload": {
+                        "s3_arn": "sampleValue1",
+                        "bedrock_params": {
+                          "model_name": "",
+                          "master": ""
+                        },
+                        "prompt.$": "$.prompt"
+                      }
+                    },
+                    "Retry": [
+                      {
+                        "ErrorEquals": [
+                          "Lambda.ServiceException",
+                          "Lambda.AWSLambdaException",
+                          "Lambda.SdkClientException",
+                          "Lambda.TooManyRequestsException"
+                        ],
+                        "IntervalSeconds": 1,
+                        "MaxAttempts": 3,
+                        "BackoffRate": 2
+                      }
+                    ],
                     "End": true
                   }
                 }
               },
-              "End": true
+              "End": true,
+              "ItemsPath": "$.Body.Body.prompts"
             }
           }
         }
