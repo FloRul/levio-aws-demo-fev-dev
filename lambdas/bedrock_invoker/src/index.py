@@ -3,7 +3,7 @@ import json
 from botocore.exceptions import BotoCoreError, ClientError
 
 s3 = boto3.client('s3')
-bedrock = boto3.client('bedrock')
+bedrock = boto3.client('bedrock-runtime')
 
 
 def lambda_handler(event, context):
