@@ -50,7 +50,7 @@ def lambda_handler(event, context):
             body=json.dumps(claude_body),
             contentType='application/json',
             accept='application/json',
-            modelId='"anthropic.claude-3-sonnet-20240229-v1:0"',
+            modelId='anthropic.claude-3-sonnet-20240229-v1:0',
         )
     except BotoCoreError as e:
         return {
