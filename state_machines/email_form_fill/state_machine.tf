@@ -71,5 +71,5 @@ resource "aws_iam_role_policy" "sfn_lambda_invoke_access" {
 resource "aws_sfn_state_machine" "sfn_state_machine" {
   name     = "esta-rfp-form-filler"
   role_arn = aws_iam_role.iam_for_sfn.arn
-  definition = jsonencode(file("${path.module}/state_machine.json"))
+  definition = jsonencode("${path.module}/state_machine.json")
 }
