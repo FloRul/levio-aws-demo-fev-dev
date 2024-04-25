@@ -36,10 +36,10 @@ def lambda_handler(event, context):
         "messages": [
             {
                 "role": "user",
-                "content": {
+                "content": [{
                     'type': "text",
                     "text": f"{prompt} <document>{extracted_text}</document>"
-                }
+                }]
             }
         ]
     }
