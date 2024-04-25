@@ -1,6 +1,7 @@
 import boto3
 import json
 from botocore.exceptions import BotoCoreError, ClientError
+from urllib.parse import urlparse
 
 s3 = boto3.client('s3')
 bedrock = boto3.client('bedrock')
@@ -14,7 +15,8 @@ def lambda_handler(event, context):
     prompt = event['prompt']
 
     # Parse the S3 ARN to get the bucket and key
-    bucket, key = s3_arn.split(':::')[1].split('/')
+    s3_path = s3_arn.replace("arn:aws:s3:::", "")
+    bucket, key = s3_path.split('/', 1)
 
     # Download the file from S3
     try:

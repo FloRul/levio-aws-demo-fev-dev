@@ -42,3 +42,4 @@ terraform.rc
 **/target
 **/.aws-sam
 .DS_Store
+.vscode/launch.json
