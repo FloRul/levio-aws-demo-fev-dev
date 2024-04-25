@@ -1,7 +1,6 @@
 import boto3
 import json
 from botocore.exceptions import BotoCoreError, ClientError
-from urllib.parse import urlparse
 
 s3 = boto3.client('s3')
 bedrock = boto3.client('bedrock')
@@ -39,7 +38,7 @@ def lambda_handler(event, context):
                 "role": "user",
                 "content": {
                     'type': "text",
-                    "text": +f"{prompt} <document>{extracted_text}</document>"
+                    "text": f"{prompt} <document>{extracted_text}</document>"
                 }
             }
         ]
@@ -61,6 +60,5 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
-        'body': 'Successfully processed the S3 ARN',
-        'bedrockResponse': response
+        'body': response
     }
