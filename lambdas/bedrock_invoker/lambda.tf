@@ -9,15 +9,15 @@ data "aws_caller_identity" "current" {}
 
 
 module "lambda_function_container_image" {
-  source = "terraform-aws-modules/lambda/aws"
-  function_name = local.lambda_function_name
-  handler       = "index.lambda_handler"
-  publish       = true
-  runtime = local.runtime
-  timeout = local.timeout
-  layers  = [local.powertools_layer_arn]
-  source_path = "${path.module}/src"
-  s3_bucket   = var.lambda_storage_bucket
+  source                   = "terraform-aws-modules/lambda/aws"
+  function_name            = local.lambda_function_name
+  handler                  = "index.lambda_handler"
+  publish                  = true
+  runtime                  = local.runtime
+  timeout                  = local.timeout
+  layers                   = [local.powertools_layer_arn]
+  source_path              = "${path.module}/src"
+  s3_bucket                = var.lambda_storage_bucket
   memory_size              = 256
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
@@ -33,14 +33,13 @@ module "lambda_function_container_image" {
       ]
     }
 
-    bedrock_invoke = {
+    bedrock = {
       effect = "Allow"
       actions = [
         "bedrock:InvokeModel"
       ]
       resources = [
-        "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:model/*",
-        "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:foundation-model/*"
+        "arn:aws:bedrock:*:*:*"
       ]
     }
 
