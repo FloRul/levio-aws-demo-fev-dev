@@ -39,7 +39,8 @@ module "lambda_function_container_image" {
         "bedrock:InvokeModel"
       ]
       resources = [
-        "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:model/*"
+        "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:model/*",
+        "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:foundation-model/*"
       ]
     }
 
