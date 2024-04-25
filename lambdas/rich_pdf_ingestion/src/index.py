@@ -19,10 +19,8 @@ def lambda_handler(event, context):
     attachment_s3_arn = event['path']
 
     try:
-        attachment_s3_info = parse_s3_arn(attachment_s3_arn)
-        print("Attachment s3 arn parsed info: ", attachment_s3_info)
-        bucket = attachment_s3_info["bucket"]
-        key = attachment_s3_info["key"]
+        bucket, key = parse_s3_arn(attachment_s3_arn)
+        print(f"Attachment located at bucket: {bucket} and key: {key}")
 
         if os.path.splitext(key)[1][1:] != "pdf":
             return {
@@ -72,24 +70,11 @@ def extract_text_from_pdf(pdf_file_path):
 
 
 def parse_s3_arn(s3_arn):
-    # Remove the ARN prefix
     s3_path = s3_arn.replace("arn:aws:s3:::", "")
-
-    # Split the path into components
     components = s3_path.split("/")
-
-    # The first component is the bucket
     bucket = components[0]
-
-
-    # The folder is all components of the key except the last one
-    folder = "/".join(components[1:-1])
-
-    return {
-        "bucket": bucket,
-        "folder": folder,
-    }
-
+    key = components[0]
+    return bucket, key
 
 def fetch_file(bucket, key):
     local_filename = f"{PATH_TO_WRITE_FILES}/{key.split('/')[-1]}"
