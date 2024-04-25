@@ -2,7 +2,6 @@ import boto3
 import json
 from botocore.exceptions import BotoCoreError, ClientError
 
-logger = Logger()
 s3 = boto3.client('s3')
 bedrock = boto3.client('bedrock-runtime')
 
