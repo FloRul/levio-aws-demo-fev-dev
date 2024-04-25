@@ -73,7 +73,7 @@ def parse_s3_arn(s3_arn):
     s3_path = s3_arn.replace("arn:aws:s3:::", "")
     components = s3_path.split("/")
     bucket = components[0]
-    key = components[0]
+    key = "/".join(components[1:])
     return bucket, key
 
 def fetch_file(bucket, key):
