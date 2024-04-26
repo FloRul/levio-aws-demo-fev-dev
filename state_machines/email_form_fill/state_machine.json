@@ -112,7 +112,6 @@
               "Type": "Task"
             },
             "Get promps responses": {
-              "End": true,
               "ItemProcessor": {
                 "ProcessorConfig": {
                   "Mode": "INLINE"
@@ -121,7 +120,6 @@
                 "States": {
                   "Invoke Claude": {
                     "End": true,
-                    "OutputPath": "$.Payload",
                     "Parameters": {
                       "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:levio-esta-bedrock-invoker:$LATEST",
                       "Payload": {
@@ -147,7 +145,11 @@
                         "MaxAttempts": 3
                       }
                     ],
-                    "Type": "Task"
+                    "Type": "Task",
+                    "ResultSelector": {
+                      "body.$": "States.StringToJson($.Payload.body)"
+                    },
+                    "ResultPath": "$.response"
                   }
                 }
               },
@@ -157,7 +159,56 @@
                 "prompt.$": "$$.Map.Item.Value",
                 "s3_arn.$": "$.parsed_attachments_for_llm_ouput.attachment_arns[0]"
               },
-              "ResultPath": "$.prompt_responses"
+              "ResultPath": "$.prompt_responses",
+              "Next": "Map claude response to document filler argument"
+            },
+            "Map claude response to document filler argument": {
+              "Type": "Map",
+              "ItemProcessor": {
+                "ProcessorConfig": {
+                  "Mode": "INLINE"
+                },
+                "StartAt": "Map to document filler arg",
+                "States": {
+                  "Map to document filler arg": {
+                    "Type": "Pass",
+                    "End": true,
+                    "Parameters": {
+                      "replacement_key.$": "$.prompt.document_text_replace_key",
+                      "replacement_text.$": "$.response.body.content[0].text"
+                    }
+                  }
+                }
+              },
+              "Next": "Fill from with Claude responses",
+              "ItemsPath": "$.prompt_responses",
+              "ResultPath": "$.map_to_document_filler_args_output"
+            },
+            "Fill from with Claude responses": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "OutputPath": "$.Payload",
+              "Parameters": {
+                "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:levio-esta-document-filler:$LATEST",
+                "Payload": {
+                  "doc_s3_arn.$": "$.execution_metadata.form_to_fill_s3_path",
+                  "replacements.$": "$.map_to_document_filler_args_output"
+                }
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2
+                }
+              ],
+              "End": true
             },
             "Map": {
               "ItemProcessor": {
