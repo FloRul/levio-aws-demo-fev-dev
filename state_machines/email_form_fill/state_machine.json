@@ -20,22 +20,6 @@
     "Parallel": {
       "Branches": [
         {
-          "StartAt": "Store Email Medata",
-          "States": {
-            "Store Email Medata": {
-              "Comment": "Stores the input in the specified bucket/key",
-              "End": true,
-              "Parameters": {
-                "Body.$": "$",
-                "Bucket.$": "$.execution_metadata.bucket",
-                "Key.$": "States.Format('rfp/{}/email', $.execution_metadata.email_id)"
-              },
-              "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
-              "Type": "Task"
-            }
-          }
-        },
-        {
           "StartAt": "Create copy of the RFP Form doc",
           "States": {
             "Create copy of the RFP Form doc": {
@@ -45,21 +29,6 @@
                 "Bucket.$": "$.execution_metadata.bucket",
                 "CopySource.$": "States.Format('{}/rfp/standard/rfp.docx', $.execution_metadata.bucket)",
                 "Key.$": "$.execution_metadata.form_to_fill_s3_path"
-              },
-              "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
-              "Type": "Task"
-            }
-          }
-        },
-        {
-          "StartAt": "Create copy of the RFP prompts and answers JSON",
-          "States": {
-            "Create copy of the RFP prompts and answers JSON": {
-              "End": true,
-              "Parameters": {
-                "Bucket.$": "$.execution_metadata.bucket",
-                "CopySource.$": "States.Format('{}/rfp/standard/rfp_prompts.json', $.execution_metadata.bucket)",
-                "Key.$": "States.Format('rfp/{}/rfp_prompts.json', $.execution_metadata.email_id)"
               },
               "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
               "Type": "Task"
