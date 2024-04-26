@@ -208,14 +208,35 @@
                 }
               ],
               "ResultPath": "$.fill_form_output",
-              "Next": "Send email with filled form"
+              "Next": "Email filled form"
             },
-            "Send email with filled form": {
+            "Email filled form": {
               "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "OutputPath": "$.Payload",
               "Parameters": {
-                "Content": {}
+                "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:levio-esta-email-sender:$LATEST",
+                "Payload": {
+                  "destination_email.$": "$.execution_metadata.sender_email",
+                  "sender_email.$": "$.execution_metadata.destination_email[0]",
+                  "subject": "",
+                  "body": "Nous avons reçu votre demande et elle sera traitée sous peu. Merci.",
+                  "attachment_s3_uris.$": "States.Array($.execution_metadata.form_to_fill_s3_path)"
+                }
               },
-              "Resource": "arn:aws:states:::aws-sdk:sesv2:sendEmail",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2
+                }
+              ],
               "End": true
             },
             "Map": {
