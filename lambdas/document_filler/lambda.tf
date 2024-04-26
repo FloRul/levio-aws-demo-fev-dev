@@ -16,11 +16,22 @@ module "lambda_function_container_image" {
   runtime = local.runtime
   timeout = local.timeout
   layers  = [local.powertools_layer_arn]
-  source_path = "${path.module}/src"
   s3_bucket   = var.lambda_storage_bucket
   memory_size              = 256
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
+  # see https://github.com/terraform-aws-modules/terraform-aws-lambda/issues/346
+  source_path = [
+    {
+      path = "${path.module}/src"
+      commands = [
+        ":zip",
+        "cd `mktemp -d`",
+        "python3.9 -m pip install --no-compile --only-binary=:all: --platform=manylinux2014_x86_64 --target=. -r ${abspath(path.module)}/src/requirements.txt",
+        ":zip .",
+      ]
+    }
+  ]
 
   policy_statements = {
     log_group = {
