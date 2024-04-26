@@ -283,4 +283,12 @@ module "levio_esta_document_filler" {
 }
 
 
+module "levio_esta_email_sender" {
+  source                = "../lambdas/email_sender"
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
+  aws_region            = var.aws_region
+  allowed_s3_resources  = [module.s3_bucket.s3_bucket_arn, "${module.s3_bucket.s3_bucket_arn}/*"]
+}
+
+
 
