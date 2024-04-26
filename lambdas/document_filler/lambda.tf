@@ -27,7 +27,7 @@ module "lambda_function_container_image" {
       commands = [
         ":zip",
         "cd `mktemp -d`",
-        "python3.9 -m pip install --no-compile --only-binary=:all: --platform=manylinux2014_x86_64 --target=. -r ${abspath(path.module)}/src/requirements.txt",
+        "python3.11 -m pip install --no-compile --only-binary=:all: --platform=manylinux2014_x86_64 --target=. -r ${abspath(path.module)}/src/requirements.txt",
         ":zip .",
       ]
     }
