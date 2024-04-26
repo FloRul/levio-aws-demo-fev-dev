@@ -12,7 +12,7 @@
           "email_id.$": "$.Records[0].ses.mail.messageId",
           "raw_email_key.$": "States.Format('rfp/raw_emails/{}', $.Records[0].ses.mail.messageId)",
           "sender_email.$": "$.Records[0].ses.mail.source",
-          "form_to_fill_s3_path.$": "States.Format('rfp/{}/formulaire_ao.docx', $.Records[0].ses.mail.messageId)"
+          "form_to_fill_s3_path.$": "States.Format('arn:aws:s3:::levio-demo-fev-esta-ses-bucket-dev/rfp/{}/formulaire_ao.docx', $.Records[0].ses.mail.messageId)"
         }
       },
       "Type": "Pass"
@@ -180,14 +180,13 @@
                   }
                 }
               },
-              "Next": "Fill from with Claude responses",
+              "Next": "Fill form with Claude responses",
               "ItemsPath": "$.prompt_responses",
               "ResultPath": "$.map_to_document_filler_args_output"
             },
-            "Fill from with Claude responses": {
+            "Fill form with Claude responses": {
               "Type": "Task",
               "Resource": "arn:aws:states:::lambda:invoke",
-              "OutputPath": "$.Payload",
               "Parameters": {
                 "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:levio-esta-document-filler:$LATEST",
                 "Payload": {
@@ -208,6 +207,15 @@
                   "BackoffRate": 2
                 }
               ],
+              "ResultPath": "$.fill_form_output",
+              "Next": "Send email with filled form"
+            },
+            "Send email with filled form": {
+              "Type": "Task",
+              "Parameters": {
+                "Content": {}
+              },
+              "Resource": "arn:aws:states:::aws-sdk:sesv2:sendEmail",
               "End": true
             },
             "Map": {

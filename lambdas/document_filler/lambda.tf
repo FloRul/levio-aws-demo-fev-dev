@@ -20,14 +20,14 @@ module "lambda_function_container_image" {
   memory_size              = 256
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
-  # see https://github.com/terraform-aws-modules/terraform-aws-lambda/issues/346
+  # see https://github.com/terraform-aws-modules/terraform-aws-lambda/issues/346 on why this custom path is necessary
   source_path = [
     {
       path = "${path.module}/src"
       commands = [
         ":zip",
         "cd `mktemp -d`",
-        "python3.11 -m pip install --no-compile --only-binary=:all: --platform=manylinux2014_x86_64 --target=. -r ${abspath(path.module)}/src/requirements.txt",
+        "python3 -m pip install --no-compile --only-binary=:all: --platform=manylinux2014_x86_64 --target=. -r ${abspath(path.module)}/src/requirements.txt",
         ":zip .",
       ]
     }
