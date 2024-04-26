@@ -68,8 +68,8 @@ def lambda_handler(event, context):
         )
 
         print(response)
-        print(response['Body'])
-        response_body = response['Body'].read().decode('utf-8')
+        print(response['body'])
+        response_body = response['body'].read().decode('utf-8')
         print(response_body)
         return {
             'statusCode': 200,
