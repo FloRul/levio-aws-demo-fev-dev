@@ -5,6 +5,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 s3 = boto3.client('s3')
 bedrock = boto3.client('bedrock-runtime')
 
+
 def lambda_handler(event, context):
     """
     Invokes a bedrock model with the given parameters and s3 text object
@@ -14,11 +15,9 @@ def lambda_handler(event, context):
 
     print(f"Invoking claude with prompt: ", prompt)
 
-    # Parse the S3 ARN to get the bucket and key
     s3_path = s3_arn.replace("arn:aws:s3:::", "")
     bucket, key = s3_path.split('/', 1)
 
-    # Download the file from S3
     print(f"Fetching file bucket: {bucket}, key: {key}")
     try:
         s3_object = s3.get_object(Bucket=bucket, Key=key)
@@ -28,10 +27,9 @@ def lambda_handler(event, context):
             'body': str(e)
         }
 
-    # Extract text from the S3 object
     extracted_text = s3_object['Body'].read().decode('utf-8')
     print(f"Extracted text that is {len(extracted_text)} characters long")
-    
+
     claude_body = {
         "anthropic_version": "bedrock-2023-05-31",
         "max_tokens": 4096,
@@ -48,10 +46,10 @@ def lambda_handler(event, context):
             }
         ]
     }
-    # Create a copy of claude_body
+
+    # Replace all the text values in messages with "redacted" since we don't want to log sensitive data
     redacted_claude_body = claude_body.copy()
 
-    # Replace all the text values in messages with "redacted"
     for message in redacted_claude_body["messages"]:
         for content in message["content"]:
             if 'text' in content:
@@ -61,7 +59,6 @@ def lambda_handler(event, context):
     bedrock_model = 'anthropic.claude-3-sonnet-20240229-v1:0'
     print(f"Invoke bedock with this model: ", bedrock_model)
 
-    # Invoke the Bedrock model with the extracted text and the provided parameters
     try:
         response = bedrock.invoke_model(
             body=json.dumps(claude_body),
@@ -69,15 +66,18 @@ def lambda_handler(event, context):
             accept='application/json',
             modelId=bedrock_model,
         )
+
+        print(response)
+        print(response['Body'])
+        response_body = response['Body'].read().decode('utf-8')
+        print(response_body)
+        return {
+            'statusCode': 200,
+            'body': response_body
+        }
+
     except BotoCoreError as e:
         return {
             'statusCode': 400,
             'body': str(e)
         }
-
-    response_body = response['Body'].read().decode('utf-8')
-
-    return {
-        'statusCode': 200,
-        'body': response_body
-    }
