@@ -17,7 +17,10 @@
             "lambda": {
                 "runtime": "python3.11",
                 "payload": {
-                    "json": {}
+                    "json": {
+                        "doc_s3_arn": "arn:aws:s3:::levio-demo-fev-esta-ses-bucket-dev/rfp/pv7jfmrt7rb5713phc1nbujbiprs8kep6jq6cm01/attachments/MESS_700001817_Gouv_Arch_Securite_extracted_pdf_content.txt",
+                        "replacements": []
+                    }
                 }
             }
         },

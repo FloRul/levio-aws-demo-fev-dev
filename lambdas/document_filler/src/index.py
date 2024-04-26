@@ -6,7 +6,7 @@ s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
     """
-    Downloads the given docx and for each replacement item it replaces the matching document_key with the text_to_fill
+    Downloads the given docx and for each replacement item it replaces the matching replacement_key with the replacement_text
     """
     s3_arn = event['doc_s3_arn']
     replacements = event['replacements']
@@ -23,8 +23,8 @@ def lambda_handler(event, context):
 
     for paragraph in doc.paragraphs:
         for replacement in replacements:
-            if replacement['document_key'] in paragraph.text:
-                paragraph.text = paragraph.text.replace(replacement['document_key'], replacement['text_to_fill'])
+            if replacement['replacement_key'] in paragraph.text:
+                paragraph.text = paragraph.text.replace(replacement['replacement_key'], replacement['replacement_text'])
 
     output_stream = BytesIO()
     doc.save(output_stream)
