@@ -20,6 +20,7 @@ def lambda_handler(event, context):
 
     try:
         bucket, key = parse_s3_arn(attachment_s3_arn)
+
         print(f"Attachment located at bucket: {bucket} and key: {key}")
 
         if os.path.splitext(key)[1][1:] != "pdf":
@@ -31,8 +32,9 @@ def lambda_handler(event, context):
         local_filename = fetch_file(bucket, key)
         extracted_text = extract_text_from_pdf(local_filename)
         extracted_text_local_file = store_extracted_text_in_local_file(extracted_text)
+        base_path = Path(key).parent
         base_name = Path(key).stem
-        new_key = f"{base_name}_extracted_pdf_content.txt"
+        new_key = f"{base_path}/{base_name}_extracted_pdf_content.txt"
         upload_file(
             file_to_upload=extracted_text_local_file,
             bucket=bucket,
