@@ -1,226 +1,231 @@
 {
-    "Comment": "Retrieves attachments from an email and invokes an AI with the email attachments and a predefied set of promts. A form document is then filled with the AI responses and sent back to the user.",
-    "StartAt": "Map SES email",
-    "States": {
-      "Map SES email": {
-        "Comment": "Map an SES email for easier consumption later on in the sate machine:\n\nemail_id: the ID of the email\ndestination_email: the destination of the email\nsender_email: the sender of the email\nbucket: the  S3 bucket in which all operations should take place in\nraw_email_key: the s3 key to the raw email. See the SES \"Deliver to S3 Bucket\" action",
-        "Next": "Parallel",
-        "Parameters": {
+  "Comment": "Retrieves attachments from an email and invokes an AI with the email attachments and a predefied set of promts. A form document is then filled with the AI responses and sent back to the user.",
+  "StartAt": "Map SES email",
+  "States": {
+    "Map SES email": {
+      "Comment": "Map an SES email for easier consumption later on in the sate machine:\n\nemail_id: the ID of the email\ndestination_email: the destination of the email\nsender_email: the sender of the email\nbucket: the  S3 bucket in which all operations should take place in\nraw_email_key: the s3 key to the raw email. See the SES \"Deliver to S3 Bucket\" action",
+      "Next": "Parallel",
+      "Parameters": {
+        "execution_metadata": {
           "bucket": "levio-demo-fev-esta-ses-bucket-dev",
           "destination_email.$": "$.Records[0].ses.mail.destination",
           "email_id.$": "$.Records[0].ses.mail.messageId",
           "raw_email_key.$": "States.Format('rfp/raw_emails/{}', $.Records[0].ses.mail.messageId)",
-          "sender_email.$": "$.Records[0].ses.mail.source"
-        },
-        "Type": "Pass"
+          "sender_email.$": "$.Records[0].ses.mail.source",
+          "form_to_fill_s3_path.$": "States.Format('rfp/{}/formulaire_ao.docx', $.Records[0].ses.mail.messageId)"
+        }
       },
-      "Parallel": {
-        "Branches": [
-          {
-            "StartAt": "Store Email Medata",
-            "States": {
-              "Store Email Medata": {
-                "Comment": "Stores the input in the specified bucket/key",
-                "End": true,
-                "Parameters": {
-                  "Body.$": "$",
-                  "Bucket.$": "$.bucket",
-                  "Key.$": "States.Format('rfp/{}/email', $.email_id)"
-                },
-                "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
-                "Type": "Task"
-              }
-            }
-          },
-          {
-            "StartAt": "Create copy of the RFP Form doc",
-            "States": {
-              "Create copy of the RFP Form doc": {
-                "Comment": "Copy the form to be filled into this execution's email folder",
-                "End": true,
-                "Parameters": {
-                  "Bucket.$": "$.bucket",
-                  "CopySource.$": "States.Format('{}/rfp/standard/rfp.docx', $.bucket)",
-                  "Key.$": "States.Format('rfp/{}/formulaire_ao.docx', $.email_id)"
-                },
-                "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
-                "Type": "Task"
-              }
-            }
-          },
-          {
-            "StartAt": "Create copy of the RFP prompts and answers JSON",
-            "States": {
-              "Create copy of the RFP prompts and answers JSON": {
-                "End": true,
-                "Parameters": {
-                  "Bucket.$": "$.bucket",
-                  "CopySource.$": "States.Format('{}/rfp/standard/rfp_prompts.json', $.bucket)",
-                  "Key.$": "States.Format('rfp/{}/rfp_prompts.json', $.email_id)"
-                },
-                "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
-                "Type": "Task"
-              }
-            }
-          },
-          {
-            "StartAt": "Download email attachments",
-            "States": {
-              "Download email attachments": {
-                "Comment": "Extract attachments from a raw email MIME file and stores them in S3",
-                "Next": "Map",
-                "OutputPath": "$.Payload",
-                "Parameters": {
-                  "FunctionName": "email-attachment-saver-dev",
-                  "Payload": {
-                    "bucket.$": "$.bucket",
-                    "s3_email_key.$": "$.raw_email_key",
-                    "s3_folder_key.$": "States.Format('rfp/{}/attachments', $.email_id)"
-                  }
-                },
-                "Resource": "arn:aws:states:::lambda:invoke",
-                "Retry": [
-                  {
-                    "BackoffRate": 2,
-                    "ErrorEquals": [
-                      "Lambda.ServiceException",
-                      "Lambda.AWSLambdaException",
-                      "Lambda.SdkClientException",
-                      "Lambda.TooManyRequestsException"
-                    ],
-                    "IntervalSeconds": 1,
-                    "MaxAttempts": 3
-                  }
-                ],
-                "Type": "Task"
+      "Type": "Pass"
+    },
+    "Parallel": {
+      "Branches": [
+        {
+          "StartAt": "Store Email Medata",
+          "States": {
+            "Store Email Medata": {
+              "Comment": "Stores the input in the specified bucket/key",
+              "End": true,
+              "Parameters": {
+                "Body.$": "$",
+                "Bucket.$": "$.execution_metadata.bucket",
+                "Key.$": "States.Format('rfp/{}/email', $.execution_metadata.email_id)"
               },
-              "Get Prompts": {
-                "Comment": "Gets the promps s3 object and convert the escaped JSON to JSON",
-                "Next": "Get promps responses",
-                "Parameters": {
-                  "Bucket": "levio-demo-fev-esta-ses-bucket-dev",
-                  "Key": "rfp/standard/rfp_prompts.json"
-                },
-                "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
-                "ResultPath": "$.Body",
-                "ResultSelector": {
-                  "parsed_JSON.$": "States.StringToJson($.Body)"
-                },
-                "Type": "Task"
-              },
-              "Get promps responses": {
-                "End": true,
-                "ItemProcessor": {
-                  "ProcessorConfig": {
-                    "Mode": "INLINE"
-                  },
-                  "StartAt": "Invoke Claude",
-                  "States": {
-                    "Invoke Claude": {
-                      "End": true,
-                      "OutputPath": "$.Payload",
-                      "Parameters": {
-                        "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:levio-esta-bedrock-invoker:$LATEST",
-                        "Payload": {
-                          "bedrock_params": {
-                            "master": "Bla",
-                            "model_name": "anthropic.claude-3-sonnet-20240229-v1:0"
-                          },
-                          "prompt.$": "$.prompt.prompt",
-                          "s3_arn.$": "$.s3_arn"
-                        }
-                      },
-                      "Resource": "arn:aws:states:::lambda:invoke",
-                      "Retry": [
-                        {
-                          "BackoffRate": 2,
-                          "ErrorEquals": [
-                            "Lambda.ServiceException",
-                            "Lambda.AWSLambdaException",
-                            "Lambda.SdkClientException",
-                            "Lambda.TooManyRequestsException"
-                          ],
-                          "IntervalSeconds": 1,
-                          "MaxAttempts": 3
-                        }
-                      ],
-                      "Type": "Task"
-                    }
-                  }
-                },
-                "ItemsPath": "$.Body.parsed_JSON.prompts",
-                "Type": "Map",
-                "ItemSelector": {
-                  "prompt.$": "$$.Map.Item.Value",
-                  "s3_arn.$": "$.attachment_arns[0]"
-                }
-              },
-              "Map": {
-                "ItemProcessor": {
-                  "ProcessorConfig": {
-                    "Mode": "INLINE"
-                  },
-                  "StartAt": "Choice",
-                  "States": {
-                    "Choice": {
-                      "Choices": [
-                        {
-                          "Next": "Rich PDF Ingestion",
-                          "StringMatches": "*.pdf",
-                          "Variable": "$"
-                        }
-                      ],
-                      "Default": "Pass",
-                      "Type": "Choice"
-                    },
-                    "Pass": {
-                      "Comment": "Attachment is not PDF, no other processing needed. Map the input to an array just so it's easier to flatten the results of the map state.",
-                      "End": true,
-                      "OutputPath": "$.arrr",
-                      "Parameters": {
-                        "arrr.$": "States.Array($)"
-                      },
-                      "Type": "Pass"
-                    },
-                    "Rich PDF Ingestion": {
-                      "End": true,
-                      "OutputPath": "$.Payload.attachment_arns",
-                      "Parameters": {
-                        "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST",
-                        "Payload": {
-                          "path.$": "$"
-                        }
-                      },
-                      "Resource": "arn:aws:states:::lambda:invoke",
-                      "Retry": [
-                        {
-                          "BackoffRate": 2,
-                          "ErrorEquals": [
-                            "Lambda.ServiceException",
-                            "Lambda.AWSLambdaException",
-                            "Lambda.SdkClientException",
-                            "Lambda.TooManyRequestsException"
-                          ],
-                          "IntervalSeconds": 1,
-                          "MaxAttempts": 3
-                        }
-                      ],
-                      "Type": "Task"
-                    }
-                  }
-                },
-                "ItemsPath": "$.attachment_arns",
-                "Next": "Get Prompts",
-                "ResultSelector": {
-                  "attachment_arns.$": "$[*][*]"
-                },
-                "Type": "Map"
-              }
+              "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
+              "Type": "Task"
             }
           }
-        ],
-        "End": true,
-        "Type": "Parallel"
-      }
+        },
+        {
+          "StartAt": "Create copy of the RFP Form doc",
+          "States": {
+            "Create copy of the RFP Form doc": {
+              "Comment": "Copy the form to be filled into this execution's email folder",
+              "End": true,
+              "Parameters": {
+                "Bucket.$": "$.execution_metadata.bucket",
+                "CopySource.$": "States.Format('{}/rfp/standard/rfp.docx', $.execution_metadata.bucket)",
+                "Key.$": "$.execution_metadata.form_to_fill_s3_path"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "Create copy of the RFP prompts and answers JSON",
+          "States": {
+            "Create copy of the RFP prompts and answers JSON": {
+              "End": true,
+              "Parameters": {
+                "Bucket.$": "$.execution_metadata.bucket",
+                "CopySource.$": "States.Format('{}/rfp/standard/rfp_prompts.json', $.execution_metadata.bucket)",
+                "Key.$": "States.Format('rfp/{}/rfp_prompts.json', $.execution_metadata.email_id)"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "Download email attachments",
+          "States": {
+            "Download email attachments": {
+              "Comment": "Extract attachments from a raw email MIME file and stores them in S3",
+              "Next": "Map",
+              "Parameters": {
+                "FunctionName": "email-attachment-saver-dev",
+                "Payload": {
+                  "bucket.$": "$.execution_metadata.bucket",
+                  "s3_email_key.$": "$.execution_metadata.raw_email_key",
+                  "s3_folder_key.$": "States.Format('rfp/{}/attachments', $.execution_metadata.email_id)"
+                }
+              },
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Retry": [
+                {
+                  "BackoffRate": 2,
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 3
+                }
+              ],
+              "Type": "Task",
+              "ResultPath": "$.download_email_attachments_ouput"
+            },
+            "Get Prompts": {
+              "Comment": "Gets the promps s3 object and convert the escaped JSON to JSON",
+              "Next": "Get promps responses",
+              "Parameters": {
+                "Bucket": "levio-demo-fev-esta-ses-bucket-dev",
+                "Key": "rfp/standard/rfp_prompts.json"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+              "ResultPath": "$.get_prompts_output",
+              "ResultSelector": {
+                "parsed_JSON.$": "States.StringToJson($.Body)"
+              },
+              "Type": "Task"
+            },
+            "Get promps responses": {
+              "End": true,
+              "ItemProcessor": {
+                "ProcessorConfig": {
+                  "Mode": "INLINE"
+                },
+                "StartAt": "Invoke Claude",
+                "States": {
+                  "Invoke Claude": {
+                    "End": true,
+                    "OutputPath": "$.Payload",
+                    "Parameters": {
+                      "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:levio-esta-bedrock-invoker:$LATEST",
+                      "Payload": {
+                        "bedrock_params": {
+                          "master": "Bla",
+                          "model_name": "anthropic.claude-3-sonnet-20240229-v1:0"
+                        },
+                        "prompt.$": "$.prompt.prompt",
+                        "s3_arn.$": "$.s3_arn"
+                      }
+                    },
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Retry": [
+                      {
+                        "BackoffRate": 2,
+                        "ErrorEquals": [
+                          "Lambda.ServiceException",
+                          "Lambda.AWSLambdaException",
+                          "Lambda.SdkClientException",
+                          "Lambda.TooManyRequestsException"
+                        ],
+                        "IntervalSeconds": 1,
+                        "MaxAttempts": 3
+                      }
+                    ],
+                    "Type": "Task"
+                  }
+                }
+              },
+              "ItemsPath": "$.get_prompts_output.parsed_JSON.user_prompts",
+              "Type": "Map",
+              "ItemSelector": {
+                "prompt.$": "$$.Map.Item.Value",
+                "s3_arn.$": "$.parsed_attachments_for_llm_ouput.attachment_arns[0]"
+              },
+              "ResultPath": "$.prompt_responses"
+            },
+            "Map": {
+              "ItemProcessor": {
+                "ProcessorConfig": {
+                  "Mode": "INLINE"
+                },
+                "StartAt": "Choice",
+                "States": {
+                  "Choice": {
+                    "Choices": [
+                      {
+                        "Next": "Rich PDF Ingestion",
+                        "StringMatches": "*.pdf",
+                        "Variable": "$"
+                      }
+                    ],
+                    "Default": "Pass",
+                    "Type": "Choice"
+                  },
+                  "Pass": {
+                    "Comment": "Attachment is not PDF, no other processing needed. Map the input to an array just so it's easier to flatten the results of the map state.",
+                    "End": true,
+                    "OutputPath": "$.arrr",
+                    "Parameters": {
+                      "arrr.$": "States.Array($)"
+                    },
+                    "Type": "Pass"
+                  },
+                  "Rich PDF Ingestion": {
+                    "End": true,
+                    "OutputPath": "$.Payload.attachment_arns",
+                    "Parameters": {
+                      "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST",
+                      "Payload": {
+                        "path.$": "$"
+                      }
+                    },
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Retry": [
+                      {
+                        "BackoffRate": 2,
+                        "ErrorEquals": [
+                          "Lambda.ServiceException",
+                          "Lambda.AWSLambdaException",
+                          "Lambda.SdkClientException",
+                          "Lambda.TooManyRequestsException"
+                        ],
+                        "IntervalSeconds": 1,
+                        "MaxAttempts": 3
+                      }
+                    ],
+                    "Type": "Task"
+                  }
+                }
+              },
+              "ItemsPath": "$.download_email_attachments_ouput.Payload.attachment_arns",
+              "Next": "Get Prompts",
+              "ResultSelector": {
+                "attachment_arns.$": "$[*][*]"
+              },
+              "Type": "Map",
+              "ResultPath": "$.parsed_attachments_for_llm_ouput"
+            }
+          }
+        }
+      ],
+      "End": true,
+      "Type": "Parallel"
     }
+  }
 }

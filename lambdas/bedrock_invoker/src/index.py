@@ -67,13 +67,9 @@ def lambda_handler(event, context):
             modelId=bedrock_model,
         )
 
-        print(response)
-        print(response['body'])
-        response_body = response['body'].read().decode('utf-8')
-        print(response_body)
         return {
             'statusCode': 200,
-            'body': response_body
+            'body': response['body'].read().decode('utf-8')
         }
 
     except BotoCoreError as e:
