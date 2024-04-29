@@ -11,7 +11,9 @@ def lambda_handler(event, context):
     Invokes a bedrock model with the given parameters and s3 text object
     """
     s3_arn = event['s3_arn']
+    system_prompt = event['system_prompt']
     prompt = event['prompt']
+
 
     print(f"Invoking claude with prompt: ", prompt)
 
@@ -33,7 +35,7 @@ def lambda_handler(event, context):
     claude_body = {
         "anthropic_version": "bedrock-2023-05-31",
         "max_tokens": 4096,
-        "system": "Agis comme un analyste d'appel d'offres. Tu as en main un appel d'offres. Ton travail est de répondre aux questions posées afin de remplire un formulaire. Répond qu’à partir de appel d'offres, ne résume pas les questions dans tes réponses. Répond en français. ",
+        "system": system_prompt,
         "messages": [
             {
                 "role": "user",

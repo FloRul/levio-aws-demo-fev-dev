@@ -96,6 +96,7 @@
                           "master": "Bla",
                           "model_name": "anthropic.claude-3-sonnet-20240229-v1:0"
                         },
+                        "system_prompt.$": "$.system_prompt",
                         "prompt.$": "$.prompt.prompt",
                         "s3_arn.$": "$.s3_arn"
                       }
@@ -125,6 +126,7 @@
               "ItemsPath": "$.get_prompts_output.parsed_JSON.user_prompts",
               "Type": "Map",
               "ItemSelector": {
+                "system_prompt.$": "$.get_prompts_output.parsed_JSON.system_prompt",
                 "prompt.$": "$$.Map.Item.Value",
                 "s3_arn.$": "$.parsed_attachments_for_llm_ouput.attachment_arns[0]"
               },
