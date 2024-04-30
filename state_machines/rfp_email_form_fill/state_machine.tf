@@ -1,5 +1,5 @@
 resource "aws_iam_role" "iam_for_sfn" {
-  name               = "my_role"
+  name               = "email_form_filler_state_machine_role"
   assume_role_policy = <<EOF
   {
     "Version": "2012-10-17",
