@@ -38,8 +38,12 @@ module "lambda_function_container_image" {
       effect = "Allow"
       actions = [
         "s3:Get*",
+        "s3:List*",
+        "s3:Describe*",
+        "s3:PutObject",
         "s3-object-lambda:Get*",
-
+        "s3-object-lambda:List*",
+        "s3-object-lambda:WriteGetObjectResponse"
       ]
       resources = var.allowed_s3_resources
     }
