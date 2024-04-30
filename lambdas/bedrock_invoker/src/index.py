@@ -30,6 +30,8 @@ def lambda_handler(event, context):
 
     extracted_text = s3_object['Body'].read().decode('utf-8')
     print(f"Extracted text that is {len(extracted_text)} characters long")
+    print(f"Preview of the first 100 chars: {extracted_text[:100]}")
+
 
     claude_body = {
         "anthropic_version": "bedrock-2023-05-31",
