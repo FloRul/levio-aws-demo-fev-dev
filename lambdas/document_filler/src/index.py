@@ -13,12 +13,13 @@ def lambda_handler(event, context):
         s3_arn = event['doc_s3_arn']
         replacements = event['replacements']
 
-        bucket_name = s3_arn.split(':')[5].split('/')[0]
-        key = '/'.join(s3_arn.split(':')[5].split('/')[1:])
+        s3_bucket, s3_key = s3_arn.replace("s3://", "").replace("arn:aws:s3:::", "").split("/", 1)
 
-        print(f"Download bucket: {bucket_name}, key: {key}")
 
-        file_obj = s3.get_object(Bucket=bucket_name, Key=key)
+        print(f"Download bucket: {s3_bucket}, key: {s3_key}")
+
+        file_obj = s3.get_object(Bucket=s3_bucket, Key=s3_key)
+
         file_content = file_obj['Body'].read()
 
         doc = Document(BytesIO(file_content))
@@ -26,18 +27,18 @@ def lambda_handler(event, context):
         for paragraph in doc.paragraphs:
             for replacement in replacements:
                 if replacement['replacement_key'] in paragraph.text:
-                    paragraph.text = paragraph.text.replace(
-                        replacement['replacement_key'], replacement['replacement_text'])
+                    print(f"replacing {replacement['replacement_key']} with {replacement['replacement_text'][:10]}")
+                    paragraph.text = paragraph.text.replace(replacement['replacement_key'], replacement['replacement_text'])
 
         output_stream = BytesIO()
         doc.save(output_stream)
 
-        s3.put_object(Bucket=bucket_name, Key=key,
+        s3.put_object(Bucket=s3_bucket, Key=s3_key,
                       Body=output_stream.getvalue())
 
         return {
             'statusCode': 200,
-            'body': f'Successfully modified {key} and uploaded to {bucket_name}'
+            'body': f'Successfully modified {key} and uploaded to {s3_bucket}'
         }
 
     except Exception as e:
