@@ -15,7 +15,6 @@ def lambda_handler(event, context):
     prompt = event['prompt']
 
 
-    print(f"Invoking claude with prompt: ", prompt)
 
     s3_path = s3_arn.replace("arn:aws:s3:::", "")
     bucket, key = s3_path.split('/', 1)
@@ -60,6 +59,8 @@ def lambda_handler(event, context):
     print(f"Invoke bedrock with this body: ", redacted_claude_body)
     bedrock_model = 'anthropic.claude-3-sonnet-20240229-v1:0'
     print(f"Invoke bedock with this model: ", bedrock_model)
+    print(f"Invoke claude with system prompt: ", system_prompt)
+    print(f"Invoke claude with prompt: ", prompt)
 
     try:
         response = bedrock.invoke_model(
