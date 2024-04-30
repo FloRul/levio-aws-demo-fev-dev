@@ -94,10 +94,6 @@
                     "Parameters": {
                       "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:levio-esta-bedrock-invoker:$LATEST",
                       "Payload": {
-                        "bedrock_params": {
-                          "master": "Bla",
-                          "model_name": "anthropic.claude-3-sonnet-20240229-v1:0"
-                        },
                         "system_prompt.$": "$.system_prompt",
                         "prompt.$": "$.prompt.prompt",
                         "s3_arn.$": "$.s3_arn"

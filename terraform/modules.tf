@@ -253,8 +253,8 @@ module "step_function_invoker" {
   state_machine_arn     = module.email_formfiller_state_machine.state_machine_arn
 }
 
-module "email_formfiller_state_machine" {
-  source                       = "../state_machines/email_form_fill"
+module "rfp_email_formfiller_state_machine" {
+  source                       = "../state_machines/rfp_email_form_fill"
   attachment_saver_lambda_name = module.email_attachment_saver.lambda_function_name
   workspace_bucket_name        = module.s3_bucket.s3_bucket_id
 }
