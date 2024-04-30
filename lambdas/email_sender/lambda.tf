@@ -38,6 +38,8 @@ module "lambda_function_container_image" {
       effect = "Allow"
       actions = [
         "s3:Get*",
+        "s3-object-lambda:Get*",
+
       ]
       resources = var.allowed_s3_resources
     }
