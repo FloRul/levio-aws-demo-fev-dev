@@ -218,24 +218,24 @@
                   "Choice": {
                     "Choices": [
                       {
-                        "Next": "Rich PDF Ingestion",
+                        "Next": "Extract text from PDF",
                         "StringMatches": "*.pdf",
                         "Variable": "$"
                       }
                     ],
-                    "Default": "Noop",
+                    "Default": "Filter out unsupported attachment",
                     "Type": "Choice"
                   },
-                  "Noop": {
+                  "Filter out unsupported attachment": {
                     "Comment": "Attachment is not PDF, no other processing needed. Map the input to an array just so it's easier to flatten the results of the map state.",
                     "End": true,
                     "OutputPath": "$.arrr",
                     "Parameters": {
-                      "arrr.$": "States.Array($)"
+                      "arrr": "[]"
                     },
                     "Type": "Pass"
                   },
-                  "Rich PDF Ingestion": {
+                  "Extract text from PDF": {
                     "End": true,
                     "OutputPath": "$.Payload.attachment_arns",
                     "Parameters": {
