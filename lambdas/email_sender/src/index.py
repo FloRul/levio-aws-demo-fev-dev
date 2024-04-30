@@ -15,7 +15,7 @@ def lambda_handler(event, context):
     body = event['body']
     attachment_s3_arns = event['attachment_s3_arns']
 
-    client = boto3.client('ses')
+    ses = boto3.client('ses')
     s3 = boto3.client('s3')
 
     msg = MIMEMultipart()
@@ -27,6 +27,7 @@ def lambda_handler(event, context):
     for attachment in attachment_s3_arns:
         try:
             s3_bucket, s3_key = attachment.replace("s3://", "").replace("arn:aws:s3:::", "").split("/", 1)
+            print(f"Fetching attachment {s3_key} from bucket {s3_bucket}")
             file_obj = s3.get_object(Bucket=s3_bucket, Key=s3_key)
             file_content = file_obj['Body'].read()
 
@@ -37,7 +38,7 @@ def lambda_handler(event, context):
             print("S3 Access Denied")
 
     try:
-        response = client.send_raw_email(
+        response = ses.send_raw_email(
             Source=sender_email,
             Destinations=[destination_email],
             RawMessage={
