@@ -33,12 +33,11 @@ def lambda_handler(event, context):
         output_stream = BytesIO()
         doc.save(output_stream)
 
-        s3.put_object(Bucket=s3_bucket, Key=s3_key,
-                      Body=output_stream.getvalue())
+        s3.put_object(Bucket=s3_bucket, Key=s3_key, Body=output_stream.getvalue())
 
         return {
             'statusCode': 200,
-            'body': f'Successfully modified {key} and uploaded to {s3_bucket}'
+            'body': f'Successfully modified {s3_key} and uploaded to {s3_bucket}'
         }
 
     except Exception as e:
