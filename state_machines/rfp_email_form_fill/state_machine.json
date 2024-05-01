@@ -111,7 +111,7 @@
                           "ThrottlingException"
                         ],
                         "MaxAttempts": 4,
-                        "IntervalSeconds": 60,
+                        "IntervalSeconds": 120,
                         "JitterStrategy": "FULL"
                       }
                     ],
@@ -223,6 +223,11 @@
                         "Next": "Extract text from PDF",
                         "StringMatches": "*.pdf",
                         "Variable": "$"
+                      },
+                      {
+                        "Variable": "$",
+                        "StringMatches": "*.txt",
+                        "Next": "Do nothing on supported file type (txt)"
                       }
                     ],
                     "Default": "Filter out unsupported attachment",
@@ -261,6 +266,14 @@
                       }
                     ],
                     "Type": "Task"
+                  },
+                  "Do nothing on supported file type (txt)": {
+                    "Type": "Pass",
+                    "End": true,
+                    "Parameters": {
+                      "arrr.$": "States.Array($)"
+                    },
+                    "OutputPath": "$.arrr"
                   }
                 }
               },
