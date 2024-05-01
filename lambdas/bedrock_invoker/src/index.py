@@ -64,6 +64,7 @@ def lambda_handler(event, context):
             contentType='application/json',
             accept='application/json',
             modelId=bedrock_model,
+            config=config
         )
 
         return {
