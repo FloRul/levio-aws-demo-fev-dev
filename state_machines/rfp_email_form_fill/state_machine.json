@@ -9,7 +9,7 @@
         "execution_metadata": {
           "bucket": "levio-demo-fev-esta-ses-bucket-dev",
           "work_folder.$": "States.Format('rfp/executions/{}', $.Records[0].ses.mail.messageId)",
-          "prompts_JSON_path": "rfp/standard/rfp_prompts.json",
+          "prompts_JSON_path": "rfp/configuration/rfp_prompts.json",
           "destination_email.$": "$.Records[0].ses.mail.destination",
           "email_id.$": "$.Records[0].ses.mail.messageId",
           "raw_email_key.$": "States.Format('rfp/raw_emails/{}', $.Records[0].ses.mail.messageId)",
@@ -29,7 +29,7 @@
               "End": true,
               "Parameters": {
                 "Bucket.$": "$.execution_metadata.bucket",
-                "CopySource.$": "States.Format('{}/rfp/standard/rfp.docx', $.execution_metadata.bucket)",
+                "CopySource.$": "States.Format('{}/rfp/configuration/rfp.docx', $.execution_metadata.bucket)",
                 "Key.$": "States.Format('{}/rfp.docx', $.execution_metadata.work_folder)"
               },
               "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
