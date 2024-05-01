@@ -1,7 +1,7 @@
 locals {
   lambda_function_name = "rich_pdf_ingestion"
   ses_arn              = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}"
-  timeout              = 300
+  timeout              = 600
 }
 
 data "aws_caller_identity" "current" {}
