@@ -50,14 +50,6 @@ def lambda_handler(event, context):
         ]
     }
 
-    # Replace all the text values in messages with "redacted" since we don't want to log sensitive data
-    redacted_claude_body = claude_body.copy()
-
-    for message in redacted_claude_body["messages"]:
-        for content in message["content"]:
-            if 'text' in content:
-                content['text'] = "redacted"
-
     print(f"Invoke bedrock with this body: ", claude_body)
     bedrock_model = 'anthropic.claude-3-sonnet-20240229-v1:0'
     print(f"Invoke bedock with this model: ", bedrock_model)
