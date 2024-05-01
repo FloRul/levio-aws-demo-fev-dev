@@ -132,7 +132,7 @@
               },
               "ResultPath": "$.prompt_responses",
               "Next": "Map claude response to document filler argument",
-              "MaxConcurrency": 3
+              "MaxConcurrency": 4
             },
             "Map claude response to document filler argument": {
               "Type": "Map",
