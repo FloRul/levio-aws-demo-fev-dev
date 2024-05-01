@@ -58,7 +58,7 @@ def lambda_handler(event, context):
             if 'text' in content:
                 content['text'] = "redacted"
 
-    print(f"Invoke bedrock with this body: ", redacted_claude_body)
+    print(f"Invoke bedrock with this body: ", claude_body)
     bedrock_model = 'anthropic.claude-3-sonnet-20240229-v1:0'
     print(f"Invoke bedock with this model: ", bedrock_model)
     print(f"Invoke claude with system prompt: ", system_prompt)
