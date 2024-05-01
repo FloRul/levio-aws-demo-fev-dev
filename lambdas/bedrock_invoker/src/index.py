@@ -64,6 +64,7 @@ def lambda_handler(event, context):
     print(f"Invoke claude with system prompt: ", system_prompt)
     print(f"Invoke claude with prompt: ", prompt)
 
+
     try:
         response = bedrock.invoke_model(
             body=json.dumps(claude_body),

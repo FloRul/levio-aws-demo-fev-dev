@@ -34,18 +34,19 @@ def lambda_handler(event, context):
     if msg.is_multipart():
         for part in msg.walk():
             if part.get_content_maintype() != 'multipart' and part['Content-Disposition'] is not None:
-                try:
-                    key = "/".join([s3_folder,part.get_filename()])
-                    logger.info(f"Putting object in bucket:{bucket} and key:{key}")
-                    s3.put_object(Bucket=bucket, Key=key, Body=part.get_payload(decode=True))
-                    attachment_arns.append('arn:aws:s3:::' + bucket + '/' + key,)
+                if part['Content-Disposition'].startswith('attachment'):
+                    try:
+                        key = "/".join([s3_folder,part.get_filename()])
+                        logger.info(f"Putting object in bucket:{bucket} and key:{key}")
+                        s3.put_object(Bucket=bucket, Key=key, Body=part.get_payload(decode=True))
+                        attachment_arns.append('arn:aws:s3:::' + bucket + '/' + key,)
 
-                except NoCredentialsError:
-                    logger.error('No AWS credentials found')
-                    return {
-                        'statusCode': 400,
-                        'body': 'Error in the credentials'
-                    }
+                    except NoCredentialsError:
+                        logger.error('No AWS credentials found')
+                        return {
+                            'statusCode': 400,
+                            'body': 'Error in the credentials'
+                        }
 
     logger.info(attachment_arns)
     return {
