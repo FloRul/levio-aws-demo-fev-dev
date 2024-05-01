@@ -131,7 +131,8 @@
                 "s3_arn.$": "$.parsed_attachments_for_llm_ouput.attachment_arns[0]"
               },
               "ResultPath": "$.prompt_responses",
-              "Next": "Map claude response to document filler argument"
+              "Next": "Map claude response to document filler argument",
+              "MaxConcurrency": 3
             },
             "Map claude response to document filler argument": {
               "Type": "Map",
