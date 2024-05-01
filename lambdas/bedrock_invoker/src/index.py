@@ -4,8 +4,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 from botocore.config import Config
 
 s3 = boto3.client('s3')
-bedrock = boto3.client('bedrock-runtime')
-config = Config(read_timeout=100000)
+bedrock = boto3.client('bedrock-runtime', config=Config(read_timeout=1000))
 
 def lambda_handler(event, context):
     """
@@ -64,7 +63,6 @@ def lambda_handler(event, context):
             contentType='application/json',
             accept='application/json',
             modelId=bedrock_model,
-            config=config
         )
 
         return {
