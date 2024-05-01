@@ -107,10 +107,12 @@
                           "Lambda.ServiceException",
                           "Lambda.AWSLambdaException",
                           "Lambda.SdkClientException",
-                          "Lambda.TooManyRequestsException"
+                          "Lambda.TooManyRequestsException",
+                          "ThrottlingException"
                         ],
-                        "IntervalSeconds": 1,
-                        "MaxAttempts": 3
+                        "MaxAttempts": 4,
+                        "IntervalSeconds": 60,
+                        "JitterStrategy": "FULL"
                       }
                     ],
                     "Type": "Task",

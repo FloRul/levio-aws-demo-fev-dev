@@ -1,6 +1,6 @@
 locals {
   lambda_function_name = "levio-esta-bedrock-invoker"
-  timeout              = 300
+  timeout              = 600
   runtime              = "python3.11"
   powertools_layer_arn = "arn:aws:lambda:${var.aws_region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:67"
 }
