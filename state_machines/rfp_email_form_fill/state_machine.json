@@ -8,13 +8,13 @@
       "Parameters": {
         "execution_metadata": {
           "bucket": "levio-demo-fev-esta-ses-bucket-dev",
-          "work_folder.$": "States.Format('rfp/executions/{}', $.Records[0].ses.mail.messageId)",
+          "work_folder.$": "States.Format('rfp/executions/{}_{}', $$.State.EnteredTime, $.Records[0].ses.mail.messageId)",
           "prompts_JSON_path": "rfp/configuration/rfp_prompts.json",
           "destination_email.$": "$.Records[0].ses.mail.destination",
           "email_id.$": "$.Records[0].ses.mail.messageId",
           "raw_email_key.$": "States.Format('rfp/raw_emails/{}', $.Records[0].ses.mail.messageId)",
           "sender_email.$": "$.Records[0].ses.mail.source",
-          "form_to_fill_s3_uri.$": "States.Format('s3://levio-demo-fev-esta-ses-bucket-dev/rfp/executions/{}/rfp.docx', $.Records[0].ses.mail.messageId)"
+          "form_to_fill_s3_uri.$": "States.Format('s3://levio-demo-fev-esta-ses-bucket-dev/rfp/executions/{}_{}/rfp.docx', $$.State.EnteredTime, $.Records[0].ses.mail.messageId)"
         }
       },
       "Type": "Pass"
