@@ -16,11 +16,12 @@ def lambda_handler(event, context):
     subject = event['subject']
     body = event['body']
     attachment_s3_arns = event.get('attachment_s3_arns', [])
+    multipart_mime_type = event.get('multipart_mime_type', 'mixed')
 
     ses = boto3.client('ses')
     s3 = boto3.client('s3')
 
-    msg = MIMEMultipart('alternative')
+    msg = MIMEMultipart(multipart_mime_type)
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = destination_email
