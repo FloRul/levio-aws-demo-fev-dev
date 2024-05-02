@@ -16,10 +16,9 @@ def lambda_handler(event, context):
     Etract text/tables from a PDF and store in a s3 object
     """
     print(event)
-    attachment_s3_arn = event['path']
 
     try:
-        bucket, key = parse_s3_arn(attachment_s3_arn)
+        bucket, key = event['pdf_s3_uri'].replace("s3://", "").split("/", 1)
 
         print(f"Attachment located at bucket: {bucket} and key: {key}")
 
@@ -69,14 +68,6 @@ def extract_text_from_pdf(pdf_file_path):
         text += df.to_html()
 
     return text
-
-
-def parse_s3_arn(s3_arn):
-    s3_path = s3_arn.replace("arn:aws:s3:::", "")
-    components = s3_path.split("/")
-    bucket = components[0]
-    key = "/".join(components[1:])
-    return bucket, key
 
 def fetch_file(bucket, key):
     local_filename = f"{PATH_TO_WRITE_FILES}/{key.split('/')[-1]}"

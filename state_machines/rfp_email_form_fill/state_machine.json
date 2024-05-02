@@ -272,7 +272,7 @@
                     "Parameters": {
                       "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST",
                       "Payload": {
-                        "path.$": "$"
+                        "pdf_s3_uri.$": "$"
                       }
                     },
                     "Resource": "arn:aws:states:::lambda:invoke",
