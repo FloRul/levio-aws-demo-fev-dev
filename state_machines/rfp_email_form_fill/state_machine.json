@@ -180,7 +180,20 @@
                 }
               ],
               "ResultPath": "$.fill_form_output",
-              "Next": "Email filled form"
+              "Next": "Get Filled HMTL form"
+            },
+            "Get Filled HMTL form": {
+              "Type": "Task",
+              "Next": "Email filled form",
+              "Parameters": {
+                "Bucket.$": "$.execution_metadata.bucket",
+                "Key.$": "States.Format('{}/formulaire.html', $.execution_metadata.work_folder)"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+              "ResultSelector": {
+                "html.$": "$.Body"
+              },
+              "ResultPath": "$.filled_form_html"
             },
             "Email filled form": {
               "Type": "Task",
@@ -192,14 +205,15 @@
                   "destination_email.$": "$.execution_metadata.sender_email",
                   "sender_email.$": "$.execution_metadata.destination_email[0]",
                   "subject": "",
+                  "multipart_mime_type": "alternative",
                   "body": [
                     {
                       "type": "plain",
-                      "message": "Voici le formulaire rempli. Merci."
+                      "message": "Voici le formulaire rempli: "
                     },
                     {
                       "type": "html",
-                      "message": "<h1>test</h1>"
+                      "message.$": "$.filled_form_html.html"
                     }
                   ]
                 }
