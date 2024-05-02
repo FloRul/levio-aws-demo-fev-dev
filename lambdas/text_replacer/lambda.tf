@@ -22,19 +22,6 @@ module "lambda_function_container_image" {
   attach_policy_statements = true
   source_path = "${path.module}/src"
 
-  # see https://github.com/terraform-aws-modules/terraform-aws-lambda/issues/346 on why this custom path is necessary
-  # source_path = [
-  #   {
-  #     path = "${path.module}/src"
-  #     commands = [
-  #       ":zip",
-  #       "cd `mktemp -d`",
-  #       "python3 -m pip install --no-compile --only-binary=:all: --platform=manylinux2014_x86_64 --target=. -r ${abspath(path.module)}/src/requirements.txt",
-  #       ":zip .",
-  #     ]
-  #   }
-  # ]
-
   policy_statements = {
     log_group = {
       effect = "Allow"

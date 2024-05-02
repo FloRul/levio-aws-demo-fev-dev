@@ -1,0 +1,14 @@
+{
+    "doc_s3_arn": "arn:aws:s3:::mybucket/some_path/myhtml.html",
+    "replacements": [
+        {},
+        {
+            "replacement_key": "title",
+            "replacement_value": "My New Title"
+        },
+        {
+            "replacement_key": "h1",
+            "replacement_value": "My New H1"
+        }
+    ]
+}

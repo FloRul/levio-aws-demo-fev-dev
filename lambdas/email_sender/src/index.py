@@ -15,7 +15,7 @@ def lambda_handler(event, context):
     destination_email = event['destination_email']
     subject = event['subject']
     body = event['body']
-    attachment_s3_arns = event['attachment_s3_arns']
+    attachment_s3_arns = event.get('attachment_s3_arns', [])
 
     ses = boto3.client('ses')
     s3 = boto3.client('s3')
@@ -25,8 +25,7 @@ def lambda_handler(event, context):
     msg['From'] = sender_email
     msg['To'] = destination_email
 
-    for mime_text_json in body:
-        mime_text_dict = json.loads(mime_text_json)
+    for mime_text_dict in body:
         mime_text = MIMEText(mime_text_dict['message'], mime_text_dict['type'])
         msg.attach(mime_text)
 
