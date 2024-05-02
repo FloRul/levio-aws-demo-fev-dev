@@ -1,5 +1,5 @@
 locals {
-  lambda_function_name = "levio-esta-document-filler"
+  lambda_function_name = "levio-esta-text-replacer"
   timeout              = 30
   runtime              = "python3.11"
   powertools_layer_arn = "arn:aws:lambda:${var.aws_region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:67"
@@ -21,17 +21,17 @@ module "lambda_function_container_image" {
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
   # see https://github.com/terraform-aws-modules/terraform-aws-lambda/issues/346 on why this custom path is necessary
-  source_path = [
-    {
-      path = "${path.module}/src"
-      commands = [
-        ":zip",
-        "cd `mktemp -d`",
-        "python3 -m pip install --no-compile --only-binary=:all: --platform=manylinux2014_x86_64 --target=. -r ${abspath(path.module)}/src/requirements.txt",
-        ":zip .",
-      ]
-    }
-  ]
+  # source_path = [
+  #   {
+  #     path = "${path.module}/src"
+  #     commands = [
+  #       ":zip",
+  #       "cd `mktemp -d`",
+  #       "python3 -m pip install --no-compile --only-binary=:all: --platform=manylinux2014_x86_64 --target=. -r ${abspath(path.module)}/src/requirements.txt",
+  #       ":zip .",
+  #     ]
+  #   }
+  # ]
 
   policy_statements = {
     log_group = {

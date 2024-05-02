@@ -50,7 +50,6 @@ def lambda_handler(event, context):
         ]
     }
 
-    print(f"Invoke bedrock with this body: ", claude_body)
     bedrock_model = 'anthropic.claude-3-sonnet-20240229-v1:0'
     print(f"Invoke bedock with this model: ", bedrock_model)
     print(f"Invoke claude with system prompt: ", system_prompt)

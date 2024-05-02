@@ -1,3 +1,4 @@
+import json
 import boto3
 from botocore.exceptions import NoCredentialsError
 from email.mime.multipart import MIMEMultipart
@@ -7,6 +8,7 @@ from email.mime.application import MIMEApplication
 def lambda_handler(event, context):
     """
     Downloads the attachment_s3_arns into memory and add them as attachments before sending the email with the given params.
+    body is an array of json strings with the following format: {type: "plain/html/xml/csv", message: "Hello World"}
     attachment_s3_arns can be in URI or ARN format
     """
     sender_email = event['sender_email']
@@ -22,7 +24,11 @@ def lambda_handler(event, context):
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = destination_email
-    msg.attach(MIMEText(body, 'plain'))
+
+    for mime_text_json in body:
+        mime_text_dict = json.loads(mime_text_json)
+        mime_text = MIMEText(mime_text_dict['message'], mime_text_dict['type'])
+        msg.attach(mime_text)
 
     for attachment in attachment_s3_arns:
         try:

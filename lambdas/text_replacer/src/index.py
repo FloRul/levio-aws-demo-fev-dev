@@ -1,13 +1,12 @@
 import boto3
-from docx import Document
+import re
 from io import BytesIO
 
 s3 = boto3.client('s3')
 
-
 def lambda_handler(event, context):
     """
-    Downloads the given docx and for each replacement item it replaces the matching replacement_key with the replacement_text 
+    Downloads the given text file (txt, html, json, csv, xml, js, py, md etc) and for each replacement item it replaces the matching replacement_key with the replacement_text 
     """
     try:
         s3_arn = event['doc_s3_arn']
@@ -15,23 +14,18 @@ def lambda_handler(event, context):
 
         s3_bucket, s3_key = s3_arn.replace("s3://", "").replace("arn:aws:s3:::", "").split("/", 1)
 
-
         print(f"Download bucket: {s3_bucket}, key: {s3_key}")
 
         file_obj = s3.get_object(Bucket=s3_bucket, Key=s3_key)
 
-        file_content = file_obj['Body'].read()
+        file_content = file_obj['Body'].read().decode('utf-8')
 
-        doc = Document(BytesIO(file_content))
-
-        for paragraph in doc.paragraphs:
-            for replacement in replacements:
-                if replacement['replacement_key'] in paragraph.text:
-                    print(f"replacing {replacement['replacement_key']} with {replacement['replacement_text'][:10]}")
-                    paragraph.text = paragraph.text.replace(replacement['replacement_key'], replacement['replacement_text'])
+        for replacement in replacements:
+            print(f"replacing {replacement['replacement_key']} with {replacement['replacement_text'][:10]}")
+            file_content = re.sub(re.escape(replacement['replacement_key']), replacement['replacement_text'], file_content)
 
         output_stream = BytesIO()
-        doc.save(output_stream)
+        output_stream.write(file_content.encode('utf-8'))
 
         s3.put_object(Bucket=s3_bucket, Key=s3_key, Body=output_stream.getvalue())
 

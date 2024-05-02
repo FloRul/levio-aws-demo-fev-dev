@@ -275,8 +275,8 @@ module "bedrock_invoker" {
   allowed_s3_resources  = [module.s3_bucket.s3_bucket_arn, "${module.s3_bucket.s3_bucket_arn}/*"]
 }
 
-module "levio_esta_document_filler" {
-  source                = "../lambdas/document_filler"
+module "levio_esta_text_replacer" {
+  source                = "../lambdas/text_replacer"
   lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
   aws_region            = var.aws_region
   allowed_s3_resources  = [module.s3_bucket.s3_bucket_arn, "${module.s3_bucket.s3_bucket_arn}/*"]
