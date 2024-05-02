@@ -12,9 +12,9 @@ def lambda_handler(event, context):
     """
     s3_arn = event['s3_arn']
     system_prompt = event['system_prompt']
-    prompt = event['prompt']
-    s3_path = s3_arn.replace("arn:aws:s3:::", "")
-    bucket, key = s3_path.split('/', 1)
+    prompts = event['prompts']
+    s3_uri = s3_arn.replace("s3://", "")
+    bucket, key = s3_uri.split('/', 1)
 
     print(f"Fetching file bucket: {bucket}, key: {key}")
     try:
@@ -40,17 +40,27 @@ def lambda_handler(event, context):
                 "content": [
                     {
                         'type': "text",
-                        "text": f"{prompt} <document>{extracted_text}</document>"
+                        "text": f"<document>{extracted_text}</document>"
                     }
                 ]
             }
+        ] + [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        'type': "text",
+                        "text": f"{prompt}"
+                    }
+                ]
+            } for prompt in prompts
         ]
     }
 
     bedrock_model = 'anthropic.claude-3-sonnet-20240229-v1:0'
     print(f"Invoke bedock with this model: ", bedrock_model)
     print(f"Invoke claude with system prompt: ", system_prompt)
-    print(f"Invoke claude with prompt: ", prompt)
+    print(f"Invoke claude with prompt: ", prompts)
 
 
     try:
