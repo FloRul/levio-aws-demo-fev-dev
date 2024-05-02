@@ -254,7 +254,8 @@
                       }
                     ],
                     "Default": "Filter out unsupported attachment",
-                    "Type": "Choice"
+                    "Type": "Choice",
+                    "InputPath": "$.attachment_uri"
                   },
                   "Filter out unsupported attachment": {
                     "Comment": "Attachment is not PDF, no other processing needed. Map the input to an array just so it's easier to flatten the results of the map state.",
@@ -300,7 +301,7 @@
                   }
                 }
               },
-              "ItemsPath": "$.download_email_attachments_ouput.Payload.attachment_arns",
+              "ItemsPath": "$.download_email_attachments_ouput.Payload.attachments",
               "Next": "Get Prompts",
               "ResultSelector": {
                 "attachment_arns.$": "$[*][*]"

@@ -29,7 +29,7 @@ def lambda_handler(event, context):
     raw_email_data = response['Body'].read()
     msg = email.message_from_bytes(raw_email_data)
 
-    attachment_arns = []
+    attachment_uris = []
 
     if msg.is_multipart():
         for part in msg.walk():
@@ -39,7 +39,7 @@ def lambda_handler(event, context):
                         key = "/".join([s3_folder,part.get_filename()])
                         logger.info(f"Putting object in bucket:{bucket} and key:{key}")
                         s3.put_object(Bucket=bucket, Key=key, Body=part.get_payload(decode=True))
-                        attachment_arns.append('arn:aws:s3:::' + bucket + '/' + key,)
+                        attachment_uris.append({'attachment_uri': 's3://' + bucket + '/' + key, 'attachment_file_name': part.get_filename()})
 
                     except NoCredentialsError:
                         logger.error('No AWS credentials found')
@@ -48,9 +48,9 @@ def lambda_handler(event, context):
                             'body': 'Error in the credentials'
                         }
 
-    logger.info(attachment_arns)
+    logger.info(attachment_uris)
     return {
         'statusCode': 200,
         'body': 'Attachments saved to S3',
-        'attachment_arns': attachment_arns
+        'attachments': attachment_uris,
     }
