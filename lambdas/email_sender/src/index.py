@@ -20,7 +20,7 @@ def lambda_handler(event, context):
     ses = boto3.client('ses')
     s3 = boto3.client('s3')
 
-    msg = MIMEMultipart()
+    msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From'] = sender_email
     msg['To'] = destination_email
