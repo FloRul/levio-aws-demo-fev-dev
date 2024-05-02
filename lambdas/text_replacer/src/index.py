@@ -6,7 +6,7 @@ s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
     """
-    Downloads the given text file (txt, html, json, csv, xml, js, py, md etc) and for each replacement item it replaces the matching replacement_key with the replacement_text 
+    Downloads the given text file (txt, html, json, csv, xml, js, py, md etc...) and for each replacement item it replaces the matching replacement_key with the replacement_text 
     """
     try:
         s3_arn = event['doc_s3_arn']

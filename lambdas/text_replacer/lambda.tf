@@ -20,6 +20,8 @@ module "lambda_function_container_image" {
   memory_size              = 256
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
+  source_path = "${path.module}/src"
+
   # see https://github.com/terraform-aws-modules/terraform-aws-lambda/issues/346 on why this custom path is necessary
   # source_path = [
   #   {
