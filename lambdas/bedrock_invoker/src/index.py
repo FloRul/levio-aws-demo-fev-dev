@@ -29,10 +29,15 @@ def lambda_handler(event, context):
             s3_object = s3.get_object(Bucket=bucket, Key=key)
 
             if extension in ['.txt', '.csv', '.json']:
-                user_prompt_content.append({
-                    'type': 'text',
-                    'text': s3_object['Body'].read().decode('utf-8')
-                })
+                text_content = s3_object['Body'].read().decode('utf-8')
+                if text_content:
+                    user_prompt_content.append({
+                        'type': 'text',
+                        'text': text_content
+                    })
+
+                else:
+                    print(f"{key} is an empty file, skipping.")
             elif extension in ['.jpg', '.png', '.jpeg']:
                 image_data = s3_object['Body'].read()
                 encoded_image_data = base64.b64encode(image_data).decode()
