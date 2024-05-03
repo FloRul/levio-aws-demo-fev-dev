@@ -291,4 +291,12 @@ module "levio_esta_email_sender" {
 }
 
 
+module "levio_esta_docx_ingestion" {
+  source                = "../lambdas/docx_ingestion"
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
+  aws_region            = var.aws_region
+  allowed_s3_resources  = [module.s3_bucket.s3_bucket_arn, "${module.s3_bucket.s3_bucket_arn}/*"]
+}
+
+
 
