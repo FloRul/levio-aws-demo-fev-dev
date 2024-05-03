@@ -45,7 +45,7 @@ def lambda_handler(event, context):
         return {
             'statusCode': 200,
             'body': 'PDF text content extracted and saved',
-            'attachment_uris': extracted_files_s3_uris
+            'extracted_file_uris': extracted_files_s3_uris
         }
 
     except Exception as e:

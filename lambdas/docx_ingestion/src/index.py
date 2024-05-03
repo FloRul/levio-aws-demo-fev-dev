@@ -9,7 +9,7 @@ PATH_TO_WRITE_FILES = "/tmp"
 
 def lambda_handler(event, context):
     """
-    Downloads the given docx file from S3, extracts the text content and saves it as a txt file in the same bucket, adjacent to the docx file.
+    Downloads the given docx file from S3, extracts the text content and saves it as a txt file in the same bucket, adjacent to the original docx file.
     """
     try:
         print(event)
@@ -20,7 +20,7 @@ def lambda_handler(event, context):
         if os.path.splitext(key)[1][1:] != "docx":
             return {
                 'statusCode': 400,
-                'body': 'Invalid file format. Only PDF files are supported.'
+                'body': 'Invalid file format. Only docx files are supported.'
             }
 
         downloaded_docx_path = fetch_file(bucket, key)

@@ -128,7 +128,7 @@
               "ItemSelector": {
                 "system_prompt.$": "$.get_prompts_output.parsed_JSON.system_prompt",
                 "prompt.$": "$$.Map.Item.Value",
-                "s3_uris.$": "$.parsed_attachments_for_llm_ouput.attachment_arns"
+                "s3_uris.$": "$.parsed_attachments_for_llm_ouput.attachment_uris"
               },
               "ResultPath": "$.prompt_responses",
               "Next": "Map claude response to document filler argument",
@@ -251,6 +251,11 @@
                         "Variable": "$",
                         "StringMatches": "*.txt",
                         "Next": "Do nothing on supported file type (txt)"
+                      },
+                      {
+                        "Variable": "$",
+                        "StringMatches": "*.docx",
+                        "Next": "Extract text from DOCX"
                       }
                     ],
                     "Default": "Filter out unsupported attachment",
@@ -268,7 +273,7 @@
                   },
                   "Extract text from PDF": {
                     "End": true,
-                    "OutputPath": "$.Payload.attachment_uris",
+                    "OutputPath": "$.Payload.extracted_file_uris",
                     "Parameters": {
                       "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:rich_pdf_ingestion:$LATEST",
                       "Payload": {
@@ -298,13 +303,41 @@
                       "arrr.$": "States.Array($)"
                     },
                     "OutputPath": "$.arrr"
+                  },
+                  "Extract text from DOCX": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "OutputPath": "$.extracted_text",
+                    "Parameters": {
+                      "FunctionName": "arn:aws:lambda:us-east-1:446872271111:function:levio-esta-docx-ingestion-dev:$LATEST",
+                      "Payload": {
+                        "docx_s3_uri.$": "$"
+                      }
+                    },
+                    "Retry": [
+                      {
+                        "ErrorEquals": [
+                          "Lambda.ServiceException",
+                          "Lambda.AWSLambdaException",
+                          "Lambda.SdkClientException",
+                          "Lambda.TooManyRequestsException"
+                        ],
+                        "IntervalSeconds": 1,
+                        "MaxAttempts": 3,
+                        "BackoffRate": 2
+                      }
+                    ],
+                    "End": true,
+                    "ResultSelector": {
+                      "extracted_text.$": "States.Array($.Payload.attachment_uri)"
+                    }
                   }
                 }
               },
               "ItemsPath": "$.download_email_attachments_ouput.Payload.attachments",
               "Next": "Get Prompts",
               "ResultSelector": {
-                "attachment_arns.$": "$[*][*]"
+                "attachment_uris.$": "$[*][*]"
               },
               "Type": "Map",
               "ResultPath": "$.parsed_attachments_for_llm_ouput"
