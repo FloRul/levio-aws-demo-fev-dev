@@ -20,7 +20,6 @@ module "lambda_function_container_image" {
   memory_size              = 256
   role_name                = "${local.lambda_function_name}-role"
   attach_policy_statements = true
-    # see https://github.com/terraform-aws-modules/terraform-aws-lambda/issues/346
   source_path = "${path.module}/src"
 
   policy_statements = {

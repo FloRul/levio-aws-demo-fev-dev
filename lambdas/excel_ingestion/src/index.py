@@ -13,7 +13,6 @@ def lambda_handler(event, context):
     """
     try:
         print(event)
-        
         bucket, key = event['xlsx_s3_uri'].replace("s3://", "").split("/", 1)
         print(f"File located at bucket: {bucket} and key: {key}")
 
