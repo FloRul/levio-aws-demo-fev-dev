@@ -42,7 +42,7 @@
           "States": {
             "Download email attachments": {
               "Comment": "Extract attachments from a raw email MIME file and stores them in S3",
-              "Next": "Convert Attachment to LLM friendly txt file",
+              "Next": "Convert Attachment to LLM friendly file",
               "Parameters": {
                 "FunctionName": "email-attachment-saver-dev",
                 "Payload": {
@@ -233,7 +233,7 @@
               ],
               "End": true
             },
-            "Convert Attachment to LLM friendly txt file": {
+            "Convert Attachment to LLM friendly file": {
               "ItemProcessor": {
                 "ProcessorConfig": {
                   "Mode": "INLINE"
@@ -243,7 +243,7 @@
                   "Choice": {
                     "Choices": [
                       {
-                        "Next": "Extract text from PDF",
+                        "Next": "Extract TXT from PDF",
                         "StringMatches": "*.pdf",
                         "Variable": "$"
                       },
@@ -279,7 +279,7 @@
                       {
                         "Variable": "$",
                         "StringMatches": "*.docx",
-                        "Next": "Extract text from DOCX"
+                        "Next": "Extract TXT from DOCX"
                       },
                       {
                         "Variable": "$",
@@ -300,7 +300,7 @@
                     },
                     "Type": "Pass"
                   },
-                  "Extract text from PDF": {
+                  "Extract TXT from PDF": {
                     "End": true,
                     "OutputPath": "$.Payload.extracted_file_uris",
                     "Parameters": {
@@ -333,7 +333,7 @@
                     },
                     "OutputPath": "$.arrr"
                   },
-                  "Extract text from DOCX": {
+                  "Extract TXT from DOCX": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::lambda:invoke",
                     "OutputPath": "$.extracted_text",
