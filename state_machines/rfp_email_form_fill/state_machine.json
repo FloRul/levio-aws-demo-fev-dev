@@ -248,9 +248,33 @@
                         "Variable": "$"
                       },
                       {
-                        "Variable": "$",
-                        "StringMatches": "*.txt",
-                        "Next": "Do nothing on supported file type (txt)"
+                        "Or": [
+                          {
+                            "Variable": "$",
+                            "StringMatches": "*.txt"
+                          },
+                          {
+                            "Variable": "$",
+                            "StringMatches": "*.csv"
+                          },
+                          {
+                            "Variable": "$",
+                            "StringMatches": "*.json"
+                          },
+                          {
+                            "Variable": "$",
+                            "StringMatches": "*.png"
+                          },
+                          {
+                            "Variable": "$",
+                            "StringMatches": "*.jpeg"
+                          },
+                          {
+                            "Variable": "$",
+                            "StringMatches": "*.jpg"
+                          }
+                        ],
+                        "Next": "Do nothing on supported file type"
                       },
                       {
                         "Variable": "$",
@@ -296,7 +320,7 @@
                     ],
                     "Type": "Task"
                   },
-                  "Do nothing on supported file type (txt)": {
+                  "Do nothing on supported file type": {
                     "Type": "Pass",
                     "End": true,
                     "Parameters": {
