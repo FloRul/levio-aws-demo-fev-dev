@@ -36,9 +36,10 @@ def lambda_handler(event, context):
             elif extension in ['.jpg', '.png', '.jpeg']:
                 image_data = s3_object['Body'].read()
                 encoded_image_data = base64.b64encode(image_data).decode()
+                media_type = f'image/{'png' if extension == '.png' else 'jpeg'}'
                 user_prompt_content.append({
                     'type': 'image',
-                    'source': {'type': 'base64', 'data': encoded_image_data, 'media_type': f'image/{'png' if extension == '.png' else 'jpeg'}'}
+                    'source': {'type': 'base64', 'data': encoded_image_data, 'media_type': media_type}
                 })
 
         except ClientError as e:
