@@ -67,6 +67,29 @@ resource "aws_iam_role_policy" "sfn_lambda_invoke_access" {
   EOF
 }
 
+resource "aws_iam_role_policy" "ses_send_email_access" {
+  name = "ses_send_email_access"
+  role = aws_iam_role.iam_for_sfn.id
+
+  policy = <<EOF
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ses:SendEmail",
+                    "ses:SendRawEmail"
+                ],
+                "Resource": "*"
+            }
+        ]
+    }
+  EOF
+}
+
+
+
 
 resource "aws_sfn_state_machine" "sfn_state_machine" {
   name     = "esta-rfp-form-filler"

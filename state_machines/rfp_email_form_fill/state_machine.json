@@ -392,12 +392,51 @@
                 }
               },
               "ItemsPath": "$.download_email_attachments_ouput.Payload.attachments",
-              "Next": "Get Prompts",
+              "Next": "Check has LLM friendly files",
               "ResultSelector": {
                 "attachment_uris.$": "$[*][*]"
               },
               "Type": "Map",
               "ResultPath": "$.parsed_attachments_for_llm_ouput"
+            },
+            "Check has LLM friendly files": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Not": {
+                    "Variable": "$.parsed_attachments_for_llm_ouput[0]",
+                    "IsPresent": true
+                  },
+                  "Next": "Send no valid attachments email"
+                }
+              ],
+              "Default": "Get Prompts"
+            },
+            "Send no valid attachments email": {
+              "Type": "Task",
+              "Next": "Fail",
+              "Parameters": {
+                "FromEmailAddress.$": "$.execution_metadata.destination_email[0]",
+                "Destination": {
+                  "ToAddresses.$": "States.Array($.execution_metadata.sender_email)"
+                },
+                "Content": {
+                  "Simple": {
+                    "Subject": {
+                      "Data": "Erreur de pièce jointe incompatible"
+                    },
+                    "Body": {
+                      "Text": {
+                        "Data": "Seul les fichiers des format suivant sont acceptés: pdf, txt, csv, docx, xlsx, json, png, jpeg"
+                      }
+                    }
+                  }
+                }
+              },
+              "Resource": "arn:aws:states:::aws-sdk:sesv2:sendEmail"
+            },
+            "Fail": {
+              "Type": "Fail"
             }
           }
         }
