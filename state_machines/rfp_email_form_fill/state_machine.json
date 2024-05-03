@@ -96,7 +96,7 @@
                       "Payload": {
                         "system_prompt.$": "$.system_prompt",
                         "prompt.$": "$.prompt.prompt",
-                        "s3_arn.$": "$.s3_arn"
+                        "s3_uris.$": "$.s3_uris"
                       }
                     },
                     "Resource": "arn:aws:states:::lambda:invoke",
@@ -128,7 +128,7 @@
               "ItemSelector": {
                 "system_prompt.$": "$.get_prompts_output.parsed_JSON.system_prompt",
                 "prompt.$": "$$.Map.Item.Value",
-                "s3_arn.$": "$.parsed_attachments_for_llm_ouput.attachment_arns[0]"
+                "s3_uris.$": "$.parsed_attachments_for_llm_ouput.attachment_arns"
               },
               "ResultPath": "$.prompt_responses",
               "Next": "Map claude response to document filler argument",

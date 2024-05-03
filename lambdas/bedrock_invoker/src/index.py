@@ -2,33 +2,56 @@ import boto3
 import json
 from botocore.exceptions import BotoCoreError, ClientError
 from botocore.config import Config
+import os
+import base64
 
 s3 = boto3.client('s3')
 bedrock = boto3.client('bedrock-runtime', config=Config(read_timeout=1000))
+
 
 def lambda_handler(event, context):
     """
     Invokes a bedrock model with the given parameters and s3 text object
     """
-    s3_arn = event['s3_arn']
     system_prompt = event['system_prompt']
     prompt = event['prompt']
-    s3_path = s3_arn.replace("arn:aws:s3:::", "")
-    bucket, key = s3_path.split('/', 1)
+    s3_uris = event['s3_uris']  
 
-    print(f"Fetching file bucket: {bucket}, key: {key}")
-    try:
-        s3_object = s3.get_object(Bucket=bucket, Key=key)
-    except ClientError as e:
-        return {
-            'statusCode': 400,
-            'body': str(e)
-        }
 
-    extracted_text = s3_object['Body'].read().decode('utf-8')
-    print(f"Extracted text that is {len(extracted_text)} characters long")
-    print(f"Preview of the first 100 chars: {extracted_text[:100]}")
+    user_prompt_content = []
 
+    for s3_uri in s3_uris:
+        bucket, key = s3_uri.replace("s3://", "").split('/', 1)
+        extension = os.path.splitext(key)[1].lower()
+
+        try:
+            print(f"Fetching file bucket: {bucket}, key: {key}")
+            s3_object = s3.get_object(Bucket=bucket, Key=key)
+
+            if extension in ['.txt', '.csv', '.json']:
+                user_prompt_content.append({
+                    'type': 'text',
+                    'text': s3_object['Body'].read().decode('utf-8')
+                })
+            elif extension in ['.jpg', '.png', '.jpeg']:
+                image_data = s3_object['Body'].read()
+                encoded_image_data = base64.b64encode(image_data).decode()
+                media_type = f"image/{'png' if extension == '.png' else 'jpeg'}"
+                user_prompt_content.append({
+                    'type': 'image',
+                    'source': {'type': 'base64', 'data': encoded_image_data, 'media_type': media_type}
+                })
+
+        except ClientError as e:
+            return {
+                'statusCode': 400,
+                'body': str(e)
+            }
+
+    user_prompt_content.append({
+        'type': 'text',
+        'text': f"{prompt}"
+    })
 
     claude_body = {
         "anthropic_version": "bedrock-2023-05-31",
@@ -37,12 +60,7 @@ def lambda_handler(event, context):
         "messages": [
             {
                 "role": "user",
-                "content": [
-                    {
-                        'type': "text",
-                        "text": f"{prompt} <document>{extracted_text}</document>"
-                    }
-                ]
+                "content": user_prompt_content
             }
         ]
     }
@@ -52,7 +70,6 @@ def lambda_handler(event, context):
     print(f"Invoke claude with system prompt: ", system_prompt)
     print(f"Invoke claude with prompt: ", prompt)
 
-
     try:
         response = bedrock.invoke_model(
             body=json.dumps(claude_body),
@@ -60,7 +77,6 @@ def lambda_handler(event, context):
             accept='application/json',
             modelId=bedrock_model,
         )
-
         return {
             'statusCode': 200,
             'body': response['body'].read().decode('utf-8')
