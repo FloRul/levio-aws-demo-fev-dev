@@ -427,7 +427,7 @@
                     },
                     "Body": {
                       "Text": {
-                        "Data": "Seul les fichiers des format suivant sont acceptés: pdf, txt, csv, docx, xlsx, json, png, jpeg"
+                        "Data": "Seuls les fichiers des formats suivant sont acceptés: pdf, txt, csv, docx, xlsx, json, png, jpeg."
                       }
                     }
                   }
