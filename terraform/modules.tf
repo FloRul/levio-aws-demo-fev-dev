@@ -298,5 +298,14 @@ module "levio_esta_docx_ingestion" {
   allowed_s3_resources  = [module.s3_bucket.s3_bucket_arn, "${module.s3_bucket.s3_bucket_arn}/*"]
 }
 
+module "levio_esta_excel_ingestion" {
+  source                = "../lambdas/excel_ingestion"
+  lambda_storage_bucket = aws_s3_bucket.lambda_storage.id
+  aws_region            = var.aws_region
+  allowed_s3_resources  = [module.s3_bucket.s3_bucket_arn, "${module.s3_bucket.s3_bucket_arn}/*"]
+}
+
+
+
 
 
