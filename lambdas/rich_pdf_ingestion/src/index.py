@@ -39,13 +39,13 @@ def lambda_handler(event, context):
             bucket=bucket,
             key=new_key
         )
-        extracted_files_s3_arns = []
-        extracted_files_s3_arns.append(f"arn:aws:s3:::{bucket}/{new_key}")
+        extracted_files_s3_uris = []
+        extracted_files_s3_uris.append(f"s3://{bucket}/{new_key}")
 
         return {
             'statusCode': 200,
             'body': 'PDF text content extracted and saved',
-            'attachment_arns': extracted_files_s3_arns
+            'attachment_uris': extracted_files_s3_uris
         }
 
     except Exception as e:
