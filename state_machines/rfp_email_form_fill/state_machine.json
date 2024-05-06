@@ -404,7 +404,7 @@
               "Choices": [
                 {
                   "Not": {
-                    "Variable": "$.parsed_attachments_for_llm_ouput[0]",
+                    "Variable": "$.parsed_attachments_for_llm_ouput.attachment_uris[0]",
                     "IsPresent": true
                   },
                   "Next": "Send no valid attachments email"
@@ -414,7 +414,6 @@
             },
             "Send no valid attachments email": {
               "Type": "Task",
-              "Next": "Fail",
               "Parameters": {
                 "FromEmailAddress.$": "$.execution_metadata.destination_email[0]",
                 "Destination": {
@@ -433,16 +432,66 @@
                   }
                 }
               },
-              "Resource": "arn:aws:states:::aws-sdk:sesv2:sendEmail"
-            },
-            "Fail": {
-              "Type": "Fail"
+              "Resource": "arn:aws:states:::aws-sdk:sesv2:sendEmail",
+              "End": true
             }
           }
         }
       ],
+      "Type": "Parallel",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Comment": "Send unknown error email",
+          "Next": "Send unknown error email",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "Delete raw email",
+      "ResultPath": "$.pipeline_ouput"
+    },
+    "Delete raw email": {
+      "Type": "Task",
+      "Parameters": {
+        "Bucket.$": "$.execution_metadata.bucket",
+        "Key.$": "$.execution_metadata.raw_email_key"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:s3:deleteObject",
+      "End": true
+    },
+    "Send unknown error email": {
+      "Type": "Task",
+      "Parameters": {
+        "FromEmailAddress.$": "$.execution_metadata.destination_email[0]",
+        "Destination": {
+          "ToAddresses.$": "States.Array($.execution_metadata.sender_email)"
+        },
+        "Content": {
+          "Simple": {
+            "Subject": {
+              "Data": "Erreur inconnue"
+            },
+            "Body": {
+              "Text": {
+                "Data": "Une erreur inconnue est survenue. Contactez l'équipe ESTA pour obtenir de l'aide."
+              }
+            }
+          }
+        }
+      },
+      "Resource": "arn:aws:states:::aws-sdk:sesv2:sendEmail",
+      "Next": "Delete raw email (1)"
+    },
+    "Delete raw email (1)": {
+      "Type": "Task",
       "End": true,
-      "Type": "Parallel"
+      "Parameters": {
+        "Bucket.$": "$.execution_metadata.bucket",
+        "Key.$": "$.execution_metadata.raw_email_key"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:s3:deleteObject"
     }
   }
 }
