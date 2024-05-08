@@ -482,7 +482,8 @@
         }
       },
       "Resource": "arn:aws:states:::aws-sdk:sesv2:sendEmail",
-      "Next": "Delete raw email (1)"
+      "Next": "Delete raw email (1)",
+      "ResultPath": "$.send_unknown_email_output"
     },
     "Delete raw email (1)": {
       "Type": "Task",
