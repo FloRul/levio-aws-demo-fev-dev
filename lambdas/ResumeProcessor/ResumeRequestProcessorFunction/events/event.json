@@ -1,27 +1,31 @@
 {
   "Records": [
     {
-      "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
-      "receiptHandle": "MessageReceiptHandle",
-      "body": "02dq0817bnrmlk9crbam5luipgmpu2ns2fn7ogg1",
+      "messageId": "f8aa476a-fae4-4f52-866e-ee1b409facc4",
+      "receiptHandle": "AQEB/KYGKYPkHLGVKHunPZSLcfeBZOzrXMuBLRcEq8nvPJP2kprViJgA44TEYL9qaZ5kvdGRErrEbRvY5dwrETQ9jZum1Qr2f2eHqKLNoeKLPQ/f3/p5vTAsaTAV9OQN/B2z2TPzFNVjTgOwp+4ibAciAQx//ku31j0D7+FV+lkxqwQ7ZKC4dAIfHVQCqcvbJHlIUC7mR/TmsdxvMSlmv6IpB87aTI04XSoWJrvh/fMIqKsOsb/a0mfVuegllGmqa7+nqjaWqjFDmU+9NPuZ+wl5jzgk6ZuWmUDwnJ0gNU1s+ZRBg/zkYvEqUj16Wzz7+Jv+4zxIJ54xGAtsxOb83zGBhg==",
+      "eventSourceARN": "arn:aws:sqs:us-east-1:446872271111:levio-demo-fev-resume-request-processor-queue-dev.fifo",
+      "eventSource": "aws:sqs",
+      "awsRegion": "us-east-1",
+      "body": "1719341079716",
+      "md5OfBody": "19757d5b1bc63a4773adf96caaff6892",
+      "md5OfMessageAttributes": "b80a62cc5eeb6363683f5c256c1e3e15",
       "attributes": {
-        "sender": "bruno.abreu@levio.ca",
-        "subject": "Levio HR"
+        "ApproximateReceiveCount": "7",
+        "SentTimestamp": "1719342127476",
+        "SequenceNumber": "18886895658343407616",
+        "MessageGroupId": "1719341079716",
+        "SenderId": "AROAWQC5JXEDYODWKT7FV:bruno.abreu@levio.ca",
+        "MessageDeduplicationId": "1719341079716b389e796-c7fb-4d0a-a880-e4b826737439",
+        "ApproximateFirstReceiveTimestamp": "1719342127476"
       },
       "messageAttributes": {
-        "sender": {
+        "Email": {
           "stringValue": "bruno.abreu@levio.ca",
-          "dataType": "String"
-        },
-        "subject": {
-          "stringValue": "Levio HR",
+          "stringListValues": [],
+          "binaryListValues": [],
           "dataType": "String"
         }
-      },
-      "md5OfBody": "{{{md5_of_body}}}",
-      "eventSource": "aws:sqs",
-      "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:MyQueue",
-      "awsRegion": "us-east-1"
+      }
     }
   ]
 }

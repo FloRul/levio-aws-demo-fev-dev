@@ -48,32 +48,63 @@ public class App implements RequestHandler<SQSEvent, Void> {
         input.getRecords().forEach(record -> {
             System.out.println("Record: " + record);
 
+            String emailBody = "Resume response";
+
             String keyId = record.getBody();
+            String transcription = s3Service.getFile("resume/transcription/" + keyId + ".txt");
 
-            String email = s3Service.getFile("resume/email/" + keyId);
-            try {
-                MimeMessage message = mailService.getMimeMessage(new ByteArrayInputStream(email.getBytes(StandardCharsets.UTF_8)));
-                String emailBody = "Resume response";
-                String sender = ((InternetAddress) message.getFrom()[0]).getAddress();
-                String subject = message.getSubject();
+            if (isUploadedFromSite(record)) {
+                SQSEvent.MessageAttribute emailMessageAttribute = record.getMessageAttributes().get("Email");
 
-                List<Part> attachments = EmailUtils.extractAttachments(message);
-                String attachmentFilename = attachments.get(0).getFileName();
+                String sender = emailMessageAttribute.getStringValue();
+                String subject = "Resume subject";
 
-                String transcription = s3Service.getFile("resume/transcription/" + keyId + ".txt");
+                processAndSendTranscriptionEmail(emailBody, keyId, transcription, sender, subject, keyId);
+            } else {
+                String email = s3Service.getFile("resume/email/" + keyId);
+                try {
+                    MimeMessage message = mailService.getMimeMessage(new ByteArrayInputStream(email.getBytes(StandardCharsets.UTF_8)));
 
-                String filename = extractFileName(attachmentFilename) + "-" + keyId;
-                String dialogueTxtUri = s3Service.saveFile("resume/dialogue/" + "dialogue" + "-" + filename + ".txt", transcription.getBytes());
-                String resume = claudeService.getResume(transcription);
-                String resumeTxtUri = s3Service.saveFile("resume/" + "resume" + "-" + filename + ".txt", resume.getBytes());
+                    String sender = ((InternetAddress) message.getFrom()[0]).getAddress();
+                    String subject = message.getSubject();
 
-                sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, dialogueTxtUri, resumeTxtUri), keyId);
-            } catch (MessagingException | IOException e) {
-                throw new RuntimeException(e);
+                    List<Part> attachments = EmailUtils.extractAttachments(message);
+                    String attachmentFilename = attachments.get(0).getFileName();
+
+                    String filename = extractFileName(attachmentFilename) + "-" + keyId;
+                    processAndSendTranscriptionEmail(emailBody, keyId, transcription, sender, subject, filename);
+                } catch (MessagingException | IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
         return null;
+    }
+
+    private void processAndSendTranscriptionEmail(String emailBody, String keyId, String transcription, String sender, String subject, String filename) {
+        String dialogueTxtUri = saveTranscriptionAsDialogue(transcription, filename);
+        String resumeTxtUri = saveTranscriptionAsResume(transcription, filename);
+        sendEmailWithAttachments(emailBody, sender, subject, dialogueTxtUri, resumeTxtUri, keyId);
+    }
+
+    private String saveTranscriptionAsDialogue(String transcription, String filename) {
+        String fileKey = "resume/dialogue/" + "dialogue" + "-" + filename + ".txt";
+        return s3Service.saveFile(fileKey, transcription.getBytes());
+    }
+
+    private String saveTranscriptionAsResume(String transcription, String filename) {
+        String resume = claudeService.getResume(transcription);
+        String resumeFileKey = "resume/" + "resume" + "-" + filename + ".txt";
+        return s3Service.saveFile(resumeFileKey, resume.getBytes());
+    }
+
+    private void sendEmailWithAttachments(String emailBody, String sender, String subject, String dialogueTxtUri, String resumeTxtUri, String keyId) {
+        sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, dialogueTxtUri, resumeTxtUri), keyId);
+    }
+
+    private static boolean isUploadedFromSite(SQSEvent.SQSMessage record) {
+        return record.getMessageAttributes().containsKey("Email");
     }
 
     private String extractFileName(String fileName) {
