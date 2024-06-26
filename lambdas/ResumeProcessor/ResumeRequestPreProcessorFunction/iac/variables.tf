@@ -13,6 +13,11 @@ variable "ses_bucket_arn" {
   nullable = false
 }
 
+variable "bucket_name" {
+  type     = string
+  nullable = false
+}
+
 variable "queue_url" {
   type     = string
   nullable = false

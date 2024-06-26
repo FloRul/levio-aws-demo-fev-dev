@@ -17,7 +17,8 @@ module "lambda_function_container_image" {
   attach_policy_statements = true
 
   environment_variables = {
-    QUEUE_URL       = var.queue_url
+    QUEUE_URL   = var.queue_url
+    BUCKET_NAME = var.bucket_name
   }
 
   policy_statements = {

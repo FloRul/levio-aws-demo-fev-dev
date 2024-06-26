@@ -187,6 +187,7 @@ module "resume_request_preprocessor" {
   lambda_function_name   = local.resume_request_preprocessor_lambda_name
   lambda_repository_name = var.resume_request_preprocessor_lambda_repository_name
   ses_bucket_arn         = module.s3_bucket.s3_bucket_arn
+  bucket_name            = local.bucket_name
   request_queue_arn      = module.resume_request_processor.queue_arn
   queue_url              = module.resume_request_processor.queue_url
 }
