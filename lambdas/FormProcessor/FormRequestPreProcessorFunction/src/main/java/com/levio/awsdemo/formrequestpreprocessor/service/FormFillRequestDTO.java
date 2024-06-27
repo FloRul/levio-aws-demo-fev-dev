@@ -19,7 +19,7 @@ public class FormFillRequestDTO {
     public FormFillRequestDTO(String emailId, String formKey, String formS3ObjectKey) {
         this.emailId = emailId;
         this.formKey = formKey;
-        this.formS3URI = formS3URI;
+        this.formS3URI = formS3ObjectKey;
     }
 
     public String toJson() {
