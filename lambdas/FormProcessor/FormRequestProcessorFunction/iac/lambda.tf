@@ -61,6 +61,17 @@ module "lambda_function_container_image" {
       ]
     }
 
+    dynamodb = {
+      effect  = "Allow"
+      actions = [
+        "dynamodb:GetItem",
+        "dynamodb:Query"
+      ]
+      resources = [
+        "arn:aws:dynamodb:*:*:table/${var.table_name}"
+      ]
+    }
+
     request_sqs = {
       effect  = "Allow"
       actions = [
