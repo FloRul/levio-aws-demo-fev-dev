@@ -1,5 +1,6 @@
 package com.levio.awsdemo.formrequestprocessor;
 
+import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
@@ -20,12 +21,15 @@ import java.util.Map;
 
 public class App implements RequestHandler<SQSEvent, Void> {
     private static final String FORM_S3_URI = System.getenv("FORM_S3_URI");
+    private static final String TABLE_NAME = System.getenv("TABLE_NAME");
 
     private final DocumentService documentService;
 
     private final ClaudeService claudeService;
 
     private final S3Service s3Service;
+
+    private final DynamoDbService dynamoDbService;
 
     private final SqsProducerService sqsProducerService;
 
@@ -37,14 +41,15 @@ public class App implements RequestHandler<SQSEvent, Void> {
         this.mailService = new MailService();
         this.sqsProducerService = new SqsProducerService();
         this.s3Service = new S3Service();
+        this.dynamoDbService = new DynamoDbService();
         this.documentService = new DocumentService(s3Service);
         this.claudeService = new ClaudeService(new LambdaService());
     }
 
-    public App(S3Service s3Service,
-               DocumentService documentService,
-               ClaudeService claudeService, SqsProducerService sqsProducerService, MailService mailService) {
+    public App(S3Service s3Service, DocumentService documentService, ClaudeService claudeService,
+               SqsProducerService sqsProducerService, MailService mailService, DynamoDbService dynamoDbService) {
         this.s3Service = s3Service;
+        this.dynamoDbService = dynamoDbService;
         this.documentService = documentService;
         this.claudeService = claudeService;
         this.sqsProducerService = sqsProducerService;
@@ -71,15 +76,25 @@ public class App implements RequestHandler<SQSEvent, Void> {
 
                 String content = s3Service.getFile(formFillRequest.getEmailAttachmentS3URI());
 
-                var questionsMapper = retrieveDocumentMapper(FORM_S3_URI);
+                String formS3Uri = FORM_S3_URI;
+                String prompt;
+                Item item = dynamoDbService.getItem(TABLE_NAME, "email", sender);
+                if (item != null) {
+                    formS3Uri = (String) item.get("form-uri");
+                    prompt = (String) item.get("prompt");
+                } else {
+                    prompt = null;
+                }
+
+                var questionsMapper = retrieveDocumentMapper(formS3Uri);
                 questionsMapper.entrySet().parallelStream()
                         .forEach(positionQuestionAnswerMapper -> {
                             Map<String, String> questionAnswerMap = positionQuestionAnswerMapper.getValue();
                             System.out.print(questionAnswerMap.toString());
-                            String answer = claudeService.getResponse(questionAnswerMap.get("question"), content);
+                            String answer = claudeService.getResponse(questionAnswerMap.get("question"), content, prompt);
                             questionAnswerMap.put("answer", answer);
                         });
-                ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper, FORM_S3_URI);
+                ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper, formS3Uri);
                 String formDocxUri = s3Service.saveFile("formulaire/" + formFillRequest.getEmailId() + ".docx", fileOutputStream.toByteArray());
                 sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, formDocxUri), formFillRequest.getEmailId());
             } catch (IOException | MessagingException e) {

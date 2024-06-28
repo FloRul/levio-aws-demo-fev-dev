@@ -57,3 +57,8 @@ variable "form_s3_uri" {
   type    = string
   nullable = false
 }
+
+variable "table_name" {
+  type    = string
+  nullable = false
+}

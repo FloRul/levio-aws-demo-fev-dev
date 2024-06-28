@@ -1,6 +1,7 @@
 locals {
   memory_lambda_name                        = "levio-demo-fev-memory-dev"
   dynamo_history_table_name                 = "levio-demo-fev-chat-history-dev"
+  form_request_processor_table_name         = "levio-demo-fev-form-request-dev"
   storage_bucket_name                       = "levio-demo-fev-storage-dev"
   queue_name                                = "levio-demo-fev-ingestion-queue-dev"
   ingestion_lambda_name                     = "levio-demo-fev-ingestion-dev"
@@ -213,6 +214,7 @@ module "form_request_processor" {
   master_prompt         = var.master_prompt
   sqs_name              = local.form_request_processor_queue_name
   form_s3_uri           = local.form_s3_uri
+  table_name            = local.form_request_processor_table_name
 }
 
 module "form_request_preprocessor" {

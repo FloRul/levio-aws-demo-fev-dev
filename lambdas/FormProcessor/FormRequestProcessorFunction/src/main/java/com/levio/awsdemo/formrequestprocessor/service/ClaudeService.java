@@ -10,9 +10,9 @@ public class ClaudeService {
 
     private final LambdaService lambdaService;
 
-    public String getResponse(String question, String content) {
+    public String getResponse(String question, String content, String prompt) {
         JSONObject payload = new JSONObject()
-                .put("master_prompt", MASTER_PROMPT)
+                .put("master_prompt", prompt != null ? prompt : MASTER_PROMPT)
                 .put("prompt", question)
                 .put("text", content);
 
