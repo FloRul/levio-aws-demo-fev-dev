@@ -244,7 +244,6 @@ module "rfp_form_request_preprocessor" {
   ses_bucket_arn        = module.s3_bucket.s3_bucket_arn
   request_queue_arn     = module.form_request_processor.queue_arn
   queue_url             = module.form_request_processor.queue_url
-  form_s3_uri           = local.rfp_form_s3_uri
 }
 
 module "step_function_invoker" {
