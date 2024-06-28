@@ -1,32 +1,23 @@
 package com.levio.awsdemo.formrequestpreprocessor.service;
 
 public class FormFillRequestDTO {
-    /**
-     * The ID of the email which initiated the request
-     */
-    String emailId;
+    private final String emailId;
 
-    /**
-     * The key to the form to be filled
-     */
-    String formKey;
+    private final String emailS3URI;
 
-    /**
-     * The key to the attachment to parse
-     */
-    String formS3URI;
+    private final String emailAttachmentS3URI;
 
-    public FormFillRequestDTO(String emailId, String formKey, String formS3ObjectKey) {
+    public FormFillRequestDTO(String emailId, String emailS3URI, String emailAttachmentS3URI) {
         this.emailId = emailId;
-        this.formKey = formKey;
-        this.formS3URI = formS3ObjectKey;
+        this.emailS3URI = emailS3URI;
+        this.emailAttachmentS3URI = emailAttachmentS3URI;
     }
 
     public String toJson() {
         return "{" +
                 "\"emailId\":\"" + emailId + "\"," +
-                "\"formKey\":\"" + formKey + "\"," +
-                "\"formS3URI\":\"" + formS3URI + "\"" +
+                "\"emailS3URI\":\"" + emailS3URI + "\"," +
+                "\"emailAttachmentS3URI\":\"" + emailAttachmentS3URI + "\"" +
                 "}";
     }
 }

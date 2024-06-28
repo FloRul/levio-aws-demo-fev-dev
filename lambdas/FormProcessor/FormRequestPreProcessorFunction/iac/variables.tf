@@ -27,10 +27,3 @@ variable "aws_region" {
   type    = string
   default = "us-east-1"
 }
-
-
-variable "form_s3_uri" {
-  type    = string
-  nullable = false
-  default = "us-east-1"
-}

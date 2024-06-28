@@ -3,7 +3,7 @@
     {
       "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
       "receiptHandle": "MessageReceiptHandle",
-      "body": "u3a14tlds9k86f7374fuflhjgpjta1leq7a4cu01",
+      "body": "{\"emailId\":\"dmrhmr4s00t2s90jebn3djke8eh0tmon1u318ag1\",\"emailS3URI\":\"s3://levio-demo-fev-esta-ses-bucket-dev/formulaire/email/dmrhmr4s00t2s90jebn3djke8eh0tmon1u318ag1\",\"emailAttachmentS3URI\":\"s3://levio-demo-fev-esta-ses-bucket-dev/formulaire/attachment/dmrhmr4s00t2s90jebn3djke8eh0tmon1u318ag1.txt\"}",
       "attributes": {
         "sender": "bruno.abreu@levio.ca",
         "subject": "Levio HR"

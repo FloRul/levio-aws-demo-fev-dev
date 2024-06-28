@@ -9,12 +9,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FormFillRequestDTO {
-    @JsonProperty("emailId") // Map JSON property to field
+    @JsonProperty("emailId")
     private String emailId;
 
-    @JsonProperty("formKey") // Map JSON property to field
-    private String formKey;
+    @JsonProperty("emailS3URI")
+    private String emailS3URI;
 
-    @JsonProperty("formS3URI")
-    private String formS3URI;
+    @JsonProperty("emailAttachmentS3URI")
+    private String emailAttachmentS3URI;
+
 }

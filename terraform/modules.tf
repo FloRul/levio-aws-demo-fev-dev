@@ -212,6 +212,7 @@ module "form_request_processor" {
   queue_url             = module.email_response_processor.queue_url
   master_prompt         = var.master_prompt
   sqs_name              = local.form_request_processor_queue_name
+  form_s3_uri           = local.form_s3_uri
 }
 
 module "form_request_preprocessor" {
@@ -221,7 +222,6 @@ module "form_request_preprocessor" {
   ses_bucket_arn        = module.s3_bucket.s3_bucket_arn
   request_queue_arn     = module.form_request_processor.queue_arn
   queue_url             = module.form_request_processor.queue_url
-  form_s3_uri           = local.form_s3_uri
 }
 
 module "email_receipt_confirmation" {

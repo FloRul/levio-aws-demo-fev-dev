@@ -18,11 +18,12 @@ module "lambda_function_container_image" {
     FUNCTION_NAME = var.resume_function_name
     QUEUE_URL     = var.queue_url
     MASTER_PROMPT = var.master_prompt
+    FORM_S3_URI   = var.form_s3_uri
   }
 
   policy_statements = {
     log_group = {
-      effect = "Allow"
+      effect  = "Allow"
       actions = [
         "logs:CreateLogGroup"
       ]
@@ -32,7 +33,7 @@ module "lambda_function_container_image" {
     }
 
     log_write = {
-      effect = "Allow"
+      effect  = "Allow"
       actions = [
         "logs:CreateLogStream",
         "logs:PutLogEvents",
@@ -43,7 +44,7 @@ module "lambda_function_container_image" {
     }
 
     s3 = {
-      effect = "Allow"
+      effect  = "Allow"
       actions = [
         "s3:Get*",
         "s3:List*",
@@ -60,7 +61,7 @@ module "lambda_function_container_image" {
     }
 
     request_sqs = {
-      effect = "Allow"
+      effect  = "Allow"
       actions = [
         "sqs:ReceiveMessage",
         "sqs:DeleteMessage",
@@ -72,7 +73,7 @@ module "lambda_function_container_image" {
     }
 
     response_sqs = {
-      effect = "Allow"
+      effect  = "Allow"
       actions = [
         "sqs:SendMessage",
       ]
@@ -82,7 +83,7 @@ module "lambda_function_container_image" {
     }
 
     lambda = {
-      effect = "Allow"
+      effect  = "Allow"
       actions = [
         "lambda:InvokeFunction",
       ]

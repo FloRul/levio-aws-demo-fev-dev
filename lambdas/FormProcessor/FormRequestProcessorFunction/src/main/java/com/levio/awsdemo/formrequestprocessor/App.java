@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class App implements RequestHandler<SQSEvent, Void> {
+    private static final String FORM_S3_URI = System.getenv("FORM_S3_URI");
 
     private final DocumentService documentService;
 
@@ -30,9 +31,7 @@ public class App implements RequestHandler<SQSEvent, Void> {
 
     private final MailService mailService;
 
-
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JodaModule());
-
 
     public App() {
         this.mailService = new MailService();
@@ -44,8 +43,7 @@ public class App implements RequestHandler<SQSEvent, Void> {
 
     public App(S3Service s3Service,
                DocumentService documentService,
-               ClaudeService claudeService, SqsProducerService sqsProducerService, MailService mailService,
-               HashMap<Integer, Map<String, String>> questionsMapper) {
+               ClaudeService claudeService, SqsProducerService sqsProducerService, MailService mailService) {
         this.s3Service = s3Service;
         this.documentService = documentService;
         this.claudeService = claudeService;
@@ -64,20 +62,16 @@ public class App implements RequestHandler<SQSEvent, Void> {
                 throw new RuntimeException(e);
             }
 
-            var emailId = formFillRequest.getEmailId();
-            var formKey = formFillRequest.getFormKey();
-            var formS3URI = formFillRequest.getFormS3URI();
-            var questionsMapper = retrieveDocumentMapper(formS3URI);
-
-            String email = s3Service.getFile(formKey + "/email/" + formFillRequest.getEmailId());
+            String email = s3Service.getFile(formFillRequest.getEmailS3URI());
             try {
                 MimeMessage message = mailService.getMimeMessage(new ByteArrayInputStream(email.getBytes(StandardCharsets.UTF_8)));
                 String emailBody = "Formulaire response";
                 String sender = ((InternetAddress) message.getFrom()[0]).getAddress();
                 String subject = message.getSubject();
 
-                String content = s3Service.getFile(formS3URI);
+                String content = s3Service.getFile(formFillRequest.getEmailAttachmentS3URI());
 
+                var questionsMapper = retrieveDocumentMapper(FORM_S3_URI);
                 questionsMapper.entrySet().parallelStream()
                         .forEach(positionQuestionAnswerMapper -> {
                             Map<String, String> questionAnswerMap = positionQuestionAnswerMapper.getValue();
@@ -85,9 +79,9 @@ public class App implements RequestHandler<SQSEvent, Void> {
                             String answer = claudeService.getResponse(questionAnswerMap.get("question"), content);
                             questionAnswerMap.put("answer", answer);
                         });
-                ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper, formS3URI);
-                String formDocxUri = s3Service.saveFile(formKey+"/" + emailId + ".docx", fileOutputStream.toByteArray());
-                sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, formDocxUri), emailId);
+                ByteArrayOutputStream fileOutputStream = documentService.fillFile(questionsMapper, FORM_S3_URI);
+                String formDocxUri = s3Service.saveFile("formulaire/" + formFillRequest.getEmailId() + ".docx", fileOutputStream.toByteArray());
+                sqsProducerService.send(emailBody, getMessageAttributes(sender, subject, formDocxUri), formFillRequest.getEmailId());
             } catch (IOException | MessagingException e) {
                 throw new RuntimeException(e);
             }

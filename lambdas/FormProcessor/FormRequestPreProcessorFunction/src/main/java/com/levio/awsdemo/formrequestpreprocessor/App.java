@@ -10,8 +10,6 @@ import com.levio.awsdemo.formrequestpreprocessor.service.FormFillRequestDTO;
 import com.levio.awsdemo.formrequestpreprocessor.service.SqsProducerService;
 
 public class App implements RequestHandler<S3EventNotification, Void> {
-    private final String formS3ObjectKey = System.getenv("FORM_S3_URI");
-
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JodaModule());
 
     private final SqsProducerService sqsProducerService;
@@ -33,13 +31,15 @@ public class App implements RequestHandler<S3EventNotification, Void> {
         }
 
         input.getRecords().forEach(s3EventNotificationRecord -> {
-                var key = s3EventNotificationRecord.getS3().getObject().getKey();
-                var formFillRequest = new FormFillRequestDTO(extractEmailId(key), extractFormKey(key), formS3ObjectKey);
-                System.out.print(formFillRequest);
-                sqsProducerService.send(formFillRequest);
-        }
-
-        );
+            var key = s3EventNotificationRecord.getS3().getObject().getKey();
+            var bucketName = s3EventNotificationRecord.getS3().getBucket().getName();
+            String emailId = extractEmailId(key);
+            var emailS3URI = "s3://" + bucketName + "/" + extractFormKey(key) + "/email/" + emailId;
+            var emailAttachmentS3URI = "s3://" + bucketName + "/" + key;
+            var formFillRequest = new FormFillRequestDTO(emailId, emailS3URI, emailAttachmentS3URI);
+            System.out.print(formFillRequest);
+            sqsProducerService.send(formFillRequest);
+        });
 
         return null;
     }
